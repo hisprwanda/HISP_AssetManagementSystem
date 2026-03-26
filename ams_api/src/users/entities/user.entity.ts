@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Department } from '../../departments/entities/department.entity';
+import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
 
 @Entity('users')
 export class User {
@@ -21,4 +22,7 @@ export class User {
     @ManyToOne(() => Department, (dept) => dept.users)
     @JoinColumn({ name: 'department_id' })
     department: Department;
+
+    @OneToMany(() => AssetAssignment, (assignment) => assignment.user)
+    asset_assignments: AssetAssignment[];
 }

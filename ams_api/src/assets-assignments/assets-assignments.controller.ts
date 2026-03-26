@@ -1,34 +1,38 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AssetsAssignmentsService } from './assets-assignments.service';
-import { CreateAssetsAssignmentDto } from './dto/create-assets-assignment.dto';
-import { UpdateAssetsAssignmentDto } from './dto/update-assets-assignment.dto';
+import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { AssetAssignmentsService } from "./assets-assignments.service";
+import { CreateAssetAssignmentDto } from "./dto/create-assets-assignment.dto";
+import { UpdateAssetAssignmentDto } from "./dto/update-assets-assignment.dto";
 
-@Controller('assets-assignments')
-export class AssetsAssignmentsController {
-  constructor(private readonly assetsAssignmentsService: AssetsAssignmentsService) {}
+@ApiTags('Asset Assignments')
+@Controller('asset-assignments')
+export class AssetAssignmentsController {
+  constructor(private readonly assetAssignmentsService: AssetAssignmentsService) { }
 
   @Post()
-  create(@Body() createAssetsAssignmentDto: CreateAssetsAssignmentDto) {
-    return this.assetsAssignmentsService.create(createAssetsAssignmentDto);
+  @ApiOperation({ summary: 'Assign an asset to a user (Check-out)' })
+  create(@Body() createAssetAssignmentDto: CreateAssetAssignmentDto) {
+    return this.assetAssignmentsService.create(createAssetAssignmentDto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get full history of all asset assignments' })
   findAll() {
-    return this.assetsAssignmentsService.findAll();
+    return this.assetAssignmentsService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a specific assignment record' })
   findOne(@Param('id') id: string) {
-    return this.assetsAssignmentsService.findOne(+id);
+    return this.assetAssignmentsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAssetsAssignmentDto: UpdateAssetsAssignmentDto) {
-    return this.assetsAssignmentsService.update(+id, updateAssetsAssignmentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.assetsAssignmentsService.remove(+id);
+  @ApiOperation({ summary: 'Update assignment details or record a Return (Check-in)' })
+  update(
+    @Param('id') id: string,
+    @Body() updateAssetAssignmentDto: UpdateAssetAssignmentDto
+  ) {
+    return this.assetAssignmentsService.update(id, updateAssetAssignmentDto);
   }
 }

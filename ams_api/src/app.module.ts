@@ -7,9 +7,10 @@ import { DepartmentsModule } from './departments/departments.module';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AssetsModule } from './assets/assets.module';
-import { AssetsAssignmentsModule } from './assets-assignments/assets-assignments.module';
-import { AssetsRequestsModule } from './assets-requests/assets-requests.module';
+import { AssetAssignmentsModule } from './assets-assignments/assets-assignments.module';
+import { AssetRequestsModule } from './assets-requests/assets-requests.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AssetIncidentsModule } from './asset-incidents/asset-incidents.module';
 
 @Module({
   imports: [
@@ -35,9 +36,10 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     UsersModule,
     CategoriesModule,
     AssetsModule,
-    AssetsAssignmentsModule,
-    AssetsRequestsModule,
+    AssetAssignmentsModule,
+    AssetRequestsModule,
     AuditLogsModule,
+    AssetIncidentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

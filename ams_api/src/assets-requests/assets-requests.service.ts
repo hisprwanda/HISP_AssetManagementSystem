@@ -1,26 +1,51 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAssetsRequestDto } from './dto/create-assets-request.dto';
-import { UpdateAssetsRequestDto } from './dto/update-assets-request.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AssetRequest } from './entities/assets-request.entity';
+import { CreateAssetRequestDto } from './dto/create-assets-request.dto';
+import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
 
 @Injectable()
-export class AssetsRequestsService {
-  create(createAssetsRequestDto: CreateAssetsRequestDto) {
-    return 'This action adds a new assetsRequest';
+export class AssetRequestsService {
+  constructor(
+    @InjectRepository(AssetRequest)
+    private readonly requestRepo: Repository<AssetRequest>,
+  ) { }
+
+  async create(dto: CreateAssetRequestDto): Promise<AssetRequest> {
+    const request = this.requestRepo.create({
+      ...dto,
+      requester: { id: dto.requester_id } as any,
+      status: 'PENDING',
+    });
+    return await this.requestRepo.save(request);
   }
 
-  findAll() {
-    return `This action returns all assetsRequests`;
+  async findAll(): Promise<AssetRequest[]> {
+    return await this.requestRepo.find({
+      relations: ['requester', 'requester.department', 'verified_by_finance'],
+      order: { created_at: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} assetsRequest`;
+  async findOne(id: string): Promise<AssetRequest> {
+    const request = await this.requestRepo.findOne({
+      where: { id },
+      relations: ['requester', 'requester.department', 'verified_by_finance'],
+    });
+    if (!request) throw new NotFoundException(`Request with ID ${id} not found`);
+    return request;
   }
 
-  update(id: number, updateAssetsRequestDto: UpdateAssetsRequestDto) {
-    return `This action updates a #${id} assetsRequest`;
-  }
+  async update(id: string, dto: UpdateAssetRequestDto): Promise<AssetRequest> {
+    const request = await this.findOne(id);
 
-  remove(id: number) {
-    return `This action removes a #${id} assetsRequest`;
+    if (dto.status) request.status = dto.status;
+    if (dto.ceo_remarks) request.ceo_remarks = dto.ceo_remarks;
+    if (dto.verified_by_finance_id) {
+      request.verified_by_finance = { id: dto.verified_by_finance_id } as any;
+    }
+
+    return await this.requestRepo.save(request);
   }
 }
