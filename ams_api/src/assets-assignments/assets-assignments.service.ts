@@ -69,9 +69,6 @@ export class AssetAssignmentsService {
     }
   }
 
-  /**
-   * Returns all assignment records.
-   */
   async findAll(): Promise<AssetAssignment[]> {
     return await this.assignmentRepo.find({
       relations: ['asset', 'user'],
@@ -79,9 +76,6 @@ export class AssetAssignmentsService {
     });
   }
 
-  /**
-   * Returns a specific assignment record.
-   */
   async findOne(id: string): Promise<AssetAssignment> {
     const assignment = await this.assignmentRepo.findOne({
       where: { id },
@@ -94,17 +88,12 @@ export class AssetAssignmentsService {
     return assignment;
   }
 
-  /**
-   * Updates an assignment record (e.g., recording a return).
-   */
   async update(id: string, updateDto: UpdateAssetAssignmentDto): Promise<AssetAssignment> {
     const assignment = await this.findOne(id);
 
-    // If returning the asset
     if (updateDto.returned_at) {
       assignment.returned_at = new Date(updateDto.returned_at);
-      
-      // Also update the Asset status back to IN_STOCK and clear assigned_to
+
       const asset = await this.assetRepo.findOne({
         where: { id: assignment.asset.id }
       });
@@ -122,9 +111,6 @@ export class AssetAssignmentsService {
     return await this.assignmentRepo.save(assignment);
   }
 
-  /**
-   * Removes an assignment record history entry.
-   */
   async remove(id: string): Promise<void> {
     const assignment = await this.findOne(id);
     await this.assignmentRepo.remove(assignment);
