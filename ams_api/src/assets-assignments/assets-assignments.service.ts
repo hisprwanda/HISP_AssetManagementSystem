@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Asset } from '../assets/entities/asset.entity';
@@ -15,7 +19,7 @@ export class AssetAssignmentsService {
     @InjectRepository(Asset)
     private readonly assetRepo: Repository<Asset>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async create(createDto: CreateAssetAssignmentDto): Promise<AssetAssignment> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -27,13 +31,17 @@ export class AssetAssignmentsService {
         where: { id: createDto.asset_id },
       });
       if (!asset) {
-        throw new NotFoundException(`Asset with ID ${createDto.asset_id} not found`);
+        throw new NotFoundException(
+          `Asset with ID ${createDto.asset_id} not found`,
+        );
       }
       const user = await queryRunner.manager.findOne(User, {
         where: { id: createDto.user_id },
       });
       if (!user) {
-        throw new NotFoundException(`User with ID ${createDto.user_id} not found`);
+        throw new NotFoundException(
+          `User with ID ${createDto.user_id} not found`,
+        );
       }
 
       asset.status = 'ASSIGNED';
@@ -49,11 +57,12 @@ export class AssetAssignmentsService {
 
       await queryRunner.commitTransaction();
       return savedAssignment;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to create asset assignment');
+      throw new InternalServerErrorException(
+        'Failed to create asset assignment',
+      );
     } finally {
       await queryRunner.release();
     }
@@ -62,7 +71,7 @@ export class AssetAssignmentsService {
   async findAll(): Promise<AssetAssignment[]> {
     return await this.assignmentRepo.find({
       relations: ['asset', 'user'],
-      order: { assigned_at: 'DESC' }
+      order: { assigned_at: 'DESC' },
     });
   }
 
@@ -78,14 +87,17 @@ export class AssetAssignmentsService {
     return assignment;
   }
 
-  async update(id: string, updateDto: UpdateAssetAssignmentDto): Promise<AssetAssignment> {
+  async update(
+    id: string,
+    updateDto: UpdateAssetAssignmentDto,
+  ): Promise<AssetAssignment> {
     const assignment = await this.findOne(id);
 
     if (updateDto.returned_at) {
       assignment.returned_at = new Date(updateDto.returned_at);
 
       const asset = await this.assetRepo.findOne({
-        where: { id: assignment.asset.id }
+        where: { id: assignment.asset.id },
       });
       if (asset) {
         asset.status = 'IN_STOCK';

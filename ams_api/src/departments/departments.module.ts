@@ -10,4 +10,4 @@ import { Department } from './entities/department.entity';
   providers: [DepartmentsService],
   exports: [DepartmentsService], // Exported in case other modules need it
 })
-export class DepartmentsModule { }
+export class DepartmentsModule {}

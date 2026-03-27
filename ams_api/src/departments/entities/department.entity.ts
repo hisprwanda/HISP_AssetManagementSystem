@@ -4,18 +4,18 @@ import { Asset } from '../../assets/entities/asset.entity';
 
 @Entity('departments')
 export class Department {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column({ unique: true })
-    name: string;
+  @Column({ unique: true })
+  name: string;
 
-    @Column()
-    type: string; // 'Directorate' or 'Team'
+  @Column()
+  type: string; // 'Directorate' or 'Team'
 
-    @OneToMany(() => User, (user) => user.department)
-    users: User[];
+  @OneToMany(() => User, (user) => user.department)
+  users: User[];
 
-    @OneToMany(() => Asset, (asset) => asset.department)
-    assets: Asset[];
+  @OneToMany(() => Asset, (asset) => asset.department)
+  assets: Asset[];
 }

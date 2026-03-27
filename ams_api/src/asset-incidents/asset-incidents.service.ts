@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, DataSource } from "typeorm";
-import { AssetIncident } from "./entities/asset-incident.entity";
-import { Asset } from "src/assets/entities/asset.entity";
-import { AssetRequest } from "src/assets-requests/entities/assets-request.entity";
-import { AssetsService } from "src/assets/assets.service";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { AssetIncident } from './entities/asset-incident.entity';
+import { Asset } from 'src/assets/entities/asset.entity';
+import { AssetRequest } from 'src/assets-requests/entities/assets-request.entity';
+import { AssetsService } from 'src/assets/assets.service';
 
 @Injectable()
 export class AssetIncidentsService {
@@ -13,17 +17,23 @@ export class AssetIncidentsService {
     private readonly incidentRepo: Repository<AssetIncident>,
     private readonly assetsService: AssetsService,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
-
-  async reportIncident(dto: { asset_id: string; user_id: string; type: string; explanation: string; evidence_url?: string }) {
+  async reportIncident(dto: {
+    asset_id: string;
+    user_id: string;
+    type: string;
+    explanation: string;
+    evidence_url?: string;
+  }) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-
-      const asset = await queryRunner.manager.findOne(Asset, { where: { id: dto.asset_id } });
+      const asset = await queryRunner.manager.findOne(Asset, {
+        where: { id: dto.asset_id },
+      });
       if (!asset) throw new NotFoundException('Asset not found');
 
       asset.status = dto.type === 'MISSING' ? 'MISSING' : 'UNDER_REPAIR';
@@ -40,7 +50,6 @@ export class AssetIncidentsService {
       const savedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
       return savedIncident;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -48,7 +57,11 @@ export class AssetIncidentsService {
       await queryRunner.release();
     }
   }
-  async resolveIncident(incidentId: string, resolution: 'ACCEPTED' | 'DENIED', remarks: string) {
+  async resolveIncident(
+    incidentId: string,
+    resolution: 'ACCEPTED' | 'DENIED',
+    remarks: string,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -61,7 +74,9 @@ export class AssetIncidentsService {
 
       if (!incident) throw new NotFoundException('Incident not found');
       if (incident.investigation_status !== 'INVESTIGATING') {
-        throw new BadRequestException('This incident has already been resolved.');
+        throw new BadRequestException(
+          'This incident has already been resolved.',
+        );
       }
 
       incident.investigation_status = resolution;
@@ -74,16 +89,16 @@ export class AssetIncidentsService {
         });
         const savedRequest = await queryRunner.manager.save(request);
         incident.replacement_request = savedRequest;
-
       } else if (resolution === 'DENIED') {
-        const currentBookValue = this.assetsService.calculateCurrentValue(incident.asset);
+        const currentBookValue = this.assetsService.calculateCurrentValue(
+          incident.asset,
+        );
         incident.penalty_amount = currentBookValue;
       }
 
       const updatedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
       return updatedIncident;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

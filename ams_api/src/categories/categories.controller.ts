@@ -1,14 +1,22 @@
-import { from } from "rxjs";
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { CategoriesService } from "./categories.service";
-import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) { }
+  constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new asset category (Unique names only)' })
@@ -21,7 +29,6 @@ export class CategoriesController {
   findAll() {
     return this.categoriesService.findAll();
   }
-
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific category by UUID' })
@@ -39,7 +46,10 @@ export class CategoriesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update category details' })
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 

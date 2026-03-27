@@ -7,11 +7,9 @@ import { AssetAssignment } from './entities/assets-assignment.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AssetAssignment, Asset, User])
-  ],
+  imports: [TypeOrmModule.forFeature([AssetAssignment, Asset, User])],
   controllers: [AssetAssignmentsController],
   providers: [AssetAssignmentsService],
   exports: [AssetAssignmentsService],
 })
-export class AssetAssignmentsModule { }
+export class AssetAssignmentsModule {}

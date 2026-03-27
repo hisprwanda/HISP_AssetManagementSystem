@@ -3,17 +3,17 @@ import { Asset } from '../../assets/entities/asset.entity';
 
 @Entity('categories')
 export class Category {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column({ unique: true })
-    name: string;
-    @Column('decimal', { precision: 5, scale: 2 })
-    depreciation_rate: number;
+  @Column({ unique: true })
+  name: string;
+  @Column('decimal', { precision: 5, scale: 2 })
+  depreciation_rate: number;
 
-    @Column('decimal', { precision: 5, scale: 2, default: 0 })
-    salvage_rate: number;
+  @Column('decimal', { precision: 5, scale: 2, default: 0 })
+  salvage_rate: number;
 
-    @OneToMany(() => Asset, (asset) => asset.category)
-    assets: Asset[];
+  @OneToMany(() => Asset, (asset) => asset.category)
+  assets: Asset[];
 }

@@ -1,13 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param } from "@nestjs/common";
-import { AssetRequestsService } from "./assets-requests.service";
-import { CreateAssetRequestDto } from "./dto/create-assets-request.dto";
-import { UpdateAssetRequestDto } from "./dto/update-assets-request.dto";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { AssetRequestsService } from './assets-requests.service';
+import { CreateAssetRequestDto } from './dto/create-assets-request.dto';
+import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Asset Requests Workflow')
 @Controller('asset-requests')
 export class AssetRequestsController {
-  constructor(private readonly assetRequestsService: AssetRequestsService) { }
+  constructor(private readonly assetRequestsService: AssetRequestsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Submit a new equipment request' })
@@ -28,9 +28,13 @@ export class AssetRequestsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Advance the request workflow (Approve/Reject/Verify)' })
-  update(@Param('id') id: string, @Body() updateAssetRequestDto: UpdateAssetRequestDto) {
+  @ApiOperation({
+    summary: 'Advance the request workflow (Approve/Reject/Verify)',
+  })
+  update(
+    @Param('id') id: string,
+    @Body() updateAssetRequestDto: UpdateAssetRequestDto,
+  ) {
     return this.assetRequestsService.update(id, updateAssetRequestDto);
   }
 }
-

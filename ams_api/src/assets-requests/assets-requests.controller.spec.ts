@@ -1,17 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AssetsRequestsController } from './assets-requests.controller';
-import { AssetsRequestsService } from './assets-requests.service';
+import { AssetRequestsController } from './assets-requests.controller';
+import { AssetRequestsService } from './assets-requests.service';
 
-describe('AssetsRequestsController', () => {
-  let controller: AssetsRequestsController;
+describe('AssetRequestsController', () => {
+  let controller: AssetRequestsController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AssetsRequestsController],
-      providers: [AssetsRequestsService],
+      controllers: [AssetRequestsController],
+      providers: [
+        {
+          provide: AssetRequestsService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
-    controller = module.get<AssetsRequestsController>(AssetsRequestsController);
+    controller = module.get<AssetRequestsController>(AssetRequestsController);
   });
 
   it('should be defined', () => {

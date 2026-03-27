@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssetRequest } from './entities/assets-request.entity';
+import { User } from 'src/users/entities/user.entity';
 import { CreateAssetRequestDto } from './dto/create-assets-request.dto';
 import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
 
@@ -10,12 +11,12 @@ export class AssetRequestsService {
   constructor(
     @InjectRepository(AssetRequest)
     private readonly requestRepo: Repository<AssetRequest>,
-  ) { }
+  ) {}
 
   async create(dto: CreateAssetRequestDto): Promise<AssetRequest> {
     const request = this.requestRepo.create({
       ...dto,
-      requester: { id: dto.requester_id } as any,
+      requester: { id: dto.requester_id } as User,
       status: 'PENDING',
     });
     return await this.requestRepo.save(request);
@@ -33,7 +34,8 @@ export class AssetRequestsService {
       where: { id },
       relations: ['requester', 'requester.department', 'verified_by_finance'],
     });
-    if (!request) throw new NotFoundException(`Request with ID ${id} not found`);
+    if (!request)
+      throw new NotFoundException(`Request with ID ${id} not found`);
     return request;
   }
 
@@ -43,7 +45,7 @@ export class AssetRequestsService {
     if (dto.status) request.status = dto.status;
     if (dto.ceo_remarks) request.ceo_remarks = dto.ceo_remarks;
     if (dto.verified_by_finance_id) {
-      request.verified_by_finance = { id: dto.verified_by_finance_id } as any;
+      request.verified_by_finance = { id: dto.verified_by_finance_id } as User;
     }
 
     return await this.requestRepo.save(request);

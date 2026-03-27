@@ -1,0 +1,13 @@
+{
+  "name": "hisp-ams-root",
+  "private": true,
+  "scripts": {
+    "format": "npm run format --prefix ams_api && npm run format --prefix ams_web",
+    "format:check": "npm run format:check --prefix ams_api && npm run format:check --prefix ams_web",
+    "lint": "npm run lint --prefix ams_api && npm run lint --prefix ams_web",
+    "lint:check": "npm run lint:check --prefix ams_api && npm run lint:check --prefix ams_web",
+    "type-check": "npm run type-check --prefix ams_api && npm run type-check --prefix ams_web",
+    "test": "npm run test --prefix ams_api",
+    "dev": "docker-compose up --build"
+  }
+}

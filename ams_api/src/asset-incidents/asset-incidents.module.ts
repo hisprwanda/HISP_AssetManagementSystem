@@ -13,4 +13,4 @@ import { AssetsModule } from '../assets/assets.module'; // Required for Deprecia
   controllers: [AssetIncidentsController],
   providers: [AssetIncidentsService],
 })
-export class AssetIncidentsModule { }
+export class AssetIncidentsModule {}

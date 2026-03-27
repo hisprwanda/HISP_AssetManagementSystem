@@ -7,7 +7,7 @@ import { ResolveIncidentDto } from './dto/resolve-asset-incident.dto';
 @ApiTags('Asset Incidents & Investigations')
 @Controller('asset-incidents')
 export class AssetIncidentsController {
-  constructor(private readonly assetIncidentsService: AssetIncidentsService) { }
+  constructor(private readonly assetIncidentsService: AssetIncidentsService) {}
 
   @Post('report')
   @ApiOperation({ summary: 'Report a broken or missing asset' })
@@ -17,10 +17,11 @@ export class AssetIncidentsController {
 
   @Patch(':id/resolve')
   @ApiOperation({ summary: 'Resolve an investigation (Accept or Deny)' })
-  resolveIncident(
-    @Param('id') id: string,
-    @Body() dto: ResolveIncidentDto,
-  ) {
-    return this.assetIncidentsService.resolveIncident(id, dto.resolution, dto.remarks);
+  resolveIncident(@Param('id') id: string, @Body() dto: ResolveIncidentDto) {
+    return this.assetIncidentsService.resolveIncident(
+      id,
+      dto.resolution,
+      dto.remarks,
+    );
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Department } from './entities/department.entity';
@@ -10,14 +14,16 @@ export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private readonly departmentRepo: Repository<Department>,
-  ) { }
+  ) {}
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
     const existing = await this.departmentRepo.findOne({
-      where: { name: createDepartmentDto.name }
+      where: { name: createDepartmentDto.name },
     });
     if (existing) {
-      throw new ConflictException(`Department with name '${createDepartmentDto.name}' already exists`);
+      throw new ConflictException(
+        `Department with name '${createDepartmentDto.name}' already exists`,
+      );
     }
 
     const department = this.departmentRepo.create(createDepartmentDto);
@@ -32,22 +38,27 @@ export class DepartmentsService {
   async findOne(id: string): Promise<Department> {
     const department = await this.departmentRepo.findOne({
       where: { id },
-      relations: ['users']
+      relations: ['users'],
     });
-    if (!department) throw new NotFoundException(`Department with ID ${id} not found`);
+    if (!department)
+      throw new NotFoundException(`Department with ID ${id} not found`);
     return department;
   }
 
   async findByName(name: string): Promise<Department> {
     const department = await this.departmentRepo.findOne({
       where: { name },
-      relations: ['users']
+      relations: ['users'],
     });
-    if (!department) throw new NotFoundException(`Department with name '${name}' not found`);
+    if (!department)
+      throw new NotFoundException(`Department with name '${name}' not found`);
     return department;
   }
 
-  async update(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<Department> {
+  async update(
+    id: string,
+    updateDepartmentDto: UpdateDepartmentDto,
+  ): Promise<Department> {
     const department = await this.findOne(id);
     Object.assign(department, updateDepartmentDto);
     return await this.departmentRepo.save(department);

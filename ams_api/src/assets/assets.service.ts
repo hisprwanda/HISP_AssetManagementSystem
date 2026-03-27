@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Asset } from './entities/asset.entity';
@@ -10,17 +15,17 @@ import { User } from 'src/users/entities/user.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
 import { DisposeAssetDto } from './dto/dispose-asset.dto';
 
-
 @Injectable()
 export class AssetsService {
   constructor(
     @InjectRepository(Asset)
     private readonly assetRepo: Repository<Asset>,
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { category_id, department_id, assigned_to_user_id, ...assetData } = createAssetDto;
+    const { category_id, department_id, assigned_to_user_id, ...assetData } =
+      createAssetDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -31,7 +36,9 @@ export class AssetsService {
         ...assetData,
         category: { id: category_id } as Category,
         department: { id: department_id } as Department,
-        assigned_to: assigned_to_user_id ? ({ id: assigned_to_user_id } as User) : null,
+        assigned_to: assigned_to_user_id
+          ? ({ id: assigned_to_user_id } as User)
+          : null,
       });
 
       const savedAsset = await queryRunner.manager.save(asset);
@@ -40,7 +47,7 @@ export class AssetsService {
         const initialAssignment = queryRunner.manager.create(AssetAssignment, {
           asset: savedAsset,
           user: { id: assigned_to_user_id } as User,
-          condition_on_assign: "Initial Purchase / Brand New",
+          condition_on_assign: 'Initial Purchase / Brand New',
           assigned_at: new Date(),
         });
         await queryRunner.manager.save(initialAssignment);
@@ -48,11 +55,12 @@ export class AssetsService {
 
       await queryRunner.commitTransaction();
       return savedAsset;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('Transaction Failed:', error);
-      throw new InternalServerErrorException('Failed to create asset and initial assignment record');
+      throw new InternalServerErrorException(
+        'Failed to create asset and initial assignment record',
+      );
     } finally {
       await queryRunner.release();
     }
@@ -64,7 +72,7 @@ export class AssetsService {
     });
   }
 
-  async findOne(id: string): Promise<any> {
+  async findOne(id: string): Promise<Asset & { current_book_value: string }> {
     const asset = await this.assetRepo.findOne({
       where: { id },
       relations: ['category', 'department', 'assigned_to'],
@@ -80,12 +88,15 @@ export class AssetsService {
   async update(id: string, updateAssetDto: UpdateAssetDto): Promise<Asset> {
     const asset = await this.findOne(id);
 
-    if (updateAssetDto.category_id) asset.category = { id: updateAssetDto.category_id } as Category;
-    if (updateAssetDto.department_id) asset.department = { id: updateAssetDto.department_id } as Department;
+    if (updateAssetDto.category_id)
+      asset.category = { id: updateAssetDto.category_id } as Category;
+    if (updateAssetDto.department_id)
+      asset.department = { id: updateAssetDto.department_id } as Department;
 
     if (updateAssetDto.assigned_to_user_id !== undefined) {
-
-      asset.assigned_to = updateAssetDto.assigned_to_user_id ? ({ id: updateAssetDto.assigned_to_user_id } as User) : null as any;
+      asset.assigned_to = updateAssetDto.assigned_to_user_id
+        ? ({ id: updateAssetDto.assigned_to_user_id } as User)
+        : null;
     }
 
     Object.assign(asset, updateAssetDto);
@@ -110,7 +121,11 @@ export class AssetsService {
   }
 
   calculateCurrentValue(asset: Asset): number {
-    if (!asset.purchase_cost || !asset.purchase_date || !asset.category?.depreciation_rate) {
+    if (
+      !asset.purchase_cost ||
+      !asset.purchase_date ||
+      !asset.category?.depreciation_rate
+    ) {
       return Number(asset.purchase_cost) || 0;
     }
 
@@ -122,7 +137,9 @@ export class AssetsService {
     const depreciableAmount = cost - salvageValue;
 
     const purchaseDate = new Date(asset.purchase_date);
-    const yearsElapsed = (new Date().getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    const yearsElapsed =
+      (new Date().getTime() - purchaseDate.getTime()) /
+      (1000 * 60 * 60 * 24 * 365.25);
 
     const accumulatedDepreciation = depreciableAmount * rate * yearsElapsed;
     const currentValue = cost - accumulatedDepreciation;
@@ -137,12 +154,15 @@ export class AssetsService {
     try {
       const asset = await queryRunner.manager.findOne(Asset, {
         where: { id },
-        relations: ['assignment_history']
+        relations: ['assignment_history'],
       });
 
       if (!asset) throw new NotFoundException(`Asset with ID ${id} not found`);
-      if (asset.status === 'DISPOSED') throw new BadRequestException(`Asset is already disposed`);
-      const activeAssignment = asset.assignment_history?.find(a => a.returned_at === null);
+      if (asset.status === 'DISPOSED')
+        throw new BadRequestException(`Asset is already disposed`);
+      const activeAssignment = asset.assignment_history?.find(
+        (a) => a.returned_at === null,
+      );
 
       if (activeAssignment) {
         activeAssignment.returned_at = new Date(disposeAssetDto.disposal_date);
@@ -154,12 +174,11 @@ export class AssetsService {
       asset.disposal_date = new Date(disposeAssetDto.disposal_date);
       asset.disposal_value = disposeAssetDto.disposal_value;
       asset.disposal_reason = disposeAssetDto.disposal_reason;
-      asset.assigned_to = null as any;
+      asset.assigned_to = null;
       const savedAsset = await queryRunner.manager.save(asset);
 
       await queryRunner.commitTransaction();
       return savedAsset;
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('Disposal Transaction Failed:', error);

@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { AssetsService } from "./assets.service";
-import { CreateAssetDto } from "./dto/create-asset.dto";
-import { UpdateAssetDto } from "./dto/update-asset.dto";
+import { AssetsService } from './assets.service';
+import { CreateAssetDto } from './dto/create-asset.dto';
+import { UpdateAssetDto } from './dto/update-asset.dto';
 import { DisposeAssetDto } from './dto/dispose-asset.dto';
-
 
 @ApiTags('Assets')
 @Controller('assets')
 export class AssetsController {
-  constructor(private readonly assetsService: AssetsService) { }
+  constructor(private readonly assetsService: AssetsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Register a new physical asset' })
