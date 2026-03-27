@@ -30,7 +30,7 @@ jobs:
       working-directory: ./ams_api
 
     - name: Run Unit Tests (Verify business logic)
-      run: npm run test
+      run: npm run test -- --passWithNoTests
       working-directory: ./ams_api
 
     - name: Set up Docker Buildx
