@@ -14,7 +14,7 @@ export class DepartmentsService {
   constructor(
     @InjectRepository(Department)
     private readonly departmentRepo: Repository<Department>,
-  ) { }
+  ) {}
 
   async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
     const existing = await this.departmentRepo.findOne({

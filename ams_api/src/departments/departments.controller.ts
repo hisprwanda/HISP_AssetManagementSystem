@@ -15,7 +15,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 @ApiTags('Departments')
 @Controller('departments')
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) { }
+  constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new department' })
