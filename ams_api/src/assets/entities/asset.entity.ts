@@ -55,6 +55,12 @@ export class Asset {
   @Column({ type: 'text', nullable: true })
   disposal_reason: string;
 
+  @Column('numeric', { precision: 12, scale: 2, default: 0 })
+  current_value: number;
+
+  @Column('numeric', { precision: 12, scale: 2, default: 0 })
+  accumulated_depreciation: number;
+
   @ManyToOne(() => Category, (category) => category.assets)
   @JoinColumn({ name: 'category_id' })
   category: Category;

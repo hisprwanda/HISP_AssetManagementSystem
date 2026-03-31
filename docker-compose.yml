@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     image: postgres:15-alpine
@@ -14,41 +12,45 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  api:
-    build:
-      context: ./ams_api
-      dockerfile: Dockerfile
-    container_name: hisp-ams-api
-    volumes:
-      - ./ams_api:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
-    environment:
-      - DB_HOST=database
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=12345
-      - DB_DATABASE=ams_db
-      - PORT=3000
-    restart: unless-stopped
-    depends_on:
-      - database
+#   api:
+#     build:
+#       context: ./ams_api
+#       dockerfile: Dockerfile
+#     container_name: hisp-ams-api
+#     volumes:
+#       - ./ams_api:/app
+#       - /app/node_modules
+#       - /app/dist
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - DB_HOST=database
+#       - DB_PORT=5432
+#       - DB_USERNAME=postgres
+#       - DB_PASSWORD=12345
+#       - DB_DATABASE=ams_db
+#       - PORT=3000
+#     restart: unless-stopped
+#     depends_on:
+#       - database
 
-  web:
-    build:
-      context: ./ams_web
-      dockerfile: Dockerfile
-    container_name: hisp-ams-web
-    volumes:
-      - ./ams_web:/app
-      - /app/node_modules
-    ports:
-      - "5173:5173"
-    depends_on:
-      - api
-    environment:
-      - VITE_API_URL=http://localhost:3000
+#   web:
+#     build:
+#       context: ./ams_web
+#       dockerfile: Dockerfile
+#     container_name: hisp-ams-web
+#     volumes:
+#       - ./ams_web:/app
+#       - /app/node_modules
+#     ports:
+#       - "5173:5173"
+#     depends_on:
+#       - api
+#     environment:
+#       - VITE_API_URL=http://localhost:3000
+#       - NODE_OPTIONS=--max-old-space-size=2048
+#     mem_limit: 2G
+#     restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -22,13 +22,14 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            <Route path="/" element={<DashboardHome />} />
-            <Route path="/assets" element={<Assets />} />
+            <Route path="/overview" element={<DashboardHome />} />
             <Route path="/requests" element={<Requests />} />
+            <Route path="/assets" element={<Assets />} />
             <Route path="/incidents" element={<Incidents />} />
             <Route path="/directorate" element={<Directorate />} />
           </Route>

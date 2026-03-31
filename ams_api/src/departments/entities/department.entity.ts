@@ -13,6 +13,9 @@ export class Department {
   @Column()
   type: string; // 'Directorate' or 'Country Portfolio'
 
+  @Column({ default: 'Active' })
+  status: string; // 'Active' or 'Inactive'
+
   @OneToMany(() => User, (user) => user.department)
   users: User[];
 

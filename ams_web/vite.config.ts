@@ -11,4 +11,18 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    fs: {
+      cachedChecks: true,
+    },
+    watch: {
+      usePolling: false, // Testing if native events are more memory-efficient
+    },
+    hmr: {
+      clientPort: 5173,
+    },
+  },
 })

@@ -18,4 +18,13 @@ export class CreateCategoryDto {
   @Min(0)
   @Max(100)
   depreciation_rate: number;
+
+  @ApiProperty({
+    example: 5,
+    description: 'Salvage value percentage at end of useful life',
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  salvage_rate: number;
 }

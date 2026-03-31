@@ -22,14 +22,14 @@ interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: StaffUser | null;
-  departmentId: string;
+  department?: { id: string; name: string } | null;
 }
 
 export const EditUserModal = ({
   isOpen,
   onClose,
   user,
-  departmentId,
+  department,
 }: EditUserModalProps) => {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState('');
@@ -56,7 +56,7 @@ export const EditUserModal = ({
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', departmentId] });
+      queryClient.invalidateQueries({ queryKey: ['users', department?.id] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       onClose();
       setError(null);
@@ -83,6 +83,15 @@ export const EditUserModal = ({
     }
     mutation.mutate({ full_name: fullName, email, role });
   };
+
+  const isFinanceDept =
+    department?.name === 'Admin and Finance' ||
+    department?.name === 'Admin & Finance' ||
+    department?.name === 'Admin and Finance Directorate';
+
+  const roles = isFinanceDept
+    ? ['Admin and Finance Director', 'Finance Officer', 'Operations Officer']
+    : ['Staff', 'HOD'];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -152,10 +161,11 @@ export const EditUserModal = ({
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none"
               >
-                <option value="Staff">Staff</option>
-                <option value="HOD">Head of Directorate (HOD)</option>
-                <option value="Admin and Finance">Admin and Finance</option>
-                <option value="Office of the CEO">Office of the CEO</option>
+                {roles.map((r) => (
+                  <option key={r} value={r}>
+                    {r} {r === 'HOD' ? '(Head of Directorate)' : ''}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

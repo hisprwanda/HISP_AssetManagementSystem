@@ -52,4 +52,9 @@ export class AssetsController {
   remove(@Param('id') id: string) {
     return this.assetsService.remove(id);
   }
+
+  @Post('recalculate')
+  recalculateAll() {
+    return this.assetsService.recalculateAll();
+  }
 }

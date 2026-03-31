@@ -24,7 +24,7 @@ export class UsersService implements OnModuleInit {
         full_name: 'System Admin',
         email: adminEmail,
         password_hash: hashedPassword,
-        role: 'Admin and Finance',
+        role: 'Admin and Finance Director',
       });
       await this.userRepo.save(adminUser);
       console.log(
@@ -33,7 +33,7 @@ export class UsersService implements OnModuleInit {
     } else {
       console.log('Admin user found. Enforcing Admin123! password...');
       existingAdmin.password_hash = await bcrypt.hash('Admin123!', 10);
-      existingAdmin.role = 'Admin and Finance';
+      existingAdmin.role = 'Admin and Finance Director';
       await this.userRepo.save(existingAdmin);
       console.log('✅ Admin credentials reset successfully!');
     }

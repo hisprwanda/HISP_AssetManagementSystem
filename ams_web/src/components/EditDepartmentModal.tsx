@@ -15,6 +15,7 @@ interface Department {
   id: string;
   name: string;
   type: string;
+  status: string;
 }
 
 interface EditDepartmentModalProps {
@@ -31,19 +32,23 @@ export const EditDepartmentModal = ({
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [type, setType] = useState('Directorate');
+  const [status, setStatus] = useState('Active');
   const [error, setError] = useState<string | null>(null);
-
-  // Populate fields whenever the department prop changes
   useEffect(() => {
     if (department) {
       setName(department.name);
       setType(department.type);
+      setStatus(department.status || 'Active');
       setError(null);
     }
   }, [department]);
 
   const mutation = useMutation({
-    mutationFn: async (updatedDept: { name: string; type: string }) => {
+    mutationFn: async (updatedDept: {
+      name: string;
+      type: string;
+      status: string;
+    }) => {
       const response = await api.patch(
         `/departments/${department!.id}`,
         updatedDept,
@@ -71,11 +76,11 @@ export const EditDepartmentModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!name || !type) {
+    if (!name || !type || !status) {
       setError('Please fill in all required fields.');
       return;
     }
-    mutation.mutate({ name, type });
+    mutation.mutate({ name, type, status });
   };
 
   return (
@@ -127,6 +132,21 @@ export const EditDepartmentModal = ({
             >
               <option value="Directorate">Directorate</option>
               <option value="Country Portfolio">Country Portfolio</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+              Status *
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none"
+              required
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
             </select>
           </div>
 

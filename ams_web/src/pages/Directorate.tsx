@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   X,
   Search,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
@@ -18,11 +19,14 @@ import { CreateDepartmentModal } from '../components/CreateDepartmentModal';
 import { EditDepartmentModal } from '../components/EditDepartmentModal';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
+import { ViewUserModal } from '../components/ViewUserModal';
+import { ViewDepartmentModal } from '../components/ViewDepartmentModal';
 
 interface Department {
   id: string;
   name: string;
   type: string;
+  status: string;
 }
 
 interface User {
@@ -34,12 +38,8 @@ interface User {
 }
 
 export const Directorate = () => {
-  const { user: currentUser } = useAuth();
+  const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
-  const isAdmin =
-    currentUser?.role === 'ADMIN' ||
-    currentUser?.role === 'SYSTEM_ADMIN' ||
-    currentUser?.role === 'Admin and Finance';
 
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
@@ -50,6 +50,8 @@ export const Directorate = () => {
   const [deptToDelete, setDeptToDelete] = useState<Department | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToView, setUserToView] = useState<User | null>(null);
+  const [deptToView, setDeptToView] = useState<Department | null>(null);
   const [staffSearch, setStaffSearch] = useState('');
 
   const { data: departments, isLoading: loadingDepts } = useQuery<Department[]>(
@@ -119,21 +121,21 @@ export const Directorate = () => {
   if (!selectedDept) {
     return (
       <div className="flex flex-col h-full animate-in fade-in duration-500">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+            <h1 className="text-xl font-black text-slate-800 tracking-tight">
               Directorates
             </h1>
-            <p className="text-slate-500 font-medium mt-1">
+            <p className="text-slate-500 text-sm mt-0.5">
               Manage organizational units and department heads.
             </p>
           </div>
           {isAdmin && (
             <button
               onClick={() => setIsDeptModalOpen(true)}
-              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-5 py-2.5 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group"
+              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm"
             >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+              <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
               New Directorate
             </button>
           )}
@@ -171,6 +173,16 @@ export const Directorate = () => {
                   {isAdmin && (
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeptToView(dept);
+                        }}
+                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        title="View Unit Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={(e) => handleEditClick(e, dept)}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Edit Directorate"
@@ -200,9 +212,13 @@ export const Directorate = () => {
                     <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
                       Status
                     </span>
-                    <span className="text-sm font-bold text-emerald-600 flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{' '}
-                      Active
+                    <span
+                      className={`text-sm font-bold flex items-center gap-1 ${dept.status === 'Inactive' ? 'text-slate-400' : 'text-emerald-600'}`}
+                    >
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full animate-pulse ${dept.status === 'Inactive' ? 'bg-slate-300' : 'bg-emerald-500'}`}
+                      />{' '}
+                      {dept.status || 'Active'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
@@ -228,6 +244,12 @@ export const Directorate = () => {
             setDeptToEdit(null);
           }}
           department={deptToEdit}
+        />
+
+        <ViewDepartmentModal
+          isOpen={!!deptToView}
+          onClose={() => setDeptToView(null)}
+          department={deptToView}
         />
 
         {deptToDelete && (
@@ -280,24 +302,24 @@ export const Directorate = () => {
 
   return (
     <div className="flex flex-col h-full animate-in slide-in-from-right-8 duration-300">
-      <div className="mb-8">
+      <div className="mb-5">
         <button
           onClick={() => setSelectedDept(null)}
-          className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#ff8000] transition-colors mb-4 group"
+          className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#ff8000] transition-colors mb-3 group"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
           Back to Directorates
         </button>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <Building2 className="w-6 h-6 text-[#e49f37]" />
-              <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+            <div className="flex items-center gap-2 mb-0.5">
+              <Building2 className="w-5 h-5 text-[#e49f37]" />
+              <h1 className="text-xl font-black text-slate-800 tracking-tight">
                 {selectedDept.name}
               </h1>
             </div>
-            <p className="text-slate-500 font-medium">
+            <p className="text-slate-500 text-sm">
               Managing staff and access for this unit.
             </p>
           </div>
@@ -305,16 +327,16 @@ export const Directorate = () => {
           {isAdmin && (
             <button
               onClick={() => setIsUserModalOpen(true)}
-              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-5 py-2.5 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group"
+              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm"
             >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+              <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
               Provision Staff
             </button>
           )}
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-md border border-white p-2 rounded-2xl shadow-sm mb-6 flex items-center gap-2">
+      <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-3 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -415,24 +437,34 @@ export const Directorate = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span
+                    <div
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
-                        user.role.includes('ADMIN') ||
-                        user.role === 'Admin and Finance'
-                          ? 'bg-[#ff8000]/10 text-[#ff8000] border-[#ff8000]/20'
-                          : 'bg-slate-100 text-slate-600 border-slate-200'
+                        [
+                          'Admin and Finance Director',
+                          'Finance Officer',
+                          'Operations Officer',
+                          'SYSTEM_ADMIN',
+                        ].includes(user.role)
+                          ? 'bg-orange-50 text-[#ff8000] border-orange-100'
+                          : user.role === 'HOD'
+                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                            : 'bg-slate-50 text-slate-500 border-slate-100'
                       }`}
                     >
-                      {user.role === 'Admin and Finance' ? (
-                        <Shield className="w-3 h-3" />
-                      ) : null}
-                      {user.role}
-                    </span>
+                      <Shield className="w-3 h-3" /> {user.role}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       {isAdmin && (
                         <>
+                          <button
+                            onClick={() => setUserToView(user)}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            title="View Staff Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => {
                               setUserToEdit(user);
@@ -464,7 +496,7 @@ export const Directorate = () => {
       <CreateUserModal
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
-        defaultDepartmentId={selectedDept.id}
+        department={selectedDept}
       />
 
       <EditUserModal
@@ -474,7 +506,7 @@ export const Directorate = () => {
           setUserToEdit(null);
         }}
         user={userToEdit}
-        departmentId={selectedDept.id}
+        department={selectedDept}
       />
 
       {userToDelete && (
@@ -521,6 +553,11 @@ export const Directorate = () => {
           </div>
         </div>
       )}
+      <ViewUserModal
+        isOpen={!!userToView}
+        onClose={() => setUserToView(null)}
+        user={userToView ? { ...userToView, department: selectedDept } : null}
+      />
     </div>
   );
 };

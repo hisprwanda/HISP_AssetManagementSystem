@@ -14,13 +14,13 @@ import {
 interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultDepartmentId?: string;
+  department?: { id: string; name: string } | null;
 }
 
 export const CreateUserModal = ({
   isOpen,
   onClose,
-  defaultDepartmentId,
+  department,
 }: CreateUserModalProps) => {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState('');
@@ -37,7 +37,11 @@ export const CreateUserModal = ({
       role: string;
       department_id: string;
     }) => {
-      const response = await api.post('/users', newUser);
+      const dbUser = {
+        ...newUser,
+        department_id: department?.id,
+      };
+      const response = await api.post('/users', dbUser);
       return response.data;
     },
     onSuccess: () => {
@@ -46,7 +50,6 @@ export const CreateUserModal = ({
       setFullName('');
       setEmail('');
       setPassword('');
-      setRole('Staff');
       setError(null);
     },
     onError: (err: unknown) => {
@@ -69,7 +72,7 @@ export const CreateUserModal = ({
       setError('Please fill in all required fields.');
       return;
     }
-    if (!defaultDepartmentId) {
+    if (!department) {
       setError('No department selected. Please go back and try again.');
       return;
     }
@@ -78,9 +81,33 @@ export const CreateUserModal = ({
       email,
       password_hash: password,
       role,
-      department_id: defaultDepartmentId,
+      department_id: department?.id || '',
     });
   };
+
+  const isFinanceDept =
+    department?.name === 'Admin and Finance' ||
+    department?.name === 'Admin & Finance' ||
+    department?.name === 'Admin and Finance Directorate';
+
+  const roles = React.useMemo(
+    () =>
+      isFinanceDept
+        ? [
+            'Admin and Finance Director',
+            'Finance Officer',
+            'Operations Officer',
+          ]
+        : ['Staff', 'HOD'],
+    [isFinanceDept],
+  );
+
+  // Reset role when roles change or modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setRole(roles[0]);
+    }
+  }, [isOpen, department?.name, roles]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -115,7 +142,7 @@ export const CreateUserModal = ({
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Jane Smith"
+                placeholder="enter full name"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
                 required
               />
@@ -132,7 +159,7 @@ export const CreateUserModal = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. smith.j@hisprwanda.org"
+                placeholder="enter email"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
                 required
               />
@@ -149,7 +176,7 @@ export const CreateUserModal = ({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min. 6 characters"
+                placeholder="enter password (min. 6 characters)"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
                 minLength={6}
                 required
@@ -168,10 +195,11 @@ export const CreateUserModal = ({
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all appearance-none"
               >
-                <option value="Staff">Staff</option>
-                <option value="HOD">Head of Directorate (HOD)</option>
-                <option value="Admin and Finance">Admin and Finance</option>
-                <option value="Office of the CEO">Office of the CEO</option>
+                {roles.map((r) => (
+                  <option key={r} value={r}>
+                    {r} {r === 'HOD' ? '(Head of Directorate)' : ''}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

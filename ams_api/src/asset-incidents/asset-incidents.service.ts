@@ -90,10 +90,10 @@ export class AssetIncidentsService {
         const savedRequest = await queryRunner.manager.save(request);
         incident.replacement_request = savedRequest;
       } else if (resolution === 'DENIED') {
-        const currentBookValue = this.assetsService.calculateCurrentValue(
+        const { current_value } = this.assetsService.calculateDepreciation(
           incident.asset,
         );
-        incident.penalty_amount = currentBookValue;
+        incident.penalty_amount = current_value;
       }
 
       const updatedIncident = await queryRunner.manager.save(incident);

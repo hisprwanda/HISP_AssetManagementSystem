@@ -39,6 +39,12 @@ export class AuthService {
         full_name: user.full_name,
         email: user.email,
         role: user.role,
+        department: user.department
+          ? {
+              id: user.department.id,
+              name: user.department.name,
+            }
+          : null,
       },
     };
   }

@@ -151,9 +151,9 @@ export const Layout = () => {
   };
 
   const navItems = [
-    { name: 'System Overview', path: '/', icon: LayoutDashboard },
-    { name: 'Asset Masterlist', path: '/assets', icon: Laptop },
+    { name: 'System Overview', path: '/overview', icon: LayoutDashboard },
     { name: 'Procurement', path: '/requests', icon: ClipboardCheck },
+    { name: 'Asset Masterlist', path: '/assets', icon: Laptop },
     { name: 'Investigations', path: '/incidents', icon: AlertTriangle },
     { name: 'Directorate', path: '/directorate', icon: Users },
   ];
@@ -163,78 +163,80 @@ export const Layout = () => {
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#ff8000] rounded-full blur-[150px] opacity-[0.08] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-[#e49f37] rounded-full blur-[120px] opacity-[0.08] pointer-events-none" />
 
-      <aside className="relative z-20 w-72 bg-white/60 backdrop-blur-2xl border-r border-white/80 flex flex-col shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
-        <div className="p-8 pb-6">
-          <div className="flex items-center gap-4 mb-2">
+      <aside className="relative z-20 w-60 bg-white/60 backdrop-blur-2xl border-r border-white/80 flex flex-col shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
+        <div className="p-5 pb-4">
+          <div className="flex items-center gap-3 mb-1">
             <div className="bg-white p-1 rounded-full shadow-sm border border-slate-100">
               <img
                 src="https://pbs.twimg.com/profile_images/1151137195027132418/5g7iNP8z_400x400.png"
                 alt="HISP Rwanda"
-                className="w-10 h-10 rounded-full"
+                className="w-8 h-8 rounded-full"
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-xl text-slate-800 tracking-tight leading-none">
+              <span className="font-black text-base text-slate-800 tracking-tight leading-none">
                 HISP-AMS
               </span>
-              <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-[#ff8000] mt-1">
+              <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-[#ff8000] mt-0.5">
                 Rwanda
               </span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group font-medium ${isActive
-                  ? 'bg-gradient-to-r from-[#ff8000] to-[#e49f37] text-white shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)]'
-                  : 'text-slate-500 hover:bg-white/80 hover:text-[#ff8000] hover:shadow-sm'
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 group font-medium ${
+                  isActive
+                    ? 'bg-gradient-to-r from-[#ff8000] to-[#e49f37] text-white shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)]'
+                    : 'text-slate-500 hover:bg-white/80 hover:text-[#ff8000] hover:shadow-sm'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
                   <item.icon
-                    className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'
-                      }`}
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isActive ? 'scale-110' : 'group-hover:scale-110'
+                    }`}
                   />
-                  <span className="text-sm">{item.name}</span>
+                  <span className="text-xs font-semibold">{item.name}</span>
                 </>
               )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-4 m-4 bg-white/50 backdrop-blur-md rounded-2xl border border-white shadow-sm">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ff8000] to-[#e49f37] flex items-center justify-center font-bold text-white shadow-inner">
+        <div className="p-3 m-3 bg-white/50 backdrop-blur-md rounded-xl border border-white shadow-sm">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff8000] to-[#e49f37] flex items-center justify-center font-bold text-white text-xs shadow-inner">
               {user?.full_name?.charAt(0) || 'A'}
             </div>
             <div className="flex flex-col truncate">
-              <span className="text-sm font-bold text-slate-800 truncate leading-tight">
+              <span className="text-xs font-bold text-slate-800 truncate leading-tight">
                 {user?.full_name || 'Admin User'}
               </span>
-              <span className="text-[10px] text-[#e49f37] uppercase font-black tracking-wider">
+              <span className="text-[9px] text-[#e49f37] uppercase font-black tracking-wider">
                 {user?.role || 'SYSTEM ADMIN'}
               </span>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-slate-500 bg-white/60 hover:bg-[#ff8000] hover:text-white rounded-xl transition-colors group"
+            className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-slate-500 bg-white/60 hover:bg-[#ff8000] hover:text-white rounded-lg transition-colors group"
           >
             <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            Secure Sign Out
+            Sign Out
           </button>
         </div>
       </aside>
 
       <div className="relative z-10 flex-1 flex flex-col min-w-0">
-        <header className="h-24 bg-white/40 backdrop-blur-xl border-b border-white flex items-center justify-between px-10 sticky top-0 z-30">
+        <header className="h-14 bg-white/40 backdrop-blur-xl border-b border-white flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="relative w-full max-w-md group" ref={searchRef}>
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -295,10 +297,11 @@ export const Layout = () => {
                         className="w-full flex items-center gap-4 px-6 py-4 hover:bg-orange-50/50 transition-all text-left group"
                       >
                         <div
-                          className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner ${result.type === 'asset'
+                          className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner ${
+                            result.type === 'asset'
                               ? 'bg-blue-50'
                               : 'bg-orange-50'
-                            }`}
+                          }`}
                         >
                           {result.type === 'asset' ? (
                             <Laptop className="w-5 h-5 text-blue-500" />
@@ -362,7 +365,7 @@ export const Layout = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-8 lg:p-10">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-5 lg:p-6">
           <Outlet />
         </main>
       </div>

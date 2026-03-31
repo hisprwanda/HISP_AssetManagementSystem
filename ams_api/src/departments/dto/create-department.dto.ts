@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsIn, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDepartmentDto {
@@ -17,4 +17,15 @@ export class CreateDepartmentDto {
   @IsString()
   @IsIn(['Directorate', 'Country Portfolio'])
   type: string;
+
+  @ApiProperty({
+    enum: ['Active', 'Inactive'],
+    description: 'Status of the department',
+    required: false,
+    default: 'Active',
+  })
+  @IsString()
+  @IsOptional()
+  @IsIn(['Active', 'Inactive'])
+  status?: string;
 }

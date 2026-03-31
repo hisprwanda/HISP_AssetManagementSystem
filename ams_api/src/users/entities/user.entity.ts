@@ -24,7 +24,7 @@ export class User {
   password_hash: string;
 
   @Column()
-  role: string; // 'Staff', 'HOD', 'Admin and Finance', 'Office of the CEO'
+  role: string; // 'Staff', 'HOD', 'Admin and Finance Director', 'Finance Officer', 'Operations Officer', 'SYSTEM_ADMIN', 'Office of the CEO'
 
   @ManyToOne(() => Department, (dept) => dept.users)
   @JoinColumn({ name: 'department_id' })

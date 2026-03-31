@@ -41,6 +41,17 @@ export class AssetsService {
           : null,
       });
 
+      // Automated Depreciation Calculation
+      const fullCategory = await queryRunner.manager.findOne(Category, {
+        where: { id: category_id },
+      });
+      if (fullCategory) {
+        asset.category = fullCategory;
+        const dep = this.calculateDepreciation(asset);
+        asset.current_value = dep.current_value;
+        asset.accumulated_depreciation = dep.accumulated_depreciation;
+      }
+
       const savedAsset = await queryRunner.manager.save(asset);
 
       if (assigned_to_user_id) {
@@ -72,17 +83,14 @@ export class AssetsService {
     });
   }
 
-  async findOne(id: string): Promise<Asset & { current_book_value: string }> {
+  async findOne(id: string): Promise<Asset> {
     const asset = await this.assetRepo.findOne({
       where: { id },
       relations: ['category', 'department', 'assigned_to'],
     });
 
     if (!asset) throw new NotFoundException(`Asset with ID ${id} not found`);
-    return {
-      ...asset,
-      current_book_value: this.calculateCurrentValue(asset).toFixed(2),
-    };
+    return asset;
   }
 
   async update(id: string, updateAssetDto: UpdateAssetDto): Promise<Asset> {
@@ -100,6 +108,12 @@ export class AssetsService {
     }
 
     Object.assign(asset, updateAssetDto);
+
+    // Recalculate depreciation on update
+    const dep = this.calculateDepreciation(asset);
+    asset.current_value = dep.current_value;
+    asset.accumulated_depreciation = dep.accumulated_depreciation;
+
     return await this.assetRepo.save(asset);
   }
 
@@ -120,13 +134,19 @@ export class AssetsService {
     return await this.assetRepo.save(asset);
   }
 
-  calculateCurrentValue(asset: Asset): number {
+  calculateDepreciation(asset: Asset): {
+    current_value: number;
+    accumulated_depreciation: number;
+  } {
     if (
       !asset.purchase_cost ||
       !asset.purchase_date ||
       !asset.category?.depreciation_rate
     ) {
-      return Number(asset.purchase_cost) || 0;
+      return {
+        current_value: Number(asset.purchase_cost) || 0,
+        accumulated_depreciation: 0,
+      };
     }
 
     const cost = Number(asset.purchase_cost);
@@ -137,14 +157,48 @@ export class AssetsService {
     const depreciableAmount = cost - salvageValue;
 
     const purchaseDate = new Date(asset.purchase_date);
-    const yearsElapsed =
-      (new Date().getTime() - purchaseDate.getTime()) /
-      (1000 * 60 * 60 * 24 * 365.25);
+    const now = new Date();
 
-    const accumulatedDepreciation = depreciableAmount * rate * yearsElapsed;
+    // Monthly calculation
+    const monthsElapsed =
+      (now.getFullYear() - purchaseDate.getFullYear()) * 12 +
+      (now.getMonth() - purchaseDate.getMonth());
+
+    if (monthsElapsed <= 0) {
+      return { current_value: cost, accumulated_depreciation: 0 };
+    }
+
+    const monthlyRate = rate / 12;
+    let accumulatedDepreciation =
+      depreciableAmount * monthlyRate * monthsElapsed;
+
+    // Cap at depreciable amount
+    accumulatedDepreciation = Math.min(
+      accumulatedDepreciation,
+      depreciableAmount,
+    );
+
     const currentValue = cost - accumulatedDepreciation;
 
-    return Math.max(currentValue, salvageValue);
+    return {
+      current_value: Number(currentValue.toFixed(2)),
+      accumulated_depreciation: Number(accumulatedDepreciation.toFixed(2)),
+    };
+  }
+
+  async recalculateAll(): Promise<{ updated: number }> {
+    const assets = await this.assetRepo.find({ relations: ['category'] });
+    let updatedCount = 0;
+
+    for (const asset of assets) {
+      const dep = this.calculateDepreciation(asset);
+      asset.current_value = dep.current_value;
+      asset.accumulated_depreciation = dep.accumulated_depreciation;
+      await this.assetRepo.save(asset);
+      updatedCount++;
+    }
+
+    return { updated: updatedCount };
   }
   async dispose(id: string, disposeAssetDto: DisposeAssetDto): Promise<Asset> {
     const queryRunner = this.dataSource.createQueryRunner();
