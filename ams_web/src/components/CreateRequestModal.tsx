@@ -195,7 +195,7 @@ export const CreateRequestModal = ({
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/80">
           <div>
             <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" /> Official Purchase
+              <FileText className="w-5 h-5 text-[#ff8000]" /> Official Purchase
               Requisition
             </h2>
           </div>
@@ -219,7 +219,7 @@ export const CreateRequestModal = ({
 
           <div className="grid grid-cols-3 gap-6">
             <div className="space-y-1.5 group">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-600">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                 Requesting Department *
               </label>
               <div className="relative">
@@ -232,7 +232,7 @@ export const CreateRequestModal = ({
                     setRequestedById('');
                   }}
                   disabled={loadingDepts}
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium appearance-none"
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium appearance-none"
                 >
                   <option value="" disabled>
                     {loadingDepts ? 'Loading...' : 'Select Directorate...'}
@@ -247,7 +247,7 @@ export const CreateRequestModal = ({
             </div>
 
             <div className="space-y-1.5 group">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-600">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                 Requester *
               </label>
               <div className="relative">
@@ -257,7 +257,7 @@ export const CreateRequestModal = ({
                   value={requestedById}
                   onChange={(e) => setRequestedById(e.target.value)}
                   disabled={!departmentId || loadingUsers}
-                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium appearance-none disabled:opacity-50"
+                  className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium appearance-none disabled:opacity-50"
                 >
                   <option value="" disabled>
                     {!departmentId
@@ -278,7 +278,7 @@ export const CreateRequestModal = ({
               </div>
             </div>
             <div className="space-y-1.5 group">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-600">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                 Urgency Level *
               </label>
               <div className="relative">
@@ -289,7 +289,7 @@ export const CreateRequestModal = ({
                   required
                   value={urgency}
                   onChange={(e) => setUrgency(e.target.value)}
-                  className={`w-full pl-9 pr-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-bold appearance-none ${urgency === 'CRITICAL' ? 'border-red-200 text-red-700 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 text-slate-700 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`w-full pl-9 pr-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-bold appearance-none ${urgency === 'CRITICAL' ? 'border-red-200 text-red-700 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 text-slate-700 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'}`}
                 >
                   <option value="LOW">Low (Standard)</option>
                   <option value="MEDIUM">Medium (Normal Operations)</option>
@@ -305,13 +305,13 @@ export const CreateRequestModal = ({
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-blue-600" />{' '}
+                <ShoppingCart className="w-4 h-4 text-[#ff8000]" />{' '}
                 Goods/Services Requested
               </h3>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+                className="text-xs font-bold text-[#ff8000] bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Line Item
               </button>
@@ -321,17 +321,22 @@ export const CreateRequestModal = ({
               <table className="w-full text-left">
                 <thead className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500">
                   <tr>
-                    <th className="px-4 py-3 w-16">Qty</th>
-                    <th className="px-4 py-3">Description / Item Name</th>
-                    <th className="px-4 py-3 w-32">Unit Price</th>
-                    <th className="px-4 py-3 w-32">Total</th>
-                    <th className="px-4 py-3 w-12 text-center"></th>
+                    <th className="px-4 py-4 w-24 text-center text-slate-500 font-black uppercase tracking-widest text-[10px]">
+                      Qty
+                    </th>
+                    <th className="px-4 py-4 w-1/4">Item Name</th>
+                    <th className="px-4 py-4 w-36">Description / Details</th>
+                    <th className="px-4 py-4 w-36 text-right">
+                      Unit Price (RWF)
+                    </th>
+                    <th className="px-4 py-4 w-36 text-right">Total (RWF)</th>
+                    <th className="px-4 py-4 w-16 text-center"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {items.map((item) => (
                     <tr key={item.id} className="bg-white group">
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-4">
                         <input
                           type="number"
                           min="1"
@@ -344,10 +349,10 @@ export const CreateRequestModal = ({
                               parseInt(e.target.value) || 1,
                             )
                           }
-                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500 text-sm font-medium text-center"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold text-center transition-all"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-4">
                         <input
                           type="text"
                           placeholder="e.g., HP Screen Monitor"
@@ -356,8 +361,10 @@ export const CreateRequestModal = ({
                           onChange={(e) =>
                             handleItemChange(item.id, 'name', e.target.value)
                           }
-                          className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500 text-sm font-medium mb-1"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold"
                         />
+                      </td>
+                      <td className="px-4 py-4">
                         <input
                           type="text"
                           placeholder="Additional details..."
@@ -369,10 +376,10 @@ export const CreateRequestModal = ({
                               e.target.value,
                             )
                           }
-                          className="w-full px-3 py-1.5 bg-transparent border-none outline-none text-xs text-slate-500 placeholder:text-slate-300"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-4 text-right">
                         <input
                           type="number"
                           min="0"
@@ -386,18 +393,18 @@ export const CreateRequestModal = ({
                               parseFloat(e.target.value) || 0,
                             )
                           }
-                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500 text-sm font-medium text-right"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold text-right"
                         />
                       </td>
-                      <td className="px-4 py-2 text-right text-sm font-bold text-slate-700">
+                      <td className="px-4 py-4 text-right text-sm font-black text-slate-800">
                         {(item.quantity * item.unit_price).toLocaleString()}
                       </td>
-                      <td className="px-4 py-2 text-center">
+                      <td className="px-4 py-4 text-center">
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(item.id)}
                           disabled={items.length === 1}
-                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-30"
+                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-20"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -406,7 +413,7 @@ export const CreateRequestModal = ({
                   ))}
                 </tbody>
               </table>
-              <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex justify-end items-center gap-4">
+              <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-end items-center gap-4">
                 <span className="text-xs font-black uppercase tracking-widest text-slate-400">
                   Subtotal Approved For Goods:
                 </span>
@@ -421,7 +428,7 @@ export const CreateRequestModal = ({
 
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-blue-600" /> Destination &
+              <MapPin className="w-4 h-4 text-[#ff8000]" /> Destination &
               Logistics
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -435,7 +442,7 @@ export const CreateRequestModal = ({
                   placeholder="e.g., Kigali HQ, 3rd Floor"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
                 />
               </div>
               <div className="space-y-1.5 group">
@@ -449,7 +456,7 @@ export const CreateRequestModal = ({
                     placeholder="Name"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
                   />
                 </div>
               </div>
@@ -464,7 +471,7 @@ export const CreateRequestModal = ({
                     placeholder="+250..."
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
                   />
                 </div>
               </div>
@@ -475,7 +482,7 @@ export const CreateRequestModal = ({
 
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-blue-600" /> Accounting &
+              <Calculator className="w-4 h-4 text-[#ff8000]" /> Accounting &
               Final Authorization
             </h3>
 
@@ -492,7 +499,7 @@ export const CreateRequestModal = ({
                       value="BUDGET"
                       checked={costBasis === 'BUDGET'}
                       onChange={() => setCostBasis('BUDGET')}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 text-[#ff8000] focus:ring-[#ff8000]"
                     />
                     Amount in Budget
                   </label>
@@ -503,7 +510,7 @@ export const CreateRequestModal = ({
                       value="MARKET_RESEARCH"
                       checked={costBasis === 'MARKET_RESEARCH'}
                       onChange={() => setCostBasis('MARKET_RESEARCH')}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 text-[#ff8000] focus:ring-[#ff8000]"
                     />
                     Market Research
                   </label>
@@ -523,7 +530,7 @@ export const CreateRequestModal = ({
                     onChange={(e) =>
                       setTransportFees(parseFloat(e.target.value) || 0)
                     }
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
                   />
                 </div>
               </div>
@@ -537,7 +544,7 @@ export const CreateRequestModal = ({
                   placeholder="e.g., BMGF-RCA"
                   value={budgetCode1}
                   onChange={(e) => setBudgetCode1(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium uppercase"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium uppercase"
                 />
               </div>
               <div className="space-y-1.5 group">
@@ -549,13 +556,13 @@ export const CreateRequestModal = ({
                   placeholder="e.g., HISP-RW"
                   value={budgetCode2}
                   onChange={(e) => setBudgetCode2(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium uppercase"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium uppercase"
                 />
               </div>
             </div>
 
             <div className="bg-[#1e293b] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between text-white shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff8000]/10 rounded-full blur-2xl -mr-10 -mt-10" />
               <div>
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">
                   Total Expenditure Not To Exceed
@@ -589,7 +596,7 @@ export const CreateRequestModal = ({
               type="button"
               onClick={handleSubmit}
               disabled={isLoading}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md transform active:scale-95 transition-all flex justify-center items-center gap-2"
+              className="px-6 py-2.5 bg-[#ff8000] hover:bg-[#e67300] text-white text-sm font-bold rounded-xl shadow-md transform active:scale-95 transition-all flex justify-center items-center gap-2"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

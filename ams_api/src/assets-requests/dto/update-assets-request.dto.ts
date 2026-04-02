@@ -3,10 +3,10 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAssetRequestDto {
   @ApiPropertyOptional({
-    enum: ['PENDING', 'APPROVED', 'FULFILLED', 'REJECTED'],
+    enum: ['PENDING', 'HOD_APPROVED', 'APPROVED', 'FULFILLED', 'REJECTED'],
   })
   @IsOptional()
-  @IsIn(['PENDING', 'APPROVED', 'FULFILLED', 'REJECTED'])
+  @IsIn(['PENDING', 'HOD_APPROVED', 'APPROVED', 'FULFILLED', 'REJECTED'])
   status?: string;
 
   @ApiPropertyOptional()

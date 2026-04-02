@@ -43,7 +43,7 @@ interface SearchUser {
 }
 
 export const Layout = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isHOD } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -166,7 +166,16 @@ export const Layout = () => {
       ];
     } else {
       return [
-        { name: 'Asset Manager', path: '/overview', icon: LayoutDashboard },
+        {
+          name: isHOD ? 'Department' : 'Asset Manager',
+          path: '/overview',
+          icon: LayoutDashboard,
+        },
+        {
+          name: isHOD ? 'Procurement' : 'My Requests',
+          path: '/requests',
+          icon: ClipboardCheck,
+        },
         {
           name: 'Request Asset',
           onClick: () => setIsRequestModalOpen(true),
@@ -180,7 +189,7 @@ export const Layout = () => {
         { name: 'My Profile', path: '/profile', icon: UserIcon },
       ];
     }
-  }, [isAdmin]);
+  }, [isAdmin, isHOD]);
 
   return (
     <div className="relative flex h-screen bg-[#f8fafc] overflow-hidden font-sans text-slate-900">

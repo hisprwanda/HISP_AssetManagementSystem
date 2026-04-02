@@ -18,9 +18,12 @@ export class AssetRequest {
   @Column()
   title: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
   @Column({
     type: 'enum',
-    enum: ['PENDING', 'APPROVED', 'REJECTED', 'FULFILLED'],
+    enum: ['PENDING', 'HOD_APPROVED', 'APPROVED', 'REJECTED', 'FULFILLED'],
     default: 'PENDING',
   })
   status: string;

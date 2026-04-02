@@ -41,7 +41,7 @@ export interface AssetRequest {
   quantity?: number;
   estimated_unit_cost?: number;
   urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'FULFILLED';
+  status: 'PENDING' | 'HOD_APPROVED' | 'APPROVED' | 'REJECTED' | 'FULFILLED';
   requested_by?: { full_name: string; id: string };
   department?: { id: string; name: string };
   items?: {

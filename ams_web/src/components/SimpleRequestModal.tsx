@@ -34,7 +34,7 @@ export const SimpleRequestModal = ({
 
   const [categoryId, setCategoryId] = useState('');
   const [itemName, setItemName] = useState('');
-  const [justification, setJustification] = useState('');
+  const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -52,7 +52,7 @@ export const SimpleRequestModal = ({
       requested_by_id?: string;
       department_id?: string;
       urgency: string;
-      status: string;
+      status?: string;
       items: {
         name: string;
         description: string;
@@ -95,13 +95,13 @@ export const SimpleRequestModal = ({
   const resetForm = () => {
     setCategoryId('');
     setItemName('');
-    setJustification('');
+    setDescription('');
     setError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryId || !itemName || !justification) {
+    if (!categoryId || !itemName || !description) {
       setError('Please fill in all fields.');
       return;
     }
@@ -113,7 +113,6 @@ export const SimpleRequestModal = ({
       requested_by_id: currentUser?.id,
       department_id: currentUser?.department?.id,
       urgency: 'MEDIUM',
-      status: 'PENDING',
       items: [
         {
           name: itemName,
@@ -133,7 +132,7 @@ export const SimpleRequestModal = ({
         contact_name: currentUser?.full_name,
         contact_phone: 'N/A',
       },
-      description: justification,
+      description: description,
     };
 
     mutation.mutate(payload);
@@ -219,11 +218,11 @@ export const SimpleRequestModal = ({
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                  Why is this item needed? *
+                  Why is this item needed? (Description) *
                 </label>
                 <textarea
-                  value={justification}
-                  onChange={(e) => setJustification(e.target.value)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   placeholder="Provide a brief explanation for this procurement..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all min-h-[100px] resize-none"
                   required

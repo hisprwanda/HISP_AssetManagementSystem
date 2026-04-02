@@ -37,7 +37,7 @@ class RequestItemDto {
 }
 
 class FinancialsDto {
-  @IsEnum(['BUDGET', 'MARKET_RESEARCH'])
+  @IsEnum(['BUDGET', 'MARKET_RESEARCH', 'ESTIMATE'])
   cost_basis: string;
 
   @IsNumber()
@@ -81,6 +81,10 @@ export class CreateAssetRequestDto {
   @IsString()
   @IsNotEmpty()
   title: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   @IsUUID()
   @IsNotEmpty()

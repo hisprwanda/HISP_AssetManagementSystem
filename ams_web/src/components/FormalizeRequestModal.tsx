@@ -113,7 +113,7 @@ export const FormalizeRequestModal = ({
 
     const payload: Partial<AssetRequest> = {
       ...request,
-      status: 'APPROVED', // Formalized by HOD, now ready for Finance
+      status: 'HOD_APPROVED', // Formalized by HOD, now ready for Finance
       urgency,
       description,
       items: items.map((i) => ({
@@ -192,13 +192,12 @@ export const FormalizeRequestModal = ({
                 <div className="flex items-center gap-2 mb-3">
                   <Info className="w-4 h-4 text-[#ff8000]" />
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-[#ff8000]">
-                    Staff Justification
+                    Staff Description
                   </h4>
                 </div>
                 <p className="text-sm font-medium text-slate-600 leading-relaxed italic">
                   "
-                  {request.description ||
-                    'No additional justification provided.'}
+                  {request.description || 'No additional description provided.'}
                   "
                 </p>
               </div>
@@ -247,7 +246,7 @@ export const FormalizeRequestModal = ({
                               required
                             />
                           </div>
-                          <div className="col-span-6 md:col-span-2">
+                          <div className="col-span-6 md:col-span-3">
                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
                               Qty
                             </label>
@@ -257,11 +256,11 @@ export const FormalizeRequestModal = ({
                               onChange={(e) =>
                                 updateItem(index, 'quantity', e.target.value)
                               }
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-2 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none"
                               required
                             />
                           </div>
-                          <div className="col-span-6 md:col-span-4">
+                          <div className="col-span-12 md:col-span-4">
                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
                               Unit Price (RWF)
                             </label>
@@ -271,7 +270,7 @@ export const FormalizeRequestModal = ({
                               onChange={(e) =>
                                 updateItem(index, 'unit_price', e.target.value)
                               }
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-2 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none"
                               required
                             />
                           </div>

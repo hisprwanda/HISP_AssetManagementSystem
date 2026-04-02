@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOutletContext } from 'react-router-dom';
 import {
   ShoppingCart,
   Clock,
@@ -14,6 +15,7 @@ import {
   Check,
   X,
   Settings2,
+  Activity,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -24,7 +26,9 @@ import { FormalizeRequestModal } from '../components/FormalizeRequestModal';
 
 export const Requests = () => {
   const { user: currentUser, isAdmin, isHOD, isStaff } = useAuth();
+  const isRequesterOnly = isStaff && !isAdmin && !isHOD;
   const queryClient = useQueryClient();
+  const { openRequest } = useOutletContext<{ openRequest: () => void }>();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -102,6 +106,8 @@ export const Requests = () => {
     switch (status) {
       case 'PENDING':
         return 'bg-amber-50 text-amber-600 border-amber-200';
+      case 'HOD_APPROVED':
+        return 'bg-indigo-50 text-indigo-600 border-indigo-200';
       case 'APPROVED':
         return 'bg-blue-50 text-blue-600 border-blue-200';
       case 'FULFILLED':
@@ -138,17 +144,25 @@ export const Requests = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6 text-[#ff8000]" /> Procurement
-            Requests
+            {isStaff && !isHOD ? (
+              <Activity className="w-6 h-6 text-[#ff8000]" />
+            ) : (
+              <ShoppingCart className="w-6 h-6 text-[#ff8000]" />
+            )}
+            {isStaff && !isHOD ? 'My Asset Requests' : 'Procurement Requests'}
           </h1>
           <p className="text-slate-500 text-sm font-medium mt-1">
             {isAdmin
               ? 'Manage hardware acquisitions and budget approvals.'
-              : 'Request new equipment for your department.'}
+              : isHOD
+                ? 'Review and formalize department requisitions.'
+                : 'Track the status of your requested equipment.'}
           </p>
         </div>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() =>
+            isStaff && !isHOD ? openRequest() : setIsCreateModalOpen(true)
+          }
           className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group"
         >
           <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
@@ -156,7 +170,9 @@ export const Requests = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div
+        className={`grid grid-cols-1 ${isRequesterOnly ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4 mb-6`}
+      >
         <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
             <Clock className="w-6 h-6 text-amber-500" />
@@ -171,20 +187,24 @@ export const Requests = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-            <Banknote className="w-6 h-6 text-blue-500" />
+
+        {!isRequesterOnly && (
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Banknote className="w-6 h-6 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Est. Pending Budget
+              </p>
+              <p className="text-2xl font-black text-slate-800">
+                {pendingValue.toLocaleString()}{' '}
+                <span className="text-sm font-bold text-slate-400">RWF</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-              Est. Pending Budget
-            </p>
-            <p className="text-2xl font-black text-slate-800">
-              {pendingValue.toLocaleString()}{' '}
-              <span className="text-sm font-bold text-slate-400">RWF</span>
-            </p>
-          </div>
-        </div>
+        )}
+
         <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -215,17 +235,22 @@ export const Requests = () => {
           />
         </div>
         <div className="flex gap-1 overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
-          {['ALL', 'PENDING', 'APPROVED', 'FULFILLED', 'REJECTED'].map(
-            (status) => (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap transition-colors ${filterStatus === status ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
-              >
-                {status}
-              </button>
-            ),
-          )}
+          {[
+            'ALL',
+            'PENDING',
+            'HOD_APPROVED',
+            'APPROVED',
+            'FULFILLED',
+            'REJECTED',
+          ].map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap transition-colors ${filterStatus === status ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              {status}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -240,9 +265,11 @@ export const Requests = () => {
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   Requested By
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Total Est. Cost
-                </th>
+                {!isRequesterOnly && (
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Total Est. Cost
+                  </th>
+                )}
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   Urgency
                 </th>
@@ -258,7 +285,7 @@ export const Requests = () => {
               {isLoading && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={isRequesterOnly ? 5 : 6}
                     className="px-4 py-8 text-center text-sm text-slate-400 font-bold"
                   >
                     Loading requests...
@@ -268,7 +295,7 @@ export const Requests = () => {
               {!isLoading && filteredRequests.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={isRequesterOnly ? 5 : 6}
                     className="px-4 py-12 text-center text-sm text-slate-400 font-bold"
                   >
                     No procurement requests found.
@@ -318,17 +345,18 @@ export const Requests = () => {
                       </span>
                     </td>
 
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                        <Banknote className="w-3.5 h-3.5 text-emerald-500" />
-                        {(
-                          req.financials?.grand_total ??
-                          (req.quantity || 0) * (req.estimated_unit_cost || 0)
-                        ).toLocaleString()}{' '}
-                        RWF
-                      </div>
-                    </td>
-
+                    {!isRequesterOnly && (
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                          <Banknote className="w-3.5 h-3.5 text-emerald-500" />
+                          {(
+                            req.financials?.grand_total ??
+                            (req.quantity || 0) * (req.estimated_unit_cost || 0)
+                          ).toLocaleString()}{' '}
+                          RWF
+                        </div>
+                      </td>
+                    )}
                     <td className="px-4 py-2.5">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border border-transparent ${getUrgencyStyle(req.urgency)}`}
@@ -367,8 +395,8 @@ export const Requests = () => {
                           <FileText className="w-4 h-4" />
                         </button>
 
-                        {/* ADMIN ONLY APPROVAL ACTIONS */}
-                        {isAdmin && req.status === 'PENDING' && (
+                        {/* ADMIN ONLY APPROVAL ACTIONS - After HOD has formalized */}
+                        {isAdmin && req.status === 'HOD_APPROVED' && (
                           <>
                             <button
                               onClick={() =>
@@ -377,8 +405,8 @@ export const Requests = () => {
                                   status: 'APPROVED',
                                 })
                               }
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Approve Request"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title="Final Approval"
                             >
                               <Check className="w-4 h-4" />
                             </button>
@@ -405,7 +433,7 @@ export const Requests = () => {
                                 status: 'FULFILLED',
                               })
                             }
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Mark as Fulfilled (Purchased)"
                           >
                             <CheckCircle2 className="w-4 h-4" />

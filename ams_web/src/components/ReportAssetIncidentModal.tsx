@@ -64,7 +64,7 @@ export const ReportAssetIncidentModal = ({
       explanation: string;
       evidence_url?: string;
     }) => {
-      const response = await api.post('/asset-incidents', payload);
+      const response = await api.post('/asset-incidents/report', payload);
       return response.data;
     },
     onSuccess: () => {
