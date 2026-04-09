@@ -30,7 +30,6 @@ export const Penalties = () => {
   const filteredPenalties = useMemo(() => {
     if (!incidents) return [];
 
-    // Filter only DENIED incidents representing a penalty
     let result = incidents.filter((i) => i.investigation_status === 'DENIED');
 
     if (searchQuery) {
@@ -47,17 +46,14 @@ export const Penalties = () => {
   }, [incidents, searchQuery]);
 
   const getDepartmentName = (inc: AssetIncident) => {
-    // Try asset department
     if (typeof inc.asset?.department === 'string') return inc.asset.department;
     if (inc.asset?.department?.name) return inc.asset.department.name;
 
-    // Try reporter department
     if (typeof inc.reported_by?.department === 'string')
       return inc.reported_by.department;
     if (inc.reported_by?.department?.name)
       return inc.reported_by.department.name;
 
-    // Default fallbacks
     return 'Operations / Central';
   };
 
@@ -111,7 +107,7 @@ export const Penalties = () => {
 
   if (!isAdmin && !isFinanceAdmin) {
     return (
-      <div className="flex flex-col h-[70vh] items-center justify-center text-center animate-in fade-in duration-700">
+      <div className="flex flex-col h-[70vh] items-center justify-center text-center">
         <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mb-6 border border-red-100">
           <ShieldX className="w-10 h-10 text-red-500" />
         </div>
@@ -127,7 +123,7 @@ export const Penalties = () => {
   }
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col h-full">
       <div className="flex items-center gap-4 mb-4">
         <button
           onClick={() => navigate(-1)}

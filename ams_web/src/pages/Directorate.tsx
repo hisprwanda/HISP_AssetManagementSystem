@@ -120,7 +120,7 @@ export const Directorate = () => {
 
   if (!selectedDept) {
     return (
-      <div className="flex flex-col h-full animate-in fade-in duration-500">
+      <div className="flex flex-col h-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
           <div>
             <h1 className="text-xl font-black text-slate-800 tracking-tight">
@@ -301,7 +301,7 @@ export const Directorate = () => {
   }
 
   return (
-    <div className="flex flex-col h-full animate-in slide-in-from-right-8 duration-300">
+    <div className="flex flex-col h-full">
       <div className="mb-5">
         <button
           onClick={() => setSelectedDept(null)}

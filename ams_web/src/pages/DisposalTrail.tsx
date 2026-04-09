@@ -254,7 +254,7 @@ export const DisposalTrail = () => {
   }, [disposedAssets, searchQuery]);
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <div>
           {selectedCategory && (

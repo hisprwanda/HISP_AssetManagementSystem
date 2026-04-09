@@ -92,6 +92,7 @@ export const CreateAssetModal = ({
           : undefined,
         purchase_date: formData.purchase_date || undefined,
         warranty_expiry: formData.warranty_expiry || undefined,
+        department_id: formData.department_id || null,
         assigned_to_user_id: formData.assigned_to_user_id || null,
       };
 
@@ -120,7 +121,7 @@ export const CreateAssetModal = ({
       };
       setError(
         axiosError.response?.data?.message ||
-          'Failed to register asset. Please check serial number uniqueness.',
+          'Failed to assign asset. Please check serial number uniqueness.',
       );
     } finally {
       setIsLoading(false);
@@ -138,7 +139,7 @@ export const CreateAssetModal = ({
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50">
           <div>
             <h2 className="text-xl font-black text-slate-800 tracking-tight">
-              Register New Asset
+              Assign New Asset
             </h2>
             <p className="text-xs font-bold text-[#ff8000] uppercase tracking-wider mt-1">
               Inventory Management
@@ -490,7 +491,7 @@ export const CreateAssetModal = ({
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                Register Asset <Laptop className="w-4 h-4" />
+                Assign Asset <Laptop className="w-4 h-4" />
               </>
             )}
           </button>

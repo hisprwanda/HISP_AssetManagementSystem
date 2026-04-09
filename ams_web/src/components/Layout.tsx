@@ -87,7 +87,7 @@ export const Layout = () => {
       return response.data;
     },
     enabled: isAdmin,
-    refetchInterval: 30000, // Refresh every 30s to keep badge mostly live
+    refetchInterval: 30000,
   });
 
   const pendingIncidentsCount = useMemo(() => {
@@ -104,19 +104,17 @@ export const Layout = () => {
       const response = await api.get('/assets-requests');
       return response.data;
     },
-    enabled: isHOD || isAdmin, // Enabled for both to handle badges
+    enabled: isHOD || isAdmin,
     refetchInterval: 30000,
   });
 
   const pendingRequestsCount = useMemo(() => {
     if (!hodRequests) return 0;
     if (isAdmin) {
-      // Admin only sees formalized requests awaiting final approval
       return hodRequests.filter(
         (r: { status: string }) => r.status === 'HOD_APPROVED',
       ).length;
     }
-    // HOD sees pending drafts from their department
     return hodRequests.filter(
       (r: { department: { id: string }; status: string }) =>
         r.department?.id === user?.department?.id && r.status === 'PENDING',
@@ -214,13 +212,13 @@ export const Layout = () => {
         { name: 'System Overview', path: '/overview', icon: LayoutDashboard },
         { name: 'Procurement', path: '/requests', icon: ClipboardCheck },
         { name: 'Asset Masterlist', path: '/assets', icon: Laptop },
-        { name: 'Incidents', path: '/incidents', icon: AlertTriangle },
+        { name: 'Incident Reports', path: '/incidents', icon: AlertTriangle },
         { name: 'Directorate', path: '/directorate', icon: Users },
       ];
     } else {
       const items: NavItem[] = [
         {
-          name: isHOD ? 'Department' : 'Asset Manager',
+          name: isHOD ? 'Department Overview' : 'Assets Overview',
           path: '/overview',
           icon: LayoutDashboard,
         },
@@ -233,7 +231,7 @@ export const Layout = () => {
 
       if (isHOD) {
         items.push({
-          name: 'Incidents',
+          name: 'Incident Reports',
           path: '/incidents',
           icon: AlertTriangle,
         });
@@ -319,13 +317,14 @@ export const Layout = () => {
                       />
                       <span className="text-xs font-semibold">{item.name}</span>
                     </div>
-                    {item.name === 'Incidents' && pendingIncidentsCount > 0 && (
-                      <span
-                        className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white text-red-500' : 'bg-red-500 text-white shadow-sm'}`}
-                      >
-                        {pendingIncidentsCount}
-                      </span>
-                    )}
+                    {item.name === 'Incident Reports' &&
+                      pendingIncidentsCount > 0 && (
+                        <span
+                          className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white text-red-500' : 'bg-red-500 text-white shadow-sm'}`}
+                        >
+                          {pendingIncidentsCount}
+                        </span>
+                      )}
                     {(item.name === 'Asset Requests' ||
                       item.name === 'Procurement') &&
                       pendingRequestsCount > 0 && (
@@ -404,7 +403,7 @@ export const Layout = () => {
               </form>
 
               {showResults && searchQuery.length >= 2 && (
-                <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-xl border border-white rounded-3xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
+                <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-xl border border-white rounded-3xl shadow-2xl overflow-hidden z-50">
                   <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                       Quick Results

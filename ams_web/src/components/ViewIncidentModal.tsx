@@ -1,4 +1,5 @@
 import {
+  ShieldAlert,
   ShieldCheck,
   ShieldX,
   Calendar,
@@ -7,6 +8,7 @@ import {
   MessageSquare,
   FileText,
   Clock,
+  Download,
 } from 'lucide-react';
 import { AssetIncident } from '../types/assets';
 import {
@@ -92,7 +94,6 @@ export const ViewIncidentModal = ({
         </DialogHeader>
 
         <div className="px-6 py-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
-          {/* Reporter & Date */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
@@ -129,7 +130,6 @@ export const ViewIncidentModal = ({
             </div>
           </div>
 
-          {/* Asset Info */}
           <div className="space-y-3">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
               <Laptop className="w-3.5 h-3.5" /> Affected Asset
@@ -159,7 +159,6 @@ export const ViewIncidentModal = ({
             </div>
           </div>
 
-          {/* Original Explanation */}
           <div className="space-y-3">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
               <MessageSquare className="w-3.5 h-3.5" /> Reporter Explanation
@@ -169,10 +168,51 @@ export const ViewIncidentModal = ({
               <p className="text-xs text-slate-600 font-bold leading-relaxed whitespace-pre-wrap">
                 "{incident.explanation || 'No explanation provided'}"
               </p>
+              {incident.evidence_url && (
+                <div className="mt-4 pt-4 border-t border-slate-200/60 not-italic">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+                    Uploaded Photo Evidence
+                  </p>
+                  {incident.evidence_url.startsWith('data:image/') ? (
+                    <div className="relative group rounded-xl overflow-hidden border border-slate-200 bg-white w-max max-w-[200px] shadow-sm">
+                      <img
+                        src={incident.evidence_url}
+                        alt="Evidence"
+                        className="object-cover max-h-32"
+                      />
+                      <a
+                        href={incident.evidence_url}
+                        download={`evidence-${incident.id}`}
+                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white font-bold text-[10px] uppercase"
+                      >
+                        <Download className="w-4 h-4 mr-1.5" /> Save Photo
+                      </a>
+                    </div>
+                  ) : incident.evidence_url.startsWith('data:') ? (
+                    <a
+                      href={incident.evidence_url}
+                      download={`evidence-${incident.id}`}
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 transition-colors"
+                    >
+                      <Download className="w-3 h-3" /> Download Attachment
+                    </a>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100">
+                        <ShieldAlert className="w-3 h-3" /> Legacy Link
+                        (Unreachable)
+                      </div>
+                      <p className="text-[8px] text-slate-400 font-medium ml-1">
+                        This report was created before the storage system
+                        update.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Investigation Result (if any) */}
           {(incident.investigation_remarks ||
             incident.investigation_status !== 'INVESTIGATING') && (
             <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">

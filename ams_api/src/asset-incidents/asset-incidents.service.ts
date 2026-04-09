@@ -23,6 +23,7 @@ export class AssetIncidentsService {
     asset_id: string;
     user_id: string;
     type: string;
+    location: string;
     explanation: string;
     evidence_url?: string;
   }) {
@@ -38,10 +39,16 @@ export class AssetIncidentsService {
 
       asset.status = dto.type === 'MISSING' ? 'MISSING' : 'BROKEN';
       await queryRunner.manager.save(asset);
+      console.log('--- RECV INCIDENT REPORT ---');
+      console.log('Asset ID:', dto.asset_id);
+      console.log('Evidence URL Length:', dto.evidence_url?.length || 0);
+      console.log('Evidence URL Sample:', dto.evidence_url?.slice(0, 50));
+
       const incident = queryRunner.manager.create(AssetIncident, {
         asset: { id: dto.asset_id },
         reported_by: { id: dto.user_id },
         incident_type: dto.type,
+        location: dto.location,
         explanation: dto.explanation,
         evidence_url: dto.evidence_url,
         investigation_status: 'INVESTIGATING',

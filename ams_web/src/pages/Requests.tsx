@@ -211,7 +211,7 @@ export const Requests = () => {
   };
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
+    <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -231,97 +231,103 @@ export const Requests = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <button
-            onClick={handleExportLogs}
-            disabled={!filteredRequests.length}
-            className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2 text-sm rounded-xl font-bold shadow-sm transform active:scale-95 transition-all flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
-          >
-            <Download className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" />{' '}
-            Request log
-          </button>
+          {!isRequesterOnly && (
+            <>
+              <button
+                onClick={handleExportLogs}
+                disabled={!filteredRequests.length}
+                className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2 text-sm rounded-xl font-bold shadow-sm transform active:scale-95 transition-all flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
+              >
+                <Download className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" />{' '}
+                Request log
+              </button>
 
-          {isHOD ? (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => {
-                  setRequestMode('INDIVIDUAL');
-                  setIsCreateModalOpen(true);
-                }}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group justify-center flex-1 sm:flex-none"
-              >
-                <UserIcon className="w-4 h-4" /> Request Individual Asset
-              </button>
-              <button
-                onClick={() => {
-                  setRequestMode('SHARED');
-                  setIsCreateModalOpen(true);
-                }}
-                className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group justify-center flex-1 sm:flex-none"
-              >
-                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
-                Request Shared Asset
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() =>
-                isStaff && !isHOD ? openRequest() : setIsCreateModalOpen(true)
-              }
-              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
-            >
-              <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
-              New Request
-            </button>
+              {isHOD ? (
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => {
+                      setRequestMode('INDIVIDUAL');
+                      setIsCreateModalOpen(true);
+                    }}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group justify-center flex-1 sm:flex-none"
+                  >
+                    <UserIcon className="w-4 h-4" /> Request Individual Asset
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRequestMode('SHARED');
+                      setIsCreateModalOpen(true);
+                    }}
+                    className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group justify-center flex-1 sm:flex-none"
+                  >
+                    <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
+                    Request Shared Asset
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() =>
+                    isStaff && !isHOD
+                      ? openRequest()
+                      : setIsCreateModalOpen(true)
+                  }
+                  className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
+                >
+                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
+                  New Request
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
 
       <div
-        className={`grid grid-cols-1 ${isRequesterOnly ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4 mb-6`}
+        className={`grid grid-cols-1 ${isRequesterOnly ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-3 mb-4`}
       >
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
-            <Clock className="w-6 h-6 text-amber-500" />
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+            <Clock className="w-5 h-5 text-amber-500" />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
               Pending Review
             </p>
-            <p className="text-2xl font-black text-slate-800">
+            <p className="text-xl font-black text-slate-800 leading-none">
               {pendingCount}{' '}
-              <span className="text-sm font-bold text-slate-400">requests</span>
+              <span className="text-xs font-bold text-slate-400">requests</span>
             </p>
           </div>
         </div>
 
         {!isRequesterOnly && (
-          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Banknote className="w-6 h-6 text-blue-500" />
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Banknote className="w-5 h-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Est. Pending Budget
               </p>
-              <p className="text-2xl font-black text-slate-800">
+              <p className="text-xl font-black text-slate-800 leading-none">
                 {pendingValue.toLocaleString()}{' '}
-                <span className="text-sm font-bold text-slate-400">RWF</span>
+                <span className="text-xs font-bold text-slate-400">RWF</span>
               </p>
             </div>
           </div>
         )}
 
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
               Successfully Fulfilled
             </p>
-            <p className="text-2xl font-black text-slate-800">
+            <p className="text-xl font-black text-slate-800 leading-none">
               {fulfilledCount}{' '}
-              <span className="text-sm font-bold text-slate-400">
+              <span className="text-xs font-bold text-slate-400">
                 assets deployed
               </span>
             </p>

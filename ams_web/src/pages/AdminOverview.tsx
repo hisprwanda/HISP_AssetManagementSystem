@@ -116,7 +116,7 @@ export const AdminOverview = () => {
   if (!stats) return null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2 px-1">
@@ -135,7 +135,7 @@ export const AdminOverview = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           {
             label: 'Global Valuation',
@@ -177,27 +177,27 @@ export const AdminOverview = () => {
           <Link
             key={i}
             to={stat.path}
-            className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block"
+            className="bg-white border border-slate-100 rounded-xl p-3.5 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
-                <stat.icon className="w-4.5 h-4.5 text-[#ff8000] group-hover:text-white transition-colors" />
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
+                <stat.icon className="w-4 h-4 text-[#ff8000] group-hover:text-white transition-colors" />
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
             </p>
-            <div className="flex items-baseline gap-1.5">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
                 {stat.value}
               </h3>
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">
+              <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-tight">
                 {stat.unit}
               </span>
             </div>
             <p
-              className={`mt-3 text-[9px] font-bold uppercase tracking-widest ${stat.color === 'blue' && stats.missingAssets + stats.brokenAssets > 0 ? 'text-red-500' : 'text-slate-400'}`}
+              className={`mt-2.5 text-[8.5px] font-bold uppercase tracking-widest ${stat.color === 'blue' && stats.missingAssets + stats.brokenAssets > 0 ? 'text-red-500' : 'text-slate-400'}`}
             >
               {stat.trend}
             </p>

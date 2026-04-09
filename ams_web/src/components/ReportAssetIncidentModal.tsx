@@ -29,19 +29,21 @@ export const ReportAssetIncidentModal = ({
   isOpen,
   onClose,
 }: ReportAssetIncidentModalProps) => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isHOD, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [assetId, setAssetId] = useState('');
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [type, setType] = useState('BROKEN');
+  const [location, setLocation] = useState('');
   const [explanation, setExplanation] = useState('');
   const [evidenceUrl, setEvidenceUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isReadingFile, setIsReadingFile] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch only assets assigned to the current user
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
     queryFn: async () => {
@@ -50,17 +52,34 @@ export const ReportAssetIncidentModal = ({
     },
   });
 
-  const myAssets =
-    assets?.filter(
-      (a: Asset) =>
-        a.assigned_to?.id === currentUser?.id && a.status === 'ASSIGNED',
-    ) || [];
+  const myAssets = assets || [];
+
+  const individualAssets = myAssets.filter(
+    (a) => a.assigned_to?.id === currentUser?.id && a.status === 'ASSIGNED',
+  );
+
+  const sharedAssets = myAssets.filter(
+    (a) =>
+      (isHOD || isAdmin) &&
+      a.department?.id === currentUser?.department?.id &&
+      !a.assigned_to &&
+      (a.status === 'ASSIGNED' || a.status === 'IN_STOCK'),
+  );
+
+  const showShared = isHOD || isAdmin;
+
+  const toggleAsset = (id: string) => {
+    setSelectedAssetIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
 
   const mutation = useMutation({
     mutationFn: async (payload: {
       asset_id: string;
       user_id: string;
       type: string;
+      location: string;
       explanation: string;
       evidence_url?: string;
     }) => {
@@ -69,23 +88,13 @@ export const ReportAssetIncidentModal = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        resetForm();
-      }, 2000);
-    },
-    onError: (err: unknown) => {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      setError(
-        axiosError.response?.data?.message || 'Failed to submit report.',
-      );
     },
   });
 
   const resetForm = () => {
-    setAssetId('');
+    setSelectedAssetIds([]);
     setType('BROKEN');
+    setLocation('');
     setExplanation('');
     setEvidenceUrl('');
     setSelectedFile(null);
@@ -94,35 +103,77 @@ export const ReportAssetIncidentModal = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-      // Simulate an upload URL for now since we don't have a storage backend yet
-      setEvidenceUrl(
-        `https://storage.ams.rw/evidence/${e.target.files[0].name}`,
-      );
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+      setSelectedFile(file);
+      setIsReadingFile(true);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEvidenceUrl(reader.result as string);
+        setIsReadingFile(false);
+      };
+      reader.onerror = () => {
+        setError('Failed to read file');
+        setIsReadingFile(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!assetId || !explanation) {
-      setError('Please select an asset and provide an explanation.');
+    if (selectedAssetIds.length === 0 || !location || !explanation) {
+      setError(
+        'Please select at least one asset, provide location and explanation.',
+      );
       return;
     }
 
-    const payload = {
-      asset_id: assetId,
-      user_id: currentUser?.id || '',
-      type,
-      explanation,
-      evidence_url: evidenceUrl || undefined,
-    };
+    setIsSubmitting(true);
+    setError(null);
 
-    mutation.mutate(payload);
+    try {
+      // Logic for submitting multiple assets sequentially
+      for (const assetId of selectedAssetIds) {
+        await mutation.mutateAsync({
+          asset_id: assetId,
+          user_id: currentUser?.id || '',
+          type,
+          location,
+          explanation,
+          evidence_url: evidenceUrl || undefined,
+        });
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+        resetForm();
+        setSuccess(false);
+        setIsSubmitting(false);
+      }, 2000);
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(
+        axiosError.response?.data?.message ||
+          'Failed to submit one or more reports.',
+      );
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem] max-h-[95vh] overflow-y-auto">
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        if (!isSubmitting) onClose();
+      }}
+    >
+      <DialogContent className="sm:max-w-[550px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem] max-h-[95vh] overflow-y-auto">
         {success ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
             <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
@@ -163,26 +214,111 @@ export const ReportAssetIncidentModal = ({
                 </div>
               )}
 
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                  Select Affected Asset *
+                  Select Affected Assets *
                 </label>
-                <div className="relative">
-                  <Laptop className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <select
-                    value={assetId}
-                    onChange={(e) => setAssetId(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all appearance-none"
-                    required
-                  >
-                    <option value="">Choose an equipment...</option>
-                    {myAssets.map((asset) => (
-                      <option key={asset.id} value={asset.id}>
-                        {asset.name}
-                      </option>
-                    ))}
-                  </select>
+
+                <div
+                  className={`grid grid-cols-1 ${showShared ? 'sm:grid-cols-2' : ''} gap-4`}
+                >
+                  {/* Individual Assets Dropdown-like Section */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
+                      <div className="w-1 h-1 rounded-full bg-[#ff8000]" />
+                      My Assigned Assets
+                    </p>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden min-h-[140px] max-h-[200px] overflow-y-auto custom-scrollbar shadow-inner">
+                      {individualAssets.length > 0 ? (
+                        individualAssets.map((asset) => (
+                          <label
+                            key={asset.id}
+                            className={`flex items-start gap-2.5 p-2.5 cursor-pointer transition-colors hover:bg-white border-b border-slate-100 last:border-0 ${
+                              selectedAssetIds.includes(asset.id)
+                                ? 'bg-orange-50/50'
+                                : ''
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-3.5 h-3.5 mt-0.5 rounded border-slate-300 text-[#ff8000] focus:ring-[#ff8000]/20"
+                              checked={selectedAssetIds.includes(asset.id)}
+                              onChange={() => toggleAsset(asset.id)}
+                            />
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-black text-slate-700 truncate">
+                                {asset.name}
+                              </p>
+                              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
+                                {asset.tag_id}
+                              </p>
+                            </div>
+                          </label>
+                        ))
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center p-4 text-center opacity-40">
+                          <Laptop className="w-6 h-6 mb-2 text-slate-300" />
+                          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                            No Assigned Equipment
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Shared Assets Dropdown-like Section */}
+                  {showShared && (
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
+                        <div className="w-1 h-1 rounded-full bg-blue-500" />
+                        Shared Dept Assets
+                      </p>
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden min-h-[140px] max-h-[200px] overflow-y-auto custom-scrollbar shadow-inner">
+                        {sharedAssets.length > 0 ? (
+                          sharedAssets.map((asset) => (
+                            <label
+                              key={asset.id}
+                              className={`flex items-start gap-2.5 p-2.5 cursor-pointer transition-colors hover:bg-white border-b border-slate-100 last:border-0 ${
+                                selectedAssetIds.includes(asset.id)
+                                  ? 'bg-blue-50/30'
+                                  : ''
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                className="w-3.5 h-3.5 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20"
+                                checked={selectedAssetIds.includes(asset.id)}
+                                onChange={() => toggleAsset(asset.id)}
+                              />
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-black text-slate-700 truncate">
+                                  {asset.name}
+                                </p>
+                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
+                                  {asset.tag_id}
+                                </p>
+                              </div>
+                            </label>
+                          ))
+                        ) : (
+                          <div className="h-full flex flex-col items-center justify-center p-4 text-center opacity-40">
+                            <ShieldAlert className="w-6 h-6 mb-2 text-slate-300" />
+                            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                              No Shared Assets
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {selectedAssetIds.length > 0 && (
+                  <p className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest animate-in fade-in slide-in-from-left-2 duration-300">
+                    Selected {selectedAssetIds.length} item
+                    {selectedAssetIds.length > 1 ? 's' : ''} to report
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -204,6 +340,27 @@ export const ReportAssetIncidentModal = ({
                       {t === 'BROKEN' ? 'Damage / Broken' : 'Missing / Stolen'}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  Incident Location *
+                </label>
+                <div className="relative">
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all appearance-none"
+                    required
+                  >
+                    <option value="" disabled>
+                      Select Location...
+                    </option>
+                    <option value="WORK">Work</option>
+                    <option value="HOME">Home</option>
+                    <option value="OTHER">Other</option>
+                  </select>
                 </div>
               </div>
 
@@ -261,6 +418,27 @@ export const ReportAssetIncidentModal = ({
                     )}
                   </div>
                 </div>
+                {evidenceUrl && evidenceUrl.startsWith('data:image/') && (
+                  <div className="mt-3 relative w-full aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group">
+                    <img
+                      src={evidenceUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEvidenceUrl('');
+                          setSelectedFile(null);
+                        }}
+                        className="px-3 py-1.5 bg-red-500 text-white text-[9px] font-black uppercase rounded-lg"
+                      >
+                        Remove Photo
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <DialogFooter className="pt-2 gap-2">
@@ -273,15 +451,19 @@ export const ReportAssetIncidentModal = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={mutation.isPending}
+                  disabled={isSubmitting || isReadingFile}
                   className="flex-1 bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
-                  {mutation.isPending ? (
+                  {isSubmitting || isReadingFile ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                      Submit Final Report
+                      Submit{' '}
+                      {selectedAssetIds.length > 1
+                        ? `(${selectedAssetIds.length}) `
+                        : ''}
+                      Report
                     </>
                   )}
                 </button>

@@ -8,7 +8,7 @@ import {
   AlertCircle,
   MessageSquare,
   Info,
-  ExternalLink,
+  Download,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetIncident } from '../types/assets';
@@ -167,15 +167,45 @@ export const ResolveIncidentModal = ({
                 )}
 
                 {incident.evidence_url && (
-                  <div className="pt-1">
-                    <a
-                      href={incident.evidence_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 hover:text-blue-700 hover:underline bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 transition-colors"
-                    >
-                      <ExternalLink className="w-3 h-3" /> View Photo Evidence
-                    </a>
+                  <div className="pt-2 border-t border-slate-200/60 mt-2">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+                      Photo Evidence
+                    </p>
+                    {incident.evidence_url.startsWith('data:image/') ? (
+                      <div className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-100 w-max max-w-[200px]">
+                        <img
+                          src={incident.evidence_url}
+                          alt="Evidence"
+                          className="object-cover max-h-32"
+                        />
+                        <a
+                          href={incident.evidence_url}
+                          download={`evidence-${incident.id}`}
+                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white font-bold text-[10px] uppercase"
+                        >
+                          <Download className="w-4 h-4 mr-1.5" /> Save Photo
+                        </a>
+                      </div>
+                    ) : incident.evidence_url.startsWith('data:') ? (
+                      <a
+                        href={incident.evidence_url}
+                        download={`evidence-${incident.id}`}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 transition-colors"
+                      >
+                        <Download className="w-3 h-3" /> Download Attachment
+                      </a>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100">
+                          <AlertCircle className="w-3 h-3" /> Legacy Link
+                          (Unreachable)
+                        </div>
+                        <p className="text-[8px] text-slate-400 font-medium ml-1">
+                          This report was created before the storage system
+                          update.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

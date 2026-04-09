@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShieldAlert,
@@ -23,6 +23,7 @@ import { AssetIncident } from '../types/assets';
 
 export const Incidents = () => {
   const navigate = useNavigate();
+  const { openIncident } = useOutletContext<{ openIncident: () => void }>();
   const { isFinanceAdmin, isAdmin, isHOD, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('ALL');
@@ -128,17 +129,13 @@ export const Incidents = () => {
   };
 
   const getDepartmentName = (inc: AssetIncident) => {
-    // Try asset department
     if (typeof inc.asset?.department === 'string') return inc.asset.department;
     if (inc.asset?.department?.name) return inc.asset.department.name;
 
-    // Try reporter department
     if (typeof inc.reported_by?.department === 'string')
       return inc.reported_by.department;
     if (inc.reported_by?.department?.name)
       return inc.reported_by.department.name;
-
-    // Default fallbacks
     return 'Operations / Central';
   };
 
@@ -149,7 +146,6 @@ export const Incidents = () => {
   const handleExportLogs = () => {
     if (!filteredIncidents.length) return;
 
-    // CSV Headers
     const headers = [
       'Incident ID',
       'Date Reported',
@@ -164,15 +160,12 @@ export const Incidents = () => {
       'Resolution Remarks',
     ];
 
-    // Helper to escape CSV values
     const escapeCSV = (val: string) => {
       if (val === null || val === undefined) return '';
       const stringified = String(val);
-      // Escape double quotes and wrap in double quotes
       return `"${stringified.replace(/"/g, '""')}"`;
     };
 
-    // Map data to rows
     const rows = filteredIncidents.map((inc) => [
       escapeCSV(`#${inc.id.slice(0, 8).toUpperCase()}`),
       escapeCSV(new Date(inc.reported_at).toLocaleDateString()),
@@ -187,13 +180,10 @@ export const Incidents = () => {
       escapeCSV(getInvestigationRemarks(inc)),
     ]);
 
-    // Construct CSV string
     const csvContent = [
       headers.join(','),
       ...rows.map((row) => row.join(',')),
     ].join('\n');
-
-    // Create download link with BOM for Excel UTF-8 support
     const blob = new Blob(['\ufeff' + csvContent], {
       type: 'text/csv;charset=utf-8;',
     });
@@ -210,7 +200,7 @@ export const Incidents = () => {
 
   if (!isAdmin && !isFinanceAdmin && !isHOD) {
     return (
-      <div className="flex flex-col h-[70vh] items-center justify-center text-center animate-in fade-in duration-700">
+      <div className="flex flex-col h-[70vh] items-center justify-center text-center">
         <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mb-6 border border-red-100">
           <ShieldX className="w-10 h-10 text-red-500" />
         </div>
@@ -226,18 +216,31 @@ export const Incidents = () => {
   }
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <div>
           <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-[#ff8000]" />
-            Investigations
+            {isHOD && !isAdmin && !isFinanceAdmin
+              ? `${user?.department?.name || 'Department'} Incident Reports`
+              : 'Incident Reports'}
           </h1>
           <p className="text-slate-500 text-[10px] font-medium">
-            Audit logs for broken or missing equipment and outcomes.
+            {isHOD && !isAdmin && !isFinanceAdmin
+              ? "Audit logs for your department's equipment incidents and outcomes."
+              : 'Audit logs for broken or missing equipment and outcomes.'}
           </p>
         </div>
         <div className="flex gap-2">
+          {isHOD && (
+            <button
+              onClick={openIncident}
+              className="px-4 py-2 bg-slate-900 border border-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-orange-200" /> Report
+              Incident
+            </button>
+          )}
           <button
             onClick={handleExportLogs}
             className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group"
@@ -454,15 +457,16 @@ export const Incidents = () => {
 
                     <td className="px-8 py-5">
                       <div className="flex items-center justify-end gap-2 pr-2">
-                        {inc.investigation_status === 'INVESTIGATING' && (
-                          <button
-                            onClick={() => handleResolve(inc)}
-                            className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
-                            title="Resolve Investigation"
-                          >
-                            <ShieldAlert className="w-4 h-4" />
-                          </button>
-                        )}
+                        {inc.investigation_status === 'INVESTIGATING' &&
+                          (isAdmin || isFinanceAdmin) && (
+                            <button
+                              onClick={() => handleResolve(inc)}
+                              className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
+                              title="Resolve Investigation"
+                            >
+                              <ShieldAlert className="w-4 h-4" />
+                            </button>
+                          )}
                         <button
                           onClick={() => setIncidentToView(inc)}
                           className="p-2 bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-lg transition-all border border-slate-100"

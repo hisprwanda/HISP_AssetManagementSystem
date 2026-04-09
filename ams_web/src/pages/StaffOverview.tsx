@@ -1,31 +1,22 @@
-import { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LifeBuoy,
-  Plus,
   ShieldAlert,
-  Monitor,
-  Smartphone,
-  Printer,
   Box,
   Calendar,
-  Check,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
+  Eye,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { Asset, AssetIncident } from '../types/assets';
+import { ViewAssetModal } from '../components/ViewAssetModal';
 
-export const StaffOverview = ({
-  onOpenRequest,
-  onOpenIncident,
-}: {
-  onOpenRequest: () => void;
-  onOpenIncident: () => void;
-}) => {
+export const StaffOverview = () => {
   const { user: currentUser } = useAuth();
+  const [resolutionNotice, setResolutionNotice] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -71,257 +62,321 @@ export const StaffOverview = ({
     };
   }, [assets, incidents, currentUser]);
 
-  const getAssetIcon = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('laptop') || n.includes('computer'))
-      return <Monitor className="w-8 h-8" />;
-    if (n.includes('phone')) return <Smartphone className="w-8 h-8" />;
-    if (n.includes('printer')) return <Printer className="w-8 h-8" />;
-    return <Box className="w-8 h-8" />;
-  };
-
   if (!stats) return null;
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-8 duration-700">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="px-3 py-1 bg-blue-50 rounded-full border border-blue-100 text-[9px] font-black uppercase tracking-[0.2em] text-blue-600 flex items-center gap-1.5 shadow-sm">
-              <LifeBuoy className="w-3.5 h-3.5" /> Personnel Portal
-            </div>
-            <div className="h-1.5 w-1.5 rounded-full bg-slate-200" />
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {currentUser?.department?.name || 'Operations'} Directorate
-            </div>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-2">
-            Equipment Dashboard
-          </h1>
-          <p className="text-slate-500 font-medium text-sm max-w-xl leading-relaxed">
-            Overview of your assigned assets and quick access to requisition
-            tools.
-          </p>
-        </div>
-      </div>
+    <div className="relative min-h-screen -m-6 p-6 overflow-hidden bg-slate-50/50">
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-200/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-[140px] translate-y-1/2 pointer-events-none" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Main Content: Assets */}
-        <div className="lg:col-span-8 space-y-6">
+      <div className="relative z-10 space-y-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-orange-100 text-[9px] font-black uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
+                <LifeBuoy className="w-3.5 h-3.5" /> Personnel Portal
+              </div>
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {currentUser?.department?.name || 'Operations'} Directorate
+              </div>
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-2">
+              My Asset Overview
+            </h1>
+            <p className="text-slate-500 font-medium text-xs max-w-xl leading-relaxed">
+              Real-time monitoring of your assigned organizational equipment and
+              active incident logistics.
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full space-y-10">
           {stats.recentOutcomes.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2.5 mb-4">
-                <AlertCircle className="w-4 h-4 text-slate-400" />
-                Recent Incident Outcomes
-              </h3>
-              <div className="space-y-3">
-                {stats.recentOutcomes.map((incident) => (
-                  <div
-                    key={incident.id}
-                    className={`p-4 rounded-2xl border ${
-                      incident.investigation_status === 'ACCEPTED'
-                        ? 'bg-emerald-50/50 border-emerald-100'
-                        : 'bg-red-50/50 border-red-100'
-                    }`}
-                  >
-                    <div className="flex gap-4">
-                      <div className="shrink-0 mt-1">
-                        {incident.investigation_status === 'ACCEPTED' ? (
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                            <XCircle className="w-4 h-4 text-red-600" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4
-                            className={`text-sm font-black ${
+            <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50 group">
+              <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40">
+                <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                  <div className="w-1.5 h-4 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                  Critical Path Outcomes
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100/50 bg-slate-50/50">
+                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        Verdict
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        Asset
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        Resolution summary
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100/50">
+                    {stats.recentOutcomes.map((incident) => (
+                      <tr
+                        key={incident.id}
+                        className="group/row hover:bg-white/60"
+                      >
+                        <td className="px-4 py-3">
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent ${
                               incident.investigation_status === 'ACCEPTED'
-                                ? 'text-emerald-900'
-                                : 'text-red-900'
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                : 'bg-red-50 text-red-600 border-red-100'
                             }`}
                           >
-                            Case{' '}
+                            <span
+                              className={`w-1 h-1 rounded-full ${incident.investigation_status === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'}`}
+                            />
                             {incident.investigation_status === 'ACCEPTED'
-                              ? 'Accepted'
+                              ? 'Approved'
                               : 'Denied'}
-                            : {incident.asset?.name}
-                          </h4>
-                          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                            {new Date(
-                              incident.reported_at,
-                            ).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                        {incident.investigation_status === 'ACCEPTED' ? (
-                          <p className="text-xs font-medium text-emerald-700/80 mb-2">
-                            Your explanation was understood. A new Asset Request
-                            has been automatically submitted for a replacement{' '}
-                            {incident.asset?.name}.
-                          </p>
-                        ) : (
-                          <>
-                            <p className="text-xs font-medium text-red-700/80 mb-2">
-                              Your reasoning was denied. You are required to pay
-                              the following penalty based on the asset's
-                              depreciated value.
-                            </p>
-                            <div className="bg-white/60 rounded-xl p-3 border border-red-100 mb-2">
-                              <p className="text-[9px] font-black uppercase tracking-widest text-red-400 mb-1">
-                                Penalty Amount
-                              </p>
-                              <div className="text-sm font-black text-red-600">
-                                {Number(
-                                  incident.penalty_amount || 0,
-                                ).toLocaleString()}{' '}
-                                RWF
-                              </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                              <Box className="w-3.5 h-3.5 text-slate-400" />
                             </div>
-                            {incident.investigation_remarks && (
-                              <div className="bg-white/60 rounded-xl p-3 border border-red-100">
-                                <p className="text-[9px] font-black uppercase tracking-widest text-red-400 mb-1">
-                                  Investigation Remarks
-                                </p>
-                                <p className="text-xs font-medium text-red-800/80 italic">
-                                  "{incident.investigation_remarks}"
-                                </p>
-                              </div>
+                            <div className="flex flex-col min-w-0">
+                              <p className="text-xs font-bold text-slate-800 tracking-tight leading-tight truncate">
+                                {incident.asset?.name}
+                              </p>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                Case #{incident.id.slice(-6).toUpperCase()}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1 max-w-sm">
+                              <p className="text-xs font-semibold text-slate-500 leading-relaxed italic line-clamp-1">
+                                {incident.investigation_status === 'ACCEPTED'
+                                  ? 'Replacement requisition initiated. Check My Requests tab.'
+                                  : `Claim Denied: ${incident.investigation_remarks || 'Awaiting financial resolution.'}`}
+                              </p>
+                              {incident.investigation_status === 'DENIED' && (
+                                <div className="mt-1.5 flex items-center gap-3">
+                                  <div className="flex items-center gap-1.5 text-red-600 font-black text-[9px] uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">
+                                    <AlertCircle className="w-3 h-3" /> Penalty:{' '}
+                                    {Number(
+                                      incident.penalty_amount || 0,
+                                    ).toLocaleString()}{' '}
+                                    RWF
+                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      setResolutionNotice(
+                                        'Please contact the Directorate of Finance and Administration (DFA) penalty resolution and asset clearance.',
+                                      )
+                                    }
+                                    className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
+                                    title="Resolution Instructions"
+                                  >
+                                    <AlertCircle className="w-3 h-3 rotate-180" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/50 px-2 py-1 rounded-lg">
+                            {new Date(incident.reported_at).toLocaleDateString(
+                              'en-GB',
+                              { day: '2-digit', month: 'short' },
                             )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
 
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <div className="w-1 h-6 bg-blue-500 rounded-full" /> Assets
-              Assigned To Me
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {stats.userAssets?.map((asset) => (
-              <div
-                key={asset.id}
-                className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-slate-100 transition-all group relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-3">
-                  <div
-                    className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
-                      asset.status === 'BROKEN'
-                        ? 'bg-amber-50 text-amber-600 border-amber-100'
-                        : asset.status === 'MISSING'
-                          ? 'bg-red-50 text-red-600 border-red-100'
-                          : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                    }`}
-                  >
-                    {asset.status === 'BROKEN'
-                      ? 'Broken'
-                      : asset.status === 'MISSING'
-                        ? 'Missing'
-                        : 'Functional'}
-                  </div>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-colors border border-slate-50 shadow-inner">
-                  <div className="text-slate-400 group-hover:text-blue-500 transition-colors scale-50">
-                    {getAssetIcon(asset.name)}
-                  </div>
-                </div>
-                <h4 className="text-base font-black text-slate-900 mb-0.5 truncate group-hover:text-[#ff8000] transition-colors">
-                  {asset.name}
-                </h4>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-4 leading-none">
-                  {asset.tag_id || asset.serial_number}
-                </p>
-                <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-slate-300" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                      Assigned Mar 2024
-                    </span>
-                  </div>
-                  <Check className="w-5 h-5 text-emerald-500" />
-                </div>
-              </div>
-            ))}
-            {(!stats.userAssets || stats.userAssets.length === 0) && (
-              <div className="col-span-full py-20 px-8 text-center bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl">
-                <Box className="w-12 h-12 text-slate-200 mx-auto mb-4 opacity-20" />
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">
-                  No assets found
-                </h4>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 px-1">
-              Quick Actions
-            </h3>
-            <div className="space-y-4">
-              <button
-                onClick={onOpenRequest}
-                className="w-full group relative bg-[#ff8000] rounded-xl p-3.5 text-white text-left overflow-hidden transition-all hover:shadow-lg hover:shadow-orange-100"
-              >
-                <div className="relative z-10 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
-                    <Plus className="w-4.5 h-4.5 text-white group-hover:rotate-90 transition-transform duration-500" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black tracking-tight mb-0">
-                      Request Asset
-                    </h4>
-                    <p className="text-white/70 text-[10px] font-medium leading-tight line-clamp-1">
-                      Start a requisition
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={onOpenIncident}
-                className="w-full group relative bg-orange-50 border border-orange-100 rounded-xl p-3.5 text-left overflow-hidden transition-all hover:bg-orange-100/50"
-              >
-                <div className="relative z-10 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center border border-orange-200">
-                    <ShieldAlert className="w-4.5 h-4.5 text-[#ff8000]" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-900 tracking-tight mb-0">
-                      Report Issue
-                    </h4>
-                    <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
-                      Broken or lost equipment?
-                    </p>
-                  </div>
-                </div>
-              </button>
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50">
+            <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40">
+              <h3 className="text-[11px] font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
+                <div className="w-1.5 h-4 bg-[#ff8000] rounded-full shadow-[0_0_12px_rgba(255,128,0,0.3)]" />
+                My Asset Inventory
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100/50 bg-slate-50/50">
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Asset
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Assignment Date
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/50">
+                  {stats.userAssets.length > 0 ? (
+                    stats.userAssets.map((asset) => (
+                      <tr key={asset.id} className="group hover:bg-white/60">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 group-hover:border-orange-100">
+                              <Box className="w-4 h-4 text-slate-400 group-hover:text-[#ff8000]" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-800 tracking-tight leading-none mb-1 group-hover:text-[#ff8000]">
+                                {asset.name}
+                              </p>
+                              <code className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                {asset.tag_id || 'NON-TAGGED'}
+                              </code>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
+                            {asset.category?.name || 'General'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent shadow-sm ${
+                              asset.status === 'BROKEN'
+                                ? 'bg-amber-50 text-amber-600 border-amber-100'
+                                : asset.status === 'MISSING'
+                                  ? 'bg-red-50 text-red-600 border-red-100'
+                                  : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            }`}
+                          >
+                            <span
+                              className={`w-1 h-1 rounded-full ${
+                                asset.status === 'BROKEN'
+                                  ? 'bg-amber-500'
+                                  : asset.status === 'MISSING'
+                                    ? 'bg-red-500'
+                                    : 'bg-emerald-500'
+                              }`}
+                            />
+                            {asset.status === 'BROKEN'
+                              ? 'Broken'
+                              : asset.status === 'MISSING'
+                                ? 'Missing'
+                                : 'Assigned'}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5 text-slate-500">
+                            <Calendar className="w-3.5 h-3.5 opacity-40 text-slate-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                              {asset.purchase_date
+                                ? new Date(
+                                    asset.purchase_date,
+                                  ).toLocaleDateString('en-GB', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })
+                                : 'MAR 2024'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => setSelectedAsset(asset)}
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
+                            title="View Asset Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="py-12 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-20"
+                      >
+                        No Unit Assignments Found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-              Notice
+          <div className="pt-8 mt-4 border-t border-slate-100 flex flex-col items-center text-center">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+              <ShieldAlert className="w-3 h-3 text-orange-400" /> System
+              Protocol Notice
             </p>
-            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-              Assets listed here are officially assigned to your personnel
-              record. For transfer requests, please contact Operations.
+            <p className="text-[9px] text-slate-400 leading-relaxed font-semibold max-w-2xl italic">
+              Assets listed in this registry are officially tied to your
+              personnel record. For transfer requests, discrepancy reporting, or
+              off-boarding protocols, please contact the{' '}
+              <span className="text-slate-600 font-bold">
+                Operations Directorate
+              </span>{' '}
+              immediately.
             </p>
           </div>
         </div>
       </div>
+
+      {resolutionNotice && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+          <div className="bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full border border-white/20 relative">
+            <div className="absolute top-0 right-0 p-4">
+              <button
+                onClick={() => setResolutionNotice(null)}
+                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-black"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6 border border-red-100 shadow-inner">
+              <ShieldAlert className="w-8 h-8 text-red-500" />
+            </div>
+            <h4 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+              Penalty Resolution
+            </h4>
+            <p className="text-sm font-semibold text-slate-500 leading-relaxed mb-8 italic">
+              {resolutionNotice}
+            </p>
+            <button
+              onClick={() => setResolutionNotice(null)}
+              className="w-full py-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 shadow-xl"
+            >
+              Acknowledged
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ViewAssetModal
+        isOpen={!!selectedAsset}
+        onClose={() => setSelectedAsset(null)}
+        asset={selectedAsset}
+      />
     </div>
   );
 };

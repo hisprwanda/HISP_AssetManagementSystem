@@ -193,7 +193,6 @@ export const ViewRequestModal = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8">
-          {/* Approval Pipeline Stepper */}
           <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Activity className="w-3.5 h-3.5" /> Approval Pipeline
@@ -244,7 +243,6 @@ export const ViewRequestModal = ({
             </div>
           </div>
 
-          {/* Multi-Item Display */}
           {request.items && request.items.length > 0 ? (
             <div>
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -316,7 +314,6 @@ export const ViewRequestModal = ({
             </div>
           ) : null}
 
-          {/* Financials & Accounting */}
           {!isRequesterOnly && (
             <div className="bg-[#1e293b] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />

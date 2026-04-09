@@ -23,7 +23,7 @@ import {
 interface FormalizeRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  request: AssetRequest; // The staff request being processed
+  request: AssetRequest;
 }
 
 export const FormalizeRequestModal = ({
@@ -113,7 +113,7 @@ export const FormalizeRequestModal = ({
 
     const payload: Partial<AssetRequest> = {
       ...request,
-      status: 'HOD_APPROVED', // Formalized by HOD, now ready for Finance
+      status: 'HOD_APPROVED',
       urgency,
       description,
       items: items.map((i) => ({
@@ -187,7 +187,6 @@ export const FormalizeRequestModal = ({
                 </div>
               )}
 
-              {/* Justification - Read Only */}
               <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
                 <div className="flex items-center gap-2 mb-3">
                   <Info className="w-4 h-4 text-[#ff8000]" />
@@ -202,7 +201,6 @@ export const FormalizeRequestModal = ({
                 </p>
               </div>
 
-              {/* Line Items */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -288,7 +286,6 @@ export const FormalizeRequestModal = ({
                 </div>
               </div>
 
-              {/* Financial Summary */}
               <div className="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 justify-between items-center">

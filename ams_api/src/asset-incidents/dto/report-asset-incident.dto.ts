@@ -23,7 +23,12 @@ export class ReportIncidentDto {
   @IsIn(['BROKEN', 'MISSING'])
   type: string;
 
-  @ApiProperty({ example: 'Fell out of a canoe during field visit' })
+  @ApiProperty({ enum: ['WORK', 'HOME', 'OTHER'] })
+  @IsString()
+  @IsIn(['WORK', 'HOME', 'OTHER'])
+  location: string;
+
+  @ApiProperty({ example: 'Fell out my bag during field visit' })
   @IsString()
   @IsNotEmpty()
   explanation: string;

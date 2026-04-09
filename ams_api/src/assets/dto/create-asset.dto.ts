@@ -63,9 +63,10 @@ export class CreateAssetDto {
   @IsUUID()
   category_id: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsUUID()
-  department_id: string;
+  department_id?: string;
 
   @ApiPropertyOptional({ description: 'UUID of the user it is assigned to' })
   @IsOptional()

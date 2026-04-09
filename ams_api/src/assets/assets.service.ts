@@ -34,22 +34,24 @@ export class AssetsService {
     try {
       const asset = queryRunner.manager.create(Asset, {
         ...assetData,
-        category: { id: category_id } as Category,
-        department: { id: department_id } as Department,
+        category: category_id ? ({ id: category_id } as Category) : undefined,
+        department: department_id
+          ? ({ id: department_id } as Department)
+          : undefined,
         assigned_to: assigned_to_user_id
           ? ({ id: assigned_to_user_id } as User)
-          : null,
+          : undefined,
       });
-
-      // Automated Depreciation Calculation
-      const fullCategory = await queryRunner.manager.findOne(Category, {
-        where: { id: category_id },
-      });
-      if (fullCategory) {
-        asset.category = fullCategory;
-        const dep = this.calculateDepreciation(asset);
-        asset.current_value = dep.current_value;
-        asset.accumulated_depreciation = dep.accumulated_depreciation;
+      if (category_id) {
+        const fullCategory = await queryRunner.manager.findOne(Category, {
+          where: { id: category_id },
+        });
+        if (fullCategory) {
+          asset.category = fullCategory;
+          const dep = this.calculateDepreciation(asset);
+          asset.current_value = dep.current_value;
+          asset.accumulated_depreciation = dep.accumulated_depreciation;
+        }
       }
 
       const savedAsset = await queryRunner.manager.save(asset);
@@ -68,9 +70,19 @@ export class AssetsService {
       return savedAsset;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.error('Transaction Failed:', error);
+      console.error('--- ASSET REGISTRATION TRANSACTION FAILED ---');
+      console.error('Error Details:', error);
+
+      const err = error as { code?: string; message?: string };
+
+      if (err.code === '23505') {
+        throw new BadRequestException(
+          'Asset with this serial number or tag ID already exists.',
+        );
+      }
+
       throw new InternalServerErrorException(
-        'Failed to create asset and initial assignment record',
+        `Failed to create asset and initial assignment record: ${err.message || 'Unknown error'}`,
       );
     } finally {
       await queryRunner.release();
@@ -121,7 +133,6 @@ export class AssetsService {
 
     Object.assign(asset, updateAssetDto);
 
-    // Recalculate depreciation on update
     const dep = this.calculateDepreciation(asset);
     asset.current_value = dep.current_value;
     asset.accumulated_depreciation = dep.accumulated_depreciation;
@@ -171,7 +182,6 @@ export class AssetsService {
     const purchaseDate = new Date(asset.purchase_date);
     const now = new Date();
 
-    // Monthly calculation
     const monthsElapsed =
       (now.getFullYear() - purchaseDate.getFullYear()) * 12 +
       (now.getMonth() - purchaseDate.getMonth());
@@ -184,7 +194,6 @@ export class AssetsService {
     let accumulatedDepreciation =
       depreciableAmount * monthlyRate * monthsElapsed;
 
-    // Cap at depreciable amount
     accumulatedDepreciation = Math.min(
       accumulatedDepreciation,
       depreciableAmount,
@@ -240,7 +249,6 @@ export class AssetsService {
       asset.disposal_date = new Date(disposeAssetDto.disposal_date);
       asset.disposal_value = disposeAssetDto.disposal_value;
       asset.disposal_reason = disposeAssetDto.disposal_reason;
-      // Preserve assigned_to for auditing purposes
       const savedAsset = await queryRunner.manager.save(asset);
 
       await queryRunner.commitTransaction();

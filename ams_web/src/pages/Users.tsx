@@ -59,7 +59,7 @@ export const Users = () => {
   }, [users, searchQuery, roleFilter]);
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
+    <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
         <div>
           <h1 className="text-xl font-black text-slate-800 tracking-tight">

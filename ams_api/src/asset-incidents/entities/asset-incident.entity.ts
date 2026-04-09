@@ -27,10 +27,13 @@ export class AssetIncident {
   @Column({ type: 'enum', enum: ['BROKEN', 'MISSING'] })
   incident_type: string;
 
+  @Column({ type: 'enum', enum: ['WORK', 'HOME', 'OTHER'], nullable: true })
+  location: string;
+
   @Column('text')
   explanation: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   evidence_url: string;
 
   @Column({
