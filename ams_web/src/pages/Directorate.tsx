@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -13,6 +13,7 @@ import {
   Search,
   Eye,
 } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
 import { CreateDepartmentModal } from '../components/CreateDepartmentModal';
@@ -38,7 +39,16 @@ interface User {
 }
 
 export const Directorate = () => {
-  const { isAdmin } = useAuth();
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    setHeaderTitle('Directorate Units');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
+
+  const { isAdmin, isCEO } = useAuth();
   const queryClient = useQueryClient();
 
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
@@ -121,19 +131,12 @@ export const Directorate = () => {
   if (!selectedDept) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
-          <div>
-            <h1 className="text-xl font-black text-slate-800 tracking-tight">
-              Directorates
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
-              Manage organizational units and department heads.
-            </p>
-          </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex-1" />
           {isAdmin && (
             <button
               onClick={() => setIsDeptModalOpen(true)}
-              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm"
+              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
             >
               <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
               New Directorate
@@ -170,8 +173,8 @@ export const Directorate = () => {
                     <Building2 className="w-6 h-6 text-[#ff8000] group-hover:text-white transition-colors" />
                   </div>
 
-                  {isAdmin && (
-                    <div className="flex gap-1 transition-opacity">
+                  <div className="flex gap-1 transition-opacity">
+                    {(isAdmin || isCEO) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -182,22 +185,26 @@ export const Directorate = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={(e) => handleEditClick(e, dept)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit Directorate"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteClick(e, dept)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete Directorate"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+                    )}
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={(e) => handleEditClick(e, dept)}
+                          className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                          title="Edit Directorate"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteClick(e, dept)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Directorate"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <h3 className="text-xl font-bold text-slate-800 mb-1">
@@ -447,7 +454,7 @@ export const Directorate = () => {
                         ].includes(user.role)
                           ? 'bg-orange-50 text-[#ff8000] border-orange-100'
                           : user.role === 'HOD'
-                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                            ? 'bg-orange-50 text-[#ff8000] border-orange-100'
                             : 'bg-slate-50 text-slate-500 border-slate-100'
                       }`}
                     >
@@ -456,21 +463,23 @@ export const Directorate = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-1 transition-opacity">
+                      {(isAdmin || isCEO) && (
+                        <button
+                          onClick={() => setUserToView(user)}
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="View Staff Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      )}
                       {isAdmin && (
                         <>
-                          <button
-                            onClick={() => setUserToView(user)}
-                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            title="View Staff Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
                           <button
                             onClick={() => {
                               setUserToEdit(user);
                               setIsEditUserModalOpen(true);
                             }}
-                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
                             title="Edit Staff"
                           >
                             <Edit2 className="w-4 h-4" />

@@ -53,22 +53,22 @@ export const DisposeAssetModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
-        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-red-50/50">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-orange-100 bg-orange-50/50">
           <div>
             <h2 className="text-xl font-black text-slate-800 tracking-tight">
               Officially Dispose Asset
             </h2>
-            <p className="text-xs font-bold text-red-500 uppercase tracking-wider mt-1">
+            <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mt-1">
               Final Retirement Workflow
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+            className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -169,7 +169,7 @@ export const DisposeAssetModal = ({
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-[2] py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-[0_8px_16px_-6px_rgba(220,38,38,0.4)] transform active:scale-95 transition-all flex justify-center items-center gap-2"
+            className="flex-[2] py-3 bg-orange-600 hover:bg-orange-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

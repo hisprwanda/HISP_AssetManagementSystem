@@ -118,8 +118,8 @@ export const AdminOverview = () => {
         <div>
           <div className="flex items-center gap-3 mb-2 px-1">
             <div className="px-2 py-0.5 bg-orange-50 rounded-md border border-orange-100 text-[8px] font-black uppercase tracking-widest text-[#ff8000] flex items-center gap-1.5 shadow-sm">
-              <ShieldCheck className="w-3 h-3 text-emerald-500" />{' '}
-              Administrative Session Secure
+              <ShieldCheck className="w-3 h-3 text-[#ff8000]" /> Administrative
+              Session Secure
             </div>
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">
@@ -144,11 +144,11 @@ export const AdminOverview = () => {
             path: '/assets',
           },
           {
-            label: 'Resource Health',
+            label: 'Administrative Roster',
             value: stats.inventoryCount,
             unit: 'UNITS',
             icon: Monitor,
-            color: 'blue',
+            color: 'slate',
             trend: `${(stats.missingAssets || 0) + (stats.brokenAssets || 0)} Incidents Detected`,
             path: '/assets',
           },
@@ -157,7 +157,7 @@ export const AdminOverview = () => {
             value: stats.pendingRequestsCount,
             unit: 'OPEN',
             icon: Target,
-            color: 'amber',
+            color: 'slate',
             trend: `${(stats.pendingRequestsValue || 0).toLocaleString()} Exposure`,
             path: '/requests',
           },
@@ -166,7 +166,7 @@ export const AdminOverview = () => {
             value: stats.totalUsers,
             unit: 'PEOPLE',
             icon: Users,
-            color: 'purple',
+            color: 'slate',
             trend: 'Access Stable',
             path: '/directorate',
           },
@@ -194,7 +194,7 @@ export const AdminOverview = () => {
               </span>
             </div>
             <p
-              className={`mt-2.5 text-[8.5px] font-bold uppercase tracking-widest ${stat.color === 'blue' && stats.missingAssets + stats.brokenAssets > 0 ? 'text-red-500' : 'text-slate-400'}`}
+              className={`mt-2.5 text-[8.5px] font-bold uppercase tracking-widest ${stat.color === 'slate' && stats.missingAssets + stats.brokenAssets > 0 && i === 0 ? 'text-[#ff8000]' : 'text-slate-400'}`}
             >
               {stat.trend}
             </p>
@@ -273,16 +273,18 @@ export const AdminOverview = () => {
                       <div
                         className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 border transition-all ${
                           req.status === 'PENDING'
-                            ? 'sm:bg-amber-50 sm:text-amber-500 sm:border-amber-100'
+                            ? 'sm:bg-orange-50 sm:text-[#ff8000] sm:border-orange-100'
                             : req.status === 'APPROVED'
-                              ? 'sm:bg-blue-50 sm:text-blue-500 sm:border-blue-100'
+                              ? 'sm:bg-slate-50 sm:text-slate-500 sm:border-slate-100'
                               : req.status === 'FULFILLED'
-                                ? 'sm:bg-emerald-50 sm:text-emerald-500 sm:border-emerald-100'
-                                : 'sm:bg-red-50 sm:text-red-500 sm:border-red-100'
+                                ? 'sm:bg-orange-100 sm:text-orange-950 sm:border-orange-200 font-bold'
+                                : 'sm:bg-slate-50 sm:text-slate-400 sm:border-slate-100'
                         } bg-white shadow-sm`}
                       >
                         {req.status === 'PENDING' ? (
                           <Clock className="w-5 h-5" />
+                        ) : req.status === 'FULFILLED' ? (
+                          <ShieldCheck className="w-5 h-5" />
                         ) : (
                           <FileText className="w-5 h-5" />
                         )}
@@ -315,12 +317,13 @@ export const AdminOverview = () => {
                       <div
                         className={`px-3 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border shadow-sm ${
                           req.status === 'PENDING'
-                            ? 'bg-white text-amber-500 border-amber-100'
-                            : req.status === 'APPROVED'
-                              ? 'bg-white text-blue-500 border-blue-100'
+                            ? 'bg-white text-orange-400 border-orange-100'
+                            : req.status === 'APPROVED' ||
+                                req.status === 'HOD_APPROVED'
+                              ? 'bg-white text-slate-500 border-slate-100'
                               : req.status === 'FULFILLED'
-                                ? 'bg-white text-emerald-500 border-emerald-100'
-                                : 'bg-white text-red-500 border-red-100'
+                                ? 'bg-white text-slate-800 border-slate-200'
+                                : 'bg-white text-orange-600 border-orange-100'
                         }`}
                       >
                         {req.status}

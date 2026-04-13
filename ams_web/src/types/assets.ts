@@ -2,7 +2,7 @@ export interface Category {
   id: string;
   name: string;
   depreciation_rate?: number;
-  salvage_rate?: number;
+  disposal_rate?: number;
 }
 
 export interface User {
@@ -58,6 +58,8 @@ export interface Asset {
   disposal_date?: string;
   disposal_reason?: string;
   assignment_history?: AssetAssignment[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AssetRequest {
@@ -78,7 +80,8 @@ export interface AssetRequest {
     | 'FULFILLED';
   ceo_remarks?: string;
   purchase_order?: POData;
-  requested_by?: { full_name: string; id: string };
+  requested_by?: User;
+  verified_by_finance?: User;
   department?: { id: string; name: string };
   items?: {
     name: string;

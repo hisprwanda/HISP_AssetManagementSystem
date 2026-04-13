@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   User as UserIcon,
@@ -17,6 +18,14 @@ import { Asset } from '../types/assets';
 
 export const Profile = () => {
   const { user } = useAuth();
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    setHeaderTitle('My Account Profile');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -55,7 +64,7 @@ export const Profile = () => {
                 <h1 className="text-xl font-black text-slate-900 tracking-tight">
                   {user.full_name}
                 </h1>
-                <div className="inline-flex px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-widest border border-emerald-100 items-center gap-1 self-center sm:self-auto">
+                <div className="inline-flex px-2 py-0.5 bg-orange-50 text-orange-950 rounded-full text-[8px] font-black uppercase tracking-widest border border-orange-200 items-center gap-1 self-center sm:self-auto">
                   <ShieldCheck className="w-3 h-3" /> Verified
                 </div>
               </div>
@@ -72,8 +81,8 @@ export const Profile = () => {
             </div>
           </div>
 
-          <button className="relative z-10 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-lg flex items-center gap-2 group">
-            <Edit className="w-3.5 h-3.5 text-orange-400" />
+          <button className="relative z-10 px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-2 group">
+            <Edit className="w-3.5 h-3.5" />
             Edit Profile
           </button>
         </div>
@@ -112,64 +121,42 @@ export const Profile = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-orange-100">
                   {myAssets.length > 0 ? (
                     myAssets.map((asset) => (
                       <tr
                         key={asset.id}
-                        className="group hover:bg-slate-50/50 transition-all duration-300"
+                        className="group hover:bg-orange-100/50 transition-all duration-300"
                       >
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3.5">
-                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 transition-all">
-                              <Laptop className="w-4.5 h-4.5 text-slate-400 group-hover:text-[#ff8000]" />
+                            <div className="w-9 h-9 rounded-xl bg-white border border-orange-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 transition-all">
+                              <Laptop className="w-4.5 h-4.5 text-orange-400 group-hover:text-[#ff8000]" />
                             </div>
                             <div>
-                              <p className="text-sm font-black text-slate-800 tracking-tight leading-none mb-1 group-hover:text-[#ff8000] transition-colors">
+                              <p className="text-sm font-black text-orange-950 tracking-tight leading-none mb-1 group-hover:text-[#ff8000] transition-colors">
                                 {asset.name}
                               </p>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter italic">
+                              <p className="text-[9px] font-bold text-orange-400 uppercase tracking-tighter italic">
                                 Secured Assignment
                               </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100/50 px-2.5 py-1 rounded-lg border border-slate-200/30">
+                          <span className="text-[10px] font-bold text-orange-800 bg-orange-100/50 px-2.5 py-1 rounded-lg border border-orange-200/30">
                             {asset.category?.name || 'Equipment'}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
-                          <code className="text-[10px] font-bold text-slate-500 font-mono tracking-tighter bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 group-hover:border-[#ff8000]/20 transition-colors">
+                          <code className="text-[10px] font-bold text-orange-600 font-mono tracking-tighter bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100 group-hover:border-[#ff8000]/20 transition-colors">
                             {asset.tag_id || asset.serial_number}
                           </code>
                         </td>
                         <td className="px-5 py-3.5 text-right">
-                          <div
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-widest border shadow-sm ${
-                              asset.status === 'BROKEN'
-                                ? 'bg-amber-50 text-amber-600 border-amber-100'
-                                : asset.status === 'MISSING'
-                                  ? 'bg-red-50 text-red-600 border-red-100'
-                                  : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                            }`}
-                          >
-                            <span
-                              className={`w-1 h-1 rounded-full ${
-                                asset.status === 'BROKEN'
-                                  ? 'bg-amber-500'
-                                  : asset.status === 'MISSING'
-                                    ? 'bg-red-500'
-                                    : 'bg-emerald-500'
-                              }`}
-                            />
-                            {asset.status === 'BROKEN'
-                              ? 'Broken'
-                              : asset.status === 'MISSING'
-                                ? 'Missing'
-                                : asset.status === 'ASSIGNED'
-                                  ? 'Assigned'
-                                  : asset.status.replace('_', ' ')}
+                          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-widest border shadow-sm bg-orange-50 text-orange-600 border-orange-100">
+                            <span className="w-1 h-1 rounded-full bg-orange-500" />
+                            {asset.status.replace('_', ' ')}
                           </div>
                         </td>
                       </tr>
@@ -178,8 +165,8 @@ export const Profile = () => {
                     <tr>
                       <td colSpan={4} className="py-20 text-center">
                         <div className="flex flex-col items-center opacity-40">
-                          <AlertCircle className="w-8 h-8 text-slate-300 mb-3" />
-                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                          <AlertCircle className="w-8 h-8 text-orange-300 mb-3" />
+                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500">
                             No assets registered
                           </p>
                         </div>
@@ -193,35 +180,35 @@ export const Profile = () => {
         </div>
 
         <div className="lg:col-span-3 flex flex-col gap-6">
-          <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.5rem] p-6 shadow-lg flex flex-col gap-6">
-            <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] px-1">
+          <div className="bg-orange-50/50 backdrop-blur-xl border border-orange-100 rounded-[1.5rem] p-6 shadow-lg flex flex-col gap-6">
+            <h3 className="text-[9px] font-black text-orange-400 uppercase tracking-[0.3em] px-1">
               Properties
             </h3>
 
             <div className="space-y-6">
               <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100 group-hover:bg-[#ff8000] transition-all shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0 border border-orange-200 group-hover:bg-[#ff8000] transition-all shadow-sm">
                   <UserIcon className="w-4.5 h-4.5 text-[#ff8000] group-hover:text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-orange-400 mb-0.5 leading-none">
                     Rank
                   </p>
-                  <p className="text-xs font-black text-slate-800 tracking-tight uppercase group-hover:text-[#ff8000] transition-colors">
+                  <p className="text-xs font-black text-orange-950 tracking-tight uppercase group-hover:text-[#ff8000] transition-colors">
                     {user.role?.replace('_', ' ')}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100 group-hover:bg-blue-500 transition-all shadow-sm">
-                  <Calendar className="w-4.5 h-4.5 text-blue-500 group-hover:text-white" />
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0 border border-orange-200 group-hover:bg-orange-500 transition-all shadow-sm">
+                  <Calendar className="w-4.5 h-4.5 text-orange-500 group-hover:text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-orange-400 mb-0.5 leading-none">
                     Joined
                   </p>
-                  <p className="text-xs font-black text-slate-800 tracking-tight uppercase">
+                  <p className="text-xs font-black text-orange-950 tracking-tight uppercase">
                     {new Date().toLocaleDateString('en-US', {
                       month: 'short',
                       year: 'numeric',
@@ -231,11 +218,11 @@ export const Profile = () => {
               </div>
 
               <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:bg-emerald-500 transition-all shadow-sm">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 group-hover:text-white" />
+                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0 border border-orange-200 group-hover:bg-orange-500 transition-all shadow-sm">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-orange-500 group-hover:text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-orange-400 mb-0.5 leading-none">
                     Status
                   </p>
                   <p className="text-xs font-black text-emerald-600 tracking-tight uppercase">

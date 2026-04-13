@@ -26,7 +26,7 @@ export const ViewDepartmentModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity flex items-center justify-center p-4 overflow-y-auto"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
@@ -51,7 +51,7 @@ export const ViewDepartmentModal = ({
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
                 department.status === 'Inactive'
                   ? 'bg-slate-100 text-slate-400 border-slate-200'
-                  : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                  : 'bg-orange-50 text-orange-950 border-orange-200'
               }`}
             >
               <Activity className="w-3 h-3" /> {department.status}
@@ -104,7 +104,7 @@ export const ViewDepartmentModal = ({
                 <span className="text-xs font-bold text-slate-500">
                   Asset Management
                 </span>
-                <span className="text-xs font-black text-emerald-600 uppercase">
+                <span className="text-xs font-black text-slate-800 uppercase">
                   Enabled
                 </span>
               </div>

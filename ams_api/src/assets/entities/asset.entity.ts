@@ -61,15 +61,24 @@ export class Asset {
   @Column('numeric', { precision: 12, scale: 2, default: 0 })
   accumulated_depreciation: number;
 
+  @Column({ nullable: true })
+  category_id: string;
+
   @ManyToOne(() => Category, (category) => category.assets)
   @JoinColumn({ name: 'category_id' })
   category: Category;
+
+  @Column({ nullable: true })
+  department_id: string;
 
   @ManyToOne(() => Department, (department) => department.assets, {
     nullable: true,
   })
   @JoinColumn({ name: 'department_id' })
   department: Department;
+
+  @Column({ nullable: true })
+  assigned_to_user_id: string;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'assigned_to_user_id' })

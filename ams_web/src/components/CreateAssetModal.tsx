@@ -131,7 +131,7 @@ export const CreateAssetModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
 

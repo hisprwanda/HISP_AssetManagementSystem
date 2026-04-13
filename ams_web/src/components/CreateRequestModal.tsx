@@ -14,7 +14,6 @@ import {
   User as UserIcon,
   Phone,
   Calculator,
-  CheckCircle2,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -48,7 +47,7 @@ export const CreateRequestModal = ({
   requestMode,
   baseRequest,
 }: CreateRequestModalProps) => {
-  const { user, isHOD, isAdmin } = useAuth();
+  const { user, isHOD, isAdmin, isCEO } = useAuth();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -94,6 +93,17 @@ export const CreateRequestModal = ({
         setContactName(baseRequest.logistics?.contact_name || '');
         setContactPhone(baseRequest.logistics?.contact_phone || '');
 
+        if (baseRequest.financials) {
+          setTransportFees(baseRequest.financials.transport_fees || 0);
+          setCostBasis(
+            (baseRequest.financials.cost_basis as
+              | 'BUDGET'
+              | 'MARKET_RESEARCH') || 'BUDGET',
+          );
+          setBudgetCode1(baseRequest.financials.budget_code_1 || '');
+          setBudgetCode2(baseRequest.financials.budget_code_2 || '');
+        }
+
         if (baseRequest.items && baseRequest.items.length > 0) {
           setItems(
             baseRequest.items.map((i) => ({
@@ -105,19 +115,19 @@ export const CreateRequestModal = ({
             })),
           );
         }
-      } else if ((isHOD || isAdmin) && user?.department?.id) {
+      } else if ((isHOD || isAdmin || isCEO) && user?.department?.id) {
         setDepartmentId(user.department.id);
-        if (requestMode === 'SHARED' || isAdmin) {
+        if (requestMode === 'SHARED' || isAdmin || isCEO) {
           setRequestedById(user.id);
         } else {
           setRequestedById('');
         }
-      } else if (!isHOD && !isAdmin) {
+      } else if (!isHOD && !isAdmin && !isCEO) {
         setDepartmentId('');
         setRequestedById('');
       }
     }
-  }, [isOpen, isHOD, isAdmin, user, requestMode, baseRequest]);
+  }, [isOpen, isHOD, isAdmin, isCEO, user, requestMode, baseRequest]);
 
   const { data: departments, isFetching: loadingDepts } = useQuery({
     queryKey: ['departments'],
@@ -218,14 +228,16 @@ export const CreateRequestModal = ({
         status: baseRequest
           ? baseRequest.status === 'PENDING' && isHOD
             ? 'HOD_APPROVED'
-            : baseRequest.status === 'HOD_APPROVED'
+            : baseRequest.status === 'HOD_APPROVED' && isAdmin
               ? 'APPROVED'
               : baseRequest.status
-          : isAdmin
-            ? 'APPROVED'
-            : isHOD
-              ? 'HOD_APPROVED'
-              : 'PENDING',
+          : isCEO
+            ? 'CEO_APPROVED'
+            : isAdmin
+              ? 'APPROVED'
+              : isHOD
+                ? 'HOD_APPROVED'
+                : 'PENDING',
         items: validItems.map((item) => ({
           name: item.name,
           description: item.description,
@@ -248,6 +260,7 @@ export const CreateRequestModal = ({
           contact_phone: contactPhone,
         },
         description,
+        ...(baseRequest && isAdmin ? { verified_by_finance_id: user?.id } : {}),
       };
 
       if (baseRequest) {
@@ -277,15 +290,15 @@ export const CreateRequestModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
 
       <div className="fixed inset-y-0 right-0 w-full max-w-4xl bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
         {success ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-white">
-            <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-8 border border-emerald-100 animate-bounce">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+            <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-orange-100 group-hover:scale-110 transition-transform">
+              <ShoppingCart className="w-8 h-8 text-[#ff8000]" />
             </div>
             <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-4">
               {baseRequest ? 'Requisition Updated!' : 'Requisition Submitted!'}
@@ -710,21 +723,6 @@ export const CreateRequestModal = ({
                       onChange={(e) => setBudgetCode2(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium uppercase"
                     />
-                  </div>
-                </div>
-
-                <div className="bg-[#1e293b] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between text-white shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff8000]/10 rounded-full blur-2xl -mr-10 -mt-10" />
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">
-                      Total Expenditure Not To Exceed
-                    </p>
-                    <p className="text-sm font-medium text-slate-300">
-                      Includes Goods/Services + Transport Fees
-                    </p>
-                  </div>
-                  <div className="text-3xl font-black tracking-tight text-emerald-400 mt-2 md:mt-0">
-                    {grandTotal.toLocaleString()} RWF
                   </div>
                 </div>
               </div>

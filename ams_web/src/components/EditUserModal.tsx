@@ -97,8 +97,8 @@ export const EditUserModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[440px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]">
         <DialogHeader>
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 shadow-inner">
-            <UserCog className="w-6 h-6 text-blue-500" />
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
+            <UserCog className="w-6 h-6 text-[#ff8000]" />
           </div>
           <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
             Edit Staff Member
@@ -127,7 +127,7 @@ export const EditUserModal = ({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="e.g. Jane Smith"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
                 required
               />
             </div>
@@ -144,7 +144,7 @@ export const EditUserModal = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. smith.j@hisprwanda.org"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
                 required
               />
             </div>
@@ -159,7 +159,7 @@ export const EditUserModal = ({
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all appearance-none"
               >
                 {roles.map((r) => (
                   <option key={r} value={r}>
@@ -181,7 +181,7 @@ export const EditUserModal = ({
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(59,130,246,0.4)] transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center justify-center gap-2 group min-w-[150px]"
+              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-2.5 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center justify-center gap-2 group min-w-[150px]"
             >
               {mutation.isPending ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

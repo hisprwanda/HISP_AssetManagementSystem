@@ -4,6 +4,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 
+/**
+ * HISP Asset Management System - Main Entry Point
+ * Synchronized terminology transition: disposal_rate
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(json({ limit: '50mb' }));
@@ -15,8 +19,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
-  // Swagger Configuration
   const config = new DocumentBuilder()
     .setTitle('HISP Rwanda Asset Management System')
     .setDescription('Asset Management System API Documentation')

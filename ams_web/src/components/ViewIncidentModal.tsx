@@ -38,17 +38,17 @@ export const ViewIncidentModal = ({
       case 'ACCEPTED':
         return {
           icon: ShieldCheck,
-          color: 'text-emerald-500',
-          bg: 'bg-emerald-50',
-          border: 'border-emerald-100',
+          color: 'text-orange-950',
+          bg: 'bg-orange-50',
+          border: 'border-orange-200',
           label: 'Investigation Resolved - Accepted',
         };
       case 'DENIED':
         return {
           icon: ShieldX,
-          color: 'text-rose-500',
-          bg: 'bg-rose-50',
-          border: 'border-rose-100',
+          color: 'text-orange-600',
+          bg: 'bg-orange-50',
+          border: 'border-orange-100',
           label: 'Investigation Resolved - Denied',
         };
       default:
@@ -192,7 +192,7 @@ export const ViewIncidentModal = ({
                     <a
                       href={incident.evidence_url}
                       download={`evidence-${incident.id}`}
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-orange-600 hover:text-orange-700 hover:underline bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100 transition-colors"
                     >
                       <Download className="w-3 h-3" /> Download Attachment
                     </a>

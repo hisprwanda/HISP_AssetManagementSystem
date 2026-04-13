@@ -145,8 +145,8 @@ export const FormalizeRequestModal = ({
       <DialogContent className="sm:max-w-[700px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col max-h-[90vh]">
         {success ? (
           <div className="py-20 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 border border-emerald-100">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-orange-100 group-hover:scale-110 transition-transform">
+              <CheckCircle2 className="w-8 h-8 text-[#ff8000]" />
             </div>
             <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
               Requisition Formalized!
@@ -280,7 +280,7 @@ export const FormalizeRequestModal = ({
                           <button
                             type="button"
                             onClick={() => removeItem(index)}
-                            className="absolute -top-2 -right-2 w-7 h-7 bg-white border border-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                            className="absolute -top-2 -right-2 w-7 h-7 bg-white border border-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -291,21 +291,23 @@ export const FormalizeRequestModal = ({
                 </div>
               </div>
 
-              <div className="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden">
+              <div className="bg-orange-50 rounded-[2rem] p-8 text-slate-900 relative overflow-hidden border border-orange-100 shadow-sm">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 justify-between items-center">
                   <div className="space-y-4 w-full md:w-auto">
                     <div className="flex items-center justify-between md:justify-start gap-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Subtotal
                       </span>
                       <span className="text-xl font-black">
                         {itemsSubtotal.toLocaleString()}{' '}
-                        <span className="text-[10px] opacity-40">RWF</span>
+                        <span className="text-[10px] text-slate-400 font-bold">
+                          RWF
+                        </span>
                       </span>
                     </div>
                     <div className="flex items-center justify-between md:justify-start gap-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Logistics
                       </span>
                       <input
@@ -314,18 +316,20 @@ export const FormalizeRequestModal = ({
                         onChange={(e) =>
                           setTransportFees(Number(e.target.value))
                         }
-                        className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm font-bold text-white w-24 outline-none focus:ring-2 focus:ring-[#ff8000]"
+                        className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-sm font-bold text-slate-800 w-24 outline-none focus:ring-2 focus:ring-[#ff8000]"
                       />
                     </div>
                   </div>
-                  <div className="h-px md:h-12 w-full md:w-px bg-white/10" />
+                  <div className="h-px md:h-12 w-full md:w-px bg-slate-200" />
                   <div className="text-center md:text-right">
                     <p className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] mb-1">
                       Total Estimated Investment
                     </p>
                     <p className="text-4xl font-black tracking-tight">
                       {grandTotal.toLocaleString()}{' '}
-                      <span className="text-sm opacity-40">RWF</span>
+                      <span className="text-sm text-slate-400 font-bold">
+                        RWF
+                      </span>
                     </p>
                   </div>
                 </div>

@@ -146,8 +146,8 @@ export const SimpleRequestModal = ({
       <DialogContent className="sm:max-w-[480px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2.5rem]">
         {success ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 border border-emerald-100">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
+              <CheckCircle2 className="w-10 h-10 text-orange-500" />
             </div>
             <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
               Request Submitted!

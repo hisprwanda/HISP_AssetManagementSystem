@@ -83,8 +83,8 @@ export const ResolveIncidentModal = ({
             <div
               className={`w-16 h-16 rounded-full flex items-center justify-center mb-5 border ${
                 resolution === 'ACCEPTED'
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-500'
-                  : 'bg-red-50 border-red-100 text-red-500'
+                  ? 'bg-orange-50 border-orange-100 text-orange-950'
+                  : 'bg-orange-50 border-orange-100 text-orange-600'
               }`}
             >
               {resolution === 'ACCEPTED' ? (
@@ -125,7 +125,7 @@ export const ResolveIncidentModal = ({
 
             <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
               {error && (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2 text-red-600 text-[10px] font-black uppercase tracking-widest">
+                <div className="p-3 rounded-xl bg-orange-50 border border-orange-100 flex items-start gap-2 text-orange-600 text-[10px] font-black uppercase tracking-widest">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   {error}
                 </div>
@@ -235,7 +235,7 @@ export const ResolveIncidentModal = ({
                     </div>
                     <div className="text-left">
                       <p
-                        className={`text-[10px] font-black uppercase tracking-widest ${resolution === 'ACCEPTED' ? 'text-emerald-700' : 'text-slate-400'}`}
+                        className={`text-[10px] font-black uppercase tracking-widest ${resolution === 'ACCEPTED' ? 'text-orange-950' : 'text-slate-400'}`}
                       >
                         Accept Case
                       </p>
@@ -250,14 +250,14 @@ export const ResolveIncidentModal = ({
                     onClick={() => setResolution('DENIED')}
                     className={`p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
                       resolution === 'DENIED'
-                        ? 'bg-red-50 border-red-500/30'
+                        ? 'bg-orange-50 border-orange-500/30'
                         : 'bg-white border-slate-100 hover:border-slate-200'
                     }`}
                   >
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                         resolution === 'DENIED'
-                          ? 'bg-red-500 text-white shadow-md'
+                          ? 'bg-orange-600 text-white shadow-md'
                           : 'bg-slate-100 text-slate-400'
                       }`}
                     >
@@ -265,7 +265,7 @@ export const ResolveIncidentModal = ({
                     </div>
                     <div className="text-left">
                       <p
-                        className={`text-[10px] font-black uppercase tracking-widest ${resolution === 'DENIED' ? 'text-red-700' : 'text-slate-400'}`}
+                        className={`text-[10px] font-black uppercase tracking-widest ${resolution === 'DENIED' ? 'text-orange-600' : 'text-slate-400'}`}
                       >
                         Deny Case
                       </p>
@@ -292,9 +292,9 @@ export const ResolveIncidentModal = ({
                   />
                 </div>
                 {resolution === 'DENIED' && (
-                  <div className="flex items-start gap-2 p-3 bg-red-50 rounded-xl border border-red-100">
-                    <Info className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
-                    <p className="text-[9px] font-bold text-red-700 leading-relaxed uppercase tracking-tighter">
+                  <div className="flex items-start gap-2 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                    <Info className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
+                    <p className="text-[9px] font-bold text-orange-700 leading-relaxed uppercase tracking-tighter">
                       Penalty Application: The asset's current value will be
                       billed to the reporter.
                     </p>
@@ -317,8 +317,8 @@ export const ResolveIncidentModal = ({
                 disabled={mutation.isPending}
                 className={`flex-1 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group ${
                   resolution === 'ACCEPTED'
-                    ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-100'
-                    : 'bg-red-600 hover:bg-red-500 shadow-red-100'
+                    ? 'bg-orange-950 hover:bg-orange-900 shadow-orange-100'
+                    : 'bg-orange-600 hover:bg-orange-500 shadow-orange-100'
                 } text-white`}
               >
                 {mutation.isPending ? (

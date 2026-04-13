@@ -82,13 +82,12 @@ export const HODOverview = () => {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'IN_STOCK':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
       case 'ASSIGNED':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'BROKEN':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
       case 'MISSING':
-        return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-orange-50 text-orange-600 border-orange-200';
       default:
         return 'bg-slate-50 text-slate-500 border-slate-100';
     }
@@ -139,8 +138,8 @@ export const HODOverview = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Users className="w-5 h-5 text-blue-500" />
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
+              <Users className="w-5 h-5 text-slate-500" />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
@@ -153,8 +152,8 @@ export const HODOverview = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Laptop className="w-5 h-5 text-emerald-500" />
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
+              <Laptop className="w-5 h-5 text-orange-500" />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
@@ -172,7 +171,7 @@ export const HODOverview = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <div className="w-1.5 h-6 bg-blue-500 rounded-full" /> Shared
+                <div className="w-1.5 h-6 bg-[#ff8000] rounded-full" /> Shared
                 Department Resources
               </h3>
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
@@ -274,7 +273,7 @@ export const HODOverview = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />{' '}
+                <div className="w-1.5 h-6 bg-slate-200 rounded-full" />{' '}
                 Staff-Assigned Equipment
               </h3>
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
@@ -375,7 +374,7 @@ export const HODOverview = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <div className="w-1.5 h-6 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.4)]" />{' '}
+                <div className="w-1.5 h-6 bg-orange-200 rounded-full shadow-[0_0_10px_rgba(255,128,0,0.2)]" />{' '}
                 Critical Path Outcomes
               </h3>
             </div>
@@ -409,12 +408,12 @@ export const HODOverview = () => {
                           <div
                             className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent ${
                               incident.investigation_status === 'ACCEPTED'
-                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                : 'bg-red-50 text-red-600 border-red-100'
+                                ? 'bg-orange-50 text-orange-950 border-orange-200'
+                                : 'bg-orange-50 text-orange-600 border-orange-100'
                             }`}
                           >
                             <span
-                              className={`w-1 h-1 rounded-full ${incident.investigation_status === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'}`}
+                              className={`w-1 h-1 rounded-full ${incident.investigation_status === 'ACCEPTED' ? 'bg-white' : 'bg-orange-600'}`}
                             />
                             {incident.investigation_status === 'ACCEPTED'
                               ? 'Approved'
@@ -446,7 +445,7 @@ export const HODOverview = () => {
                               </p>
                               {incident.investigation_status === 'DENIED' && (
                                 <div className="mt-1.5 flex items-center gap-3">
-                                  <div className="flex items-center gap-1.5 text-red-600 font-black text-[9px] uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">
+                                  <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
                                     <AlertCircle className="w-3 h-3" /> Penalty:{' '}
                                     {Number(
                                       incident.penalty_amount || 0,
@@ -504,7 +503,7 @@ export const HODOverview = () => {
       </div>
 
       {resolutionNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-orange-950/20 backdrop-blur-md">
           <div className="bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full border border-white/20 relative">
             <div className="absolute top-0 right-0 p-4">
               <button
@@ -514,8 +513,8 @@ export const HODOverview = () => {
                 ✕
               </button>
             </div>
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6 border border-red-100 shadow-inner">
-              <ShieldAlert className="w-8 h-8 text-red-500" />
+            <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
+              <ShieldAlert className="w-8 h-8 text-[#ff8000]" />
             </div>
             <h4 className="text-xl font-black text-slate-900 tracking-tight mb-3">
               Penalty Resolution
@@ -525,7 +524,7 @@ export const HODOverview = () => {
             </p>
             <button
               onClick={() => setResolutionNotice(null)}
-              className="w-full py-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 shadow-xl"
+              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 shadow-xl"
             >
               Acknowledged
             </button>

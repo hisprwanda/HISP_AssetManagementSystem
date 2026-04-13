@@ -48,9 +48,14 @@ export class AssetsService {
         });
         if (fullCategory) {
           asset.category = fullCategory;
+          asset.category = fullCategory;
           const dep = this.calculateDepreciation(asset);
           asset.current_value = dep.current_value;
           asset.accumulated_depreciation = dep.accumulated_depreciation;
+          asset.disposal_value = dep.disposal_value;
+          console.log(
+            ` -> New Dep: ${dep.current_value} | New Disp: ${dep.disposal_value}`,
+          );
         }
       }
 
@@ -136,6 +141,7 @@ export class AssetsService {
     const dep = this.calculateDepreciation(asset);
     asset.current_value = dep.current_value;
     asset.accumulated_depreciation = dep.accumulated_depreciation;
+    asset.disposal_value = dep.disposal_value;
 
     return await this.assetRepo.save(asset);
   }
@@ -160,6 +166,7 @@ export class AssetsService {
   calculateDepreciation(asset: Asset): {
     current_value: number;
     accumulated_depreciation: number;
+    disposal_value: number;
   } {
     if (
       !asset.purchase_cost ||
@@ -169,15 +176,18 @@ export class AssetsService {
       return {
         current_value: Number(asset.purchase_cost) || 0,
         accumulated_depreciation: 0,
+        disposal_value:
+          Number(asset.purchase_cost || 0) *
+          (Number(asset.category?.disposal_rate || 0) / 100),
       };
     }
 
-    const cost = Number(asset.purchase_cost);
-    const rate = Number(asset.category.depreciation_rate) / 100;
-    const salvageRate = Number(asset.category.salvage_rate || 0) / 100;
+    const cost = Number(asset.purchase_cost || 0);
+    const rate = Number(asset.category?.depreciation_rate || 0) / 100;
+    const disposalRate = Number(asset.category?.disposal_rate || 0) / 100;
 
-    const salvageValue = cost * salvageRate;
-    const depreciableAmount = cost - salvageValue;
+    const disposalValue = cost * disposalRate;
+    const depreciableAmount = cost - disposalValue;
 
     const purchaseDate = new Date(asset.purchase_date);
     const now = new Date();
@@ -186,13 +196,9 @@ export class AssetsService {
       (now.getFullYear() - purchaseDate.getFullYear()) * 12 +
       (now.getMonth() - purchaseDate.getMonth());
 
-    if (monthsElapsed <= 0) {
-      return { current_value: cost, accumulated_depreciation: 0 };
-    }
-
     const monthlyRate = rate / 12;
     let accumulatedDepreciation =
-      depreciableAmount * monthlyRate * monthsElapsed;
+      depreciableAmount * monthlyRate * Math.max(0, monthsElapsed);
 
     accumulatedDepreciation = Math.min(
       accumulatedDepreciation,
@@ -204,17 +210,33 @@ export class AssetsService {
     return {
       current_value: Number(currentValue.toFixed(2)),
       accumulated_depreciation: Number(accumulatedDepreciation.toFixed(2)),
+      disposal_value: Number(disposalValue.toFixed(2)),
     };
   }
 
   async recalculateAll(): Promise<{ updated: number }> {
+    console.log('--- STARTING GLOBAL FINANCIAL RECALCULATION ---');
     const assets = await this.assetRepo.find({ relations: ['category'] });
     let updatedCount = 0;
 
     for (const asset of assets) {
+      if (!asset.category && asset.category_id) {
+        const category = await this.dataSource.manager.findOne(Category, {
+          where: { id: asset.category_id },
+        });
+        if (category) {
+          asset.category = category;
+        }
+      }
       const dep = this.calculateDepreciation(asset);
       asset.current_value = dep.current_value;
       asset.accumulated_depreciation = dep.accumulated_depreciation;
+      if (asset.status !== 'DISPOSED') {
+        asset.disposal_value = dep.disposal_value;
+        console.log(
+          ` -> Synced ${asset.name}: Dep ${dep.current_value}, Disp ${dep.disposal_value}`,
+        );
+      }
       await this.assetRepo.save(asset);
       updatedCount++;
     }

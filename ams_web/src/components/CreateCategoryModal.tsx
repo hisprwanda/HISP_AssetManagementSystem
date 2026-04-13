@@ -23,14 +23,14 @@ export const CreateCategoryModal = ({
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [depreciationRate, setDepreciationRate] = useState('10');
-  const [salvageRate, setSalvageRate] = useState('5');
+  const [disposalRate, setDisposalRate] = useState('5');
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: async (newCategory: {
       name: string;
       depreciation_rate: number;
-      salvage_rate: number;
+      disposal_rate: number;
     }) => {
       const response = await api.post('/categories', newCategory);
       return response.data;
@@ -40,7 +40,7 @@ export const CreateCategoryModal = ({
       onClose();
       setName('');
       setDepreciationRate('10');
-      setSalvageRate('5');
+      setDisposalRate('5');
       setError(null);
     },
     onError: (err: unknown) => {
@@ -66,7 +66,7 @@ export const CreateCategoryModal = ({
     mutation.mutate({
       name,
       depreciation_rate: parseFloat(depreciationRate),
-      salvage_rate: parseFloat(salvageRate),
+      disposal_rate: parseFloat(disposalRate),
     });
   };
 
@@ -123,13 +123,13 @@ export const CreateCategoryModal = ({
             </div>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
-                Salvage Rate (%) *
+                Disposal Rate (%) *
               </label>
               <input
                 type="number"
                 step="0.01"
-                value={salvageRate}
-                onChange={(e) => setSalvageRate(e.target.value)}
+                value={disposalRate}
+                onChange={(e) => setDisposalRate(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all"
                 required
               />

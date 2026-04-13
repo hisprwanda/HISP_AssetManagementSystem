@@ -31,7 +31,7 @@ export const ViewUserModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
@@ -98,8 +98,8 @@ export const ViewUserModal = ({
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Account status
                   </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-bold text-emerald-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{' '}
+                  <span className="inline-flex items-center gap-1 text-sm font-bold text-orange-600">
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />{' '}
                     Active
                   </span>
                 </div>

@@ -44,7 +44,7 @@ export const ViewAssetModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
@@ -90,13 +90,13 @@ export const ViewAssetModal = ({
               <span
                 className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
                   asset.status === 'ASSIGNED' || asset.status === 'IN_STOCK'
-                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                    ? 'bg-orange-50 text-orange-950 border border-orange-200'
                     : asset.status === 'BROKEN'
-                      ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                      ? 'bg-orange-50 text-orange-600 border border-orange-200'
                       : asset.status === 'MISSING' ||
                           asset.status === 'DISPOSED'
-                        ? 'bg-red-50 text-red-600 border border-red-100'
-                        : 'bg-slate-200 text-slate-600'
+                        ? 'bg-white text-orange-400 border border-orange-100 italic'
+                        : 'bg-slate-50 text-slate-500 border border-slate-100'
                 }`}
               >
                 {asset.status === 'ASSIGNED'

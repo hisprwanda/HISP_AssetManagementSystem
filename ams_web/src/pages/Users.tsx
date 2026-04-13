@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useOutletContext } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -34,6 +35,14 @@ interface User {
 
 export const Users = () => {
   const { isAdmin } = useAuth();
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    setHeaderTitle('User Management');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [userToView, setUserToView] = useState<User | null>(null);
@@ -61,17 +70,9 @@ export const Users = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-xl font-black text-slate-800 tracking-tight">
-            Staff Directory
-          </h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Manage enterprise access and system roles.
-          </p>
-        </div>
-
+        <div className="flex-1" />
         {isAdmin && (
-          <button className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm">
+          <button className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group text-sm">
             <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
             Provision New User
           </button>

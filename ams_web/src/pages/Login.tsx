@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Mail, Lock } from 'lucide-react';
+import { ArrowRight, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
 
@@ -67,8 +67,8 @@ export const Login = () => {
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 relative overflow-hidden font-sans">
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#ff8000] rounded-full blur-[120px] opacity-20 animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#e49f37] rounded-full blur-[150px] opacity-20" />
-      <div className="relative z-10 w-full max-w-[1000px] flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(228,159,55,0.2)] border border-white m-4 overflow-hidden">
-        <div className="w-full md:w-1/2 bg-[#ff8000] p-8 flex flex-col justify-between text-white relative">
+      <div className="relative z-10 w-full max-w-[800px] md:h-[500px] flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-[0_32px_64px_-16px_rgba(228,159,55,0.2)] border border-white m-4 overflow-hidden">
+        <div className="w-full md:w-1/2 bg-[#ff8000] p-8 md:p-10 flex flex-col justify-start text-white relative">
           <div
             className="absolute inset-0 opacity-10"
             style={{
@@ -81,7 +81,7 @@ export const Login = () => {
           <div className="relative z-10">
             <div className="bg-white p-2 rounded-xl inline-block shadow-xl mb-4">
               <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDiC5rBaWuabdf-FTUqrwzSQ_jrQWw-o3U7g&s"
+                src="/hisp.png"
                 alt="HISP Logo"
                 className="w-9 h-9 rounded-full"
               />
@@ -96,8 +96,8 @@ export const Login = () => {
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 p-8 lg:p-10 bg-white/40 flex flex-col justify-center">
-          <div className="mb-6">
+        <div className="w-full md:w-1/2 p-8 md:p-10 bg-white/40 flex flex-col justify-center">
+          <div className="mb-4">
             <h2 className="text-lg font-bold text-slate-800 tracking-tight">
               HISP-AMS Login
             </h2>
@@ -106,7 +106,7 @@ export const Login = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="group">
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
@@ -159,16 +159,6 @@ export const Login = () => {
               )}
             </button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                System Active
-              </span>
-            </div>
-            <ShieldCheck className="w-4 h-4 text-slate-300" />
-          </div>
         </div>
       </div>
       <div className="absolute bottom-6 text-center w-full">

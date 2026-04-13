@@ -26,7 +26,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-orange-950/20 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -34,10 +34,10 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div
-          className={`px-6 py-6 flex items-center gap-4 ${isApprove ? 'bg-emerald-50' : 'bg-red-50'}`}
+          className={`px-6 py-6 flex items-center gap-4 ${isApprove ? 'bg-orange-50' : 'bg-slate-50'}`}
         >
           <div
-            className={`p-2 rounded-2xl ${isApprove ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}
+            className={`p-2 rounded-2xl ${isApprove ? 'bg-orange-100 text-[#ff8000]' : 'bg-slate-200 text-slate-600'}`}
           >
             {isApprove ? (
               <CheckCircle2 className="w-6 h-6" />
@@ -50,7 +50,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
               {isApprove ? 'Final Executive Approval' : 'Decline Asset Request'}
             </h3>
             <p
-              className={`text-[11px] font-bold uppercase tracking-wider ${isApprove ? 'text-emerald-600/70' : 'text-red-600/70'}`}
+              className={`text-[11px] font-bold uppercase tracking-wider ${isApprove ? 'text-orange-600/70' : 'text-slate-500/70'}`}
             >
               CEO Decision Portal
             </p>
@@ -93,8 +93,8 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
               disabled={isPending}
               className={`flex-[2] flex items-center justify-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-widest text-white rounded-xl shadow-lg transition-all transform active:scale-[0.98] ${
                 isApprove
-                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
-                  : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                  ? 'bg-[#ff8000] hover:bg-orange-700 shadow-orange-200'
+                  : 'bg-orange-950 hover:bg-black shadow-slate-200'
               }`}
             >
               {isPending ? (

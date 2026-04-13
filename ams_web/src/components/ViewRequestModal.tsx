@@ -71,21 +71,21 @@ export const ViewRequestModal = ({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
+        return 'bg-slate-50 text-slate-400 border-slate-100';
       case 'HOD_APPROVED':
-        return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+        return 'bg-slate-100 text-slate-600 border-slate-200';
       case 'APPROVED':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
+        return 'bg-slate-200 text-slate-800 border-slate-300';
       case 'CEO_REVIEW':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-orange-50 text-[#ff8000] border-orange-200';
       case 'CEO_APPROVED':
-        return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
       case 'FULFILLED':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-slate-50 text-slate-400 border-slate-200 italic';
       case 'REJECTED':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-orange-50 text-orange-600 border-orange-100 line-through';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200';
+        return 'bg-slate-50 text-slate-500 border-slate-200';
     }
   };
 
@@ -192,7 +192,7 @@ export const ViewRequestModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-[60] transition-opacity"
         onClick={onClose}
       />
 
@@ -205,8 +205,8 @@ export const ViewRequestModal = ({
             <X className="w-5 h-5" />
           </button>
 
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-5 shadow-inner">
-            <FileText className="w-7 h-7 text-blue-500" />
+          <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-5 shadow-inner">
+            <FileText className="w-7 h-7 text-[#ff8000]" />
           </div>
 
           <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-2">
@@ -244,7 +244,7 @@ export const ViewRequestModal = ({
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black border-2 transition-all ${
                       step.status === 'completed'
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                        ? 'bg-slate-800 border-slate-800 text-white'
                         : step.status === 'current'
                           ? 'bg-white border-[#ff8000] text-[#ff8000] shadow-[0_0_12px_rgba(255,128,0,0.3)]'
                           : 'bg-white border-slate-200 text-slate-300'
@@ -259,7 +259,7 @@ export const ViewRequestModal = ({
                   <span
                     className={`mt-2 text-[9px] font-black uppercase tracking-tighter ${
                       step.status === 'completed'
-                        ? 'text-emerald-600'
+                        ? 'text-slate-600'
                         : step.status === 'current'
                           ? 'text-[#ff8000]'
                           : 'text-slate-400'
@@ -271,7 +271,7 @@ export const ViewRequestModal = ({
                     <div
                       className={`absolute top-3.5 left-[50%] w-full h-[2px] -z-10 ${
                         step.status === 'completed'
-                          ? 'bg-emerald-500'
+                          ? 'bg-slate-800'
                           : 'bg-slate-200'
                       }`}
                     />
@@ -284,7 +284,7 @@ export const ViewRequestModal = ({
           {request.items && request.items.length > 0 ? (
             <div>
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" /> Requested
+                <ShieldCheck className="w-4 h-4 text-[#ff8000]" /> Requested
                 Line Items
               </h3>
               <div className="space-y-3">
@@ -294,7 +294,7 @@ export const ViewRequestModal = ({
                     className="p-4 bg-slate-50/50 border border-slate-100 rounded-xl flex justify-between items-center group"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">
+                      <p className="text-sm font-bold text-slate-800 group-hover:text-[#ff8000] transition-colors truncate">
                         {item.name}
                       </p>
                       <p className="text-[10px] text-slate-400 font-medium truncate">
@@ -362,7 +362,7 @@ export const ViewRequestModal = ({
                 </div>
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-3xl font-black text-emerald-400 tracking-tight leading-none">
+                    <p className="text-3xl font-black text-[#ff8000] tracking-tight leading-none">
                       {grandTotal.toLocaleString()}{' '}
                       <span className="text-xs text-white opacity-50 ml-1">
                         RWF
@@ -401,12 +401,12 @@ export const ViewRequestModal = ({
           </div>
 
           {request.ceo_remarks && (
-            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
-              <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+              <h3 className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> Executive Decision
                 Remarks
               </h3>
-              <p className="text-sm font-bold text-indigo-900 leading-relaxed italic">
+              <p className="text-sm font-bold text-slate-800 leading-relaxed italic">
                 "{request.ceo_remarks}"
               </p>
             </div>
@@ -524,7 +524,7 @@ export const ViewRequestModal = ({
                     setIsDecisionModalOpen(true);
                   }}
                   disabled={mutation.isPending}
-                  className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-700 font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-100 transform active:scale-95 transition-all"
+                  className="px-6 py-2.5 bg-orange-600 text-white hover:bg-orange-700 font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-orange-100 transform active:scale-95 transition-all"
                 >
                   {mutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

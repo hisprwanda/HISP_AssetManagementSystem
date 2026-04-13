@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -23,8 +23,8 @@ import { AssetIncident } from '../types/assets';
 
 export const Incidents = () => {
   const navigate = useNavigate();
+  const { isFinanceAdmin, isAdmin, isHOD, isCEO, user } = useAuth();
   const { openIncident } = useOutletContext<{ openIncident: () => void }>();
-  const { isFinanceAdmin, isAdmin, isHOD, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -34,6 +34,17 @@ export const Incidents = () => {
     null,
   );
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    setHeaderTitle('Incident Reports');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
+
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
     queryKey: ['asset-incidents'],
@@ -73,12 +84,30 @@ export const Incidents = () => {
       );
     }
 
+    if (startDate) {
+      result = result.filter((i) => {
+        const date = new Date(i.reported_at);
+        return date >= new Date(startDate);
+      });
+    }
+
+    if (endDate) {
+      result = result.filter((i) => {
+        const date = new Date(i.reported_at);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return date <= end;
+      });
+    }
+
     return result;
   }, [
     incidents,
     filterType,
     filterStatus,
     searchQuery,
+    startDate,
+    endDate,
     isAdmin,
     isFinanceAdmin,
     isHOD,
@@ -110,14 +139,12 @@ export const Incidents = () => {
     };
   }, [incidents, isHOD, isAdmin, isFinanceAdmin, user]);
 
-  const getStatusStyle = (status: string) => {
+  const getStatusStyle = (status: AssetIncident['investigation_status']) => {
     switch (status) {
-      case 'INVESTIGATING':
-        return 'bg-amber-50 text-amber-600 border-amber-200';
       case 'ACCEPTED':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+        return 'bg-slate-50 text-slate-950 border-slate-200 font-black';
       case 'DENIED':
-        return 'bg-red-50 text-red-600 border-red-200';
+        return 'bg-orange-50 text-orange-600 border-orange-100 italic';
       default:
         return 'bg-slate-50 text-slate-500 border-slate-200';
     }
@@ -198,7 +225,7 @@ export const Incidents = () => {
     document.body.removeChild(link);
   };
 
-  if (!isAdmin && !isFinanceAdmin && !isHOD) {
+  if (!isAdmin && !isFinanceAdmin && !isHOD && !isCEO) {
     return (
       <div className="flex flex-col h-[70vh] items-center justify-center text-center">
         <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mb-6 border border-red-100">
@@ -209,7 +236,7 @@ export const Incidents = () => {
         </h1>
         <p className="text-slate-500 font-medium max-w-sm">
           Investigations and audit logs are only accessible to Administration,
-          Finance, and Department Heads.
+          Finance, Department Heads, and Executive Leadership.
         </p>
       </div>
     );
@@ -218,24 +245,12 @@ export const Incidents = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
-        <div>
-          <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-[#ff8000]" />
-            {isHOD && !isAdmin && !isFinanceAdmin
-              ? `${user?.department?.name || 'Department'} Incident Reports`
-              : 'Incident Reports'}
-          </h1>
-          <p className="text-slate-500 text-[10px] font-medium">
-            {isHOD && !isAdmin && !isFinanceAdmin
-              ? "Audit logs for your department's equipment incidents and outcomes."
-              : 'Audit logs for broken or missing equipment and outcomes.'}
-          </p>
-        </div>
+        <div className="flex-1" />
         <div className="flex gap-2">
-          {isHOD && (
+          {(isHOD || isAdmin || isCEO) && (
             <button
               onClick={openIncident}
-              className="px-4 py-2 bg-slate-900 border border-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
+              className="px-4 py-2 bg-orange-600 border border-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
             >
               <ShieldAlert className="w-3.5 h-3.5 text-orange-200" /> Report
               Incident
@@ -253,8 +268,8 @@ export const Incidents = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
-              <Clock className="w-4 h-4 text-amber-500" />
+            <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100">
+              <Clock className="w-4 h-4 text-[#ff8000]" />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
@@ -271,16 +286,16 @@ export const Incidents = () => {
         </div>
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-100">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100">
+              <ShieldCheck className="w-4 h-4 text-slate-400" />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
                 Accepted
               </p>
-              <h3 className="text-lg font-black text-emerald-600 leading-none">
+              <h3 className="text-lg font-black text-slate-800 leading-none">
                 {stats.accepted}{' '}
-                <span className="text-[9px] font-bold text-emerald-300">
+                <span className="text-[9px] font-bold text-slate-300">
                   RESOLVED
                 </span>
               </h3>
@@ -289,19 +304,19 @@ export const Incidents = () => {
         </div>
         <button
           onClick={() => navigate('/penalties')}
-          className="bg-white p-3 rounded-xl border border-rose-100 shadow-sm flex items-center justify-between hover:scale-105 hover:shadow-md transition-all group text-left cursor-pointer"
+          className="bg-white p-3 rounded-xl border border-orange-100 shadow-sm flex items-center justify-between hover:scale-105 hover:shadow-md transition-all group text-left cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center border border-red-100 group-hover:bg-red-100 transition-colors">
-              <ShieldX className="w-4 h-4 text-red-500" />
+            <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-orange-100 transition-colors">
+              <ShieldX className="w-4 h-4 text-[#ff8000]" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 group-hover:text-red-400 transition-colors">
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 group-hover:text-[#ff8000] transition-colors">
                 Denied
               </p>
-              <h3 className="text-lg font-black text-rose-600 leading-none">
+              <h3 className="text-lg font-black text-slate-800 leading-none">
                 {stats.denied}{' '}
-                <span className="text-[9px] font-bold text-rose-300">
+                <span className="text-[9px] font-bold text-orange-200">
                   PENALTIES
                 </span>
               </h3>
@@ -321,16 +336,47 @@ export const Incidents = () => {
             className="w-full bg-transparent border-none pl-10 pr-4 py-2 text-sm focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
           />
         </div>
-        <div className="flex gap-1.5 p-1 bg-slate-100/50 rounded-lg">
-          {['ALL', 'BROKEN', 'MISSING'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setFilterType(type)}
-              className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${filterType === type ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {type}
-            </button>
-          ))}
+        <div className="flex flex-col md:flex-row gap-2 items-center">
+          <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              Audit Period:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            <span className="text-slate-300 mx-1">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            {(startDate || endDate) && (
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                }}
+                className="ml-2 p-0.5 hover:bg-white rounded-md transition-colors"
+              >
+                <Trash2 className="w-3 h-3 text-rose-400" />
+              </button>
+            )}
+          </div>
+          <div className="flex gap-1.5 p-1 bg-slate-100/50 rounded-lg">
+            {['ALL', 'BROKEN', 'MISSING'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterType(type)}
+                className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${filterType === type ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex">
           <select
@@ -391,7 +437,7 @@ export const Incidents = () => {
                         <div
                           className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
                             inc.incident_type === 'MISSING'
-                              ? 'bg-red-50 text-red-500 border-red-100'
+                              ? 'bg-slate-50 text-slate-400 border-slate-100'
                               : 'bg-orange-50 text-orange-500 border-orange-100'
                           }`}
                         >
@@ -458,7 +504,7 @@ export const Incidents = () => {
                     <td className="px-8 py-5">
                       <div className="flex items-center justify-end gap-2 pr-2">
                         {inc.investigation_status === 'INVESTIGATING' &&
-                          (isAdmin || isFinanceAdmin) && (
+                          (isAdmin || isFinanceAdmin || isCEO) && (
                             <button
                               onClick={() => handleResolve(inc)}
                               className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
@@ -473,7 +519,7 @@ export const Incidents = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {(isFinanceAdmin || isAdmin) && (
+                        {(isFinanceAdmin || isAdmin || isCEO) && (
                           <button className="p-2 bg-red-50 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all border border-red-100">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -504,11 +550,11 @@ export const Incidents = () => {
           <span>{filteredIncidents.length} Investigations Registered</span>
           <div className="flex gap-4">
             <span className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" /> Pending
+              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" /> Pending
               Audit
             </span>
             <span className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Case
+              <div className="w-1.5 h-1.5 bg-slate-800 rounded-full" /> Case
               Resolved
             </span>
           </div>

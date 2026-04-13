@@ -1,8 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  History,
+  useSearchParams,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom';
+import {
   Search,
   Archive,
   Eye,
@@ -18,6 +21,7 @@ import {
   Car,
   ArrowLeft,
   Download,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ViewAssetModal } from '../components/ViewAssetModal';
@@ -59,7 +63,6 @@ const getResolvedCustodian = (asset: Asset) => {
   if (!asset.assignment_history || asset.assignment_history.length === 0)
     return null;
 
-  // Sort history by assigned_at date descending to find the last person
   const sortedHistory = [...asset.assignment_history].sort(
     (a, b) =>
       new Date(b.assigned_at).getTime() - new Date(a.assigned_at).getTime(),
@@ -77,6 +80,20 @@ export const DisposalTrail = () => {
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [assetToView, setAssetToView] = useState<Asset | null>(null);
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    const title = selectedCategory
+      ? `${selectedCategory.name} Disposal Logs`
+      : 'Disposal Trail';
+    setHeaderTitle(title);
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle, selectedCategory]);
+
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const { data: assets, isLoading } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -114,16 +131,51 @@ export const DisposalTrail = () => {
   const disposedAssets = useMemo(() => {
     if (!assets) return [];
     let filtered = assets.filter((a) => a.status === 'DISPOSED');
+
+    if (startDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.disposal_date || a.updated_at || 0);
+        return date >= new Date(startDate);
+      });
+    }
+
+    if (endDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.disposal_date || a.updated_at || 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return date <= end;
+      });
+    }
+
     if (selectedCategory) {
       filtered = filtered.filter((a) => a.category?.id === selectedCategory.id);
     }
     return filtered;
-  }, [assets, selectedCategory]);
+  }, [assets, selectedCategory, startDate, endDate]);
 
   const allDisposedAssets = useMemo(() => {
     if (!assets) return [];
-    return assets.filter((a) => a.status === 'DISPOSED');
-  }, [assets]);
+    let filtered = assets.filter((a) => a.status === 'DISPOSED');
+
+    if (startDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.disposal_date || a.created_at || 0);
+        return date >= new Date(startDate);
+      });
+    }
+
+    if (endDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.disposal_date || a.created_at || 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return date <= end;
+      });
+    }
+
+    return filtered;
+  }, [assets, startDate, endDate]);
 
   const categoryMetrics = useMemo(() => {
     if (!categories || !allDisposedAssets) return [];
@@ -265,17 +317,37 @@ export const DisposalTrail = () => {
               <ArrowLeft className="w-3 h-3" /> Back to Assets
             </button>
           )}
-          <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-            <History className="w-5 h-5 text-[#ff8000]" />
-            {selectedCategory
-              ? `${selectedCategory.name} Disposal Logs`
-              : 'Disposal Trail'}
-          </h1>
-          <p className="text-slate-500 text-[10px] font-medium">
-            {selectedCategory
-              ? `Viewing decommissioned records for the ${selectedCategory.name} category.`
-              : 'Historical log of all equipment decommissioned from the system.'}
-          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md p-1 px-2 rounded-lg border border-white shadow-sm">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              Audit Period:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            <span className="text-slate-300 mx-1">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            {(startDate || endDate) && (
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                }}
+                className="ml-2 p-0.5 hover:bg-white rounded-md transition-colors"
+              >
+                <Trash2 className="w-3 h-3 text-rose-400" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -352,7 +424,7 @@ export const DisposalTrail = () => {
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         Recovered
                       </span>
-                      <span className="text-sm font-black text-emerald-600">
+                      <span className="text-sm font-black text-slate-800">
                         {cat.recovery.toLocaleString()} RWF
                       </span>
                     </div>

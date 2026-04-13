@@ -12,7 +12,7 @@ export class Category {
   depreciation_rate: number;
 
   @Column('decimal', { precision: 5, scale: 2, default: 0 })
-  salvage_rate: number;
+  disposal_rate: number;
 
   @OneToMany(() => Asset, (asset) => asset.category)
   assets: Asset[];

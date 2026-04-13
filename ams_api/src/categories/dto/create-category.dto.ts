@@ -21,10 +21,10 @@ export class CreateCategoryDto {
 
   @ApiProperty({
     example: 5,
-    description: 'Salvage value percentage at end of useful life',
+    description: 'Disposal value percentage at end of useful life',
   })
   @IsNumber()
   @Min(0)
   @Max(100)
-  salvage_rate: number;
+  disposal_rate: number;
 }

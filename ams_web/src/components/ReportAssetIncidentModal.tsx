@@ -334,7 +334,7 @@ export const ReportAssetIncidentModal = ({
                       onClick={() => setType(t)}
                       className={`flex-1 py-2.5 rounded-xl text-[9px] font-black tracking-widest uppercase border transition-all ${
                         type === t
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                          ? 'bg-orange-500 text-white border-orange-600 shadow-md'
                           : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -433,9 +433,9 @@ export const ReportAssetIncidentModal = ({
                           setEvidenceUrl('');
                           setSelectedFile(null);
                         }}
-                        className="px-3 py-1.5 bg-red-500 text-white text-[9px] font-black uppercase rounded-lg"
+                        className="px-3 py-1.5 bg-orange-600 text-white text-[9px] font-black uppercase rounded-lg shadow-lg"
                       >
-                        Remove Photo
+                        Remove Attachment
                       </button>
                     </div>
                   </div>
@@ -453,7 +453,7 @@ export const ReportAssetIncidentModal = ({
                 <button
                   type="submit"
                   disabled={isSubmitting || isReadingFile}
-                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
                   {isSubmitting || isReadingFile ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

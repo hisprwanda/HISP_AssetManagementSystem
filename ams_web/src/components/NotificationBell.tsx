@@ -169,7 +169,7 @@ export const NotificationBell = () => {
                       <p
                         className={`text-xs font-black text-slate-900 leading-tight ${!notif.is_read ? 'text-slate-900' : 'text-slate-600'}`}
                       >
-                        {notif.title}
+                        {notif.title.replace('✅ ', '')}
                       </p>
                       <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap shrink-0">
                         {formatTime(notif.created_at)}

@@ -121,7 +121,7 @@ export const EditAssetModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
@@ -130,13 +130,13 @@ export const EditAssetModal = ({
             <h2 className="text-xl font-black text-slate-800 tracking-tight">
               Update Asset
             </h2>
-            <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mt-1">
+            <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mt-1">
               Tag: {asset.tag_id || asset.serial_number}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+            className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -153,12 +153,12 @@ export const EditAssetModal = ({
           )}
           <div>
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Laptop className="w-4 h-4 text-blue-500" /> Hardware
+              <Laptop className="w-4 h-4 text-orange-500" /> Hardware
               Specifications
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Asset Name / Model *
                 </label>
                 <input
@@ -168,11 +168,11 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 />
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Category *
                 </label>
                 <select
@@ -181,7 +181,7 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, category_id: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 >
                   <option value="" disabled>
                     Select...
@@ -194,7 +194,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Status
                 </label>
                 <select
@@ -202,7 +202,7 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 >
                   <option value="IN_STOCK">In Stock</option>
                   <option value="ASSIGNED">Assigned</option>
@@ -216,11 +216,11 @@ export const EditAssetModal = ({
           <hr className="border-slate-100" />
           <div>
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Hash className="w-4 h-4 text-blue-500" /> Identification
+              <Hash className="w-4 h-4 text-orange-500" /> Identification
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Serial Number *
                 </label>
                 <input
@@ -230,11 +230,11 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, serial_number: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 />
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Internal Tag ID
                 </label>
                 <input
@@ -243,7 +243,7 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, tag_id: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 />
               </div>
             </div>
@@ -252,11 +252,11 @@ export const EditAssetModal = ({
           <hr className="border-slate-100" />
           <div>
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-500" /> Deployment
+              <Building2 className="w-4 h-4 text-orange-500" /> Deployment
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Directorate *
                 </label>
                 <select
@@ -269,7 +269,7 @@ export const EditAssetModal = ({
                       assigned_to_user_id: '',
                     })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 >
                   <option value="" disabled>
                     Select...
@@ -282,7 +282,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Assigned To
                 </label>
                 <select
@@ -294,7 +294,7 @@ export const EditAssetModal = ({
                     })
                   }
                   disabled={!formData.department_id || loadingUsers}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-50"
                 >
                   <option value="">
                     {loadingUsers ? 'Loading staff...' : '-- Unassigned --'}
@@ -308,7 +308,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Location
                 </label>
                 <input
@@ -317,11 +317,11 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 />
               </div>
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-blue-500">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Purchase Cost (RWF)
                 </label>
                 <input
@@ -331,7 +331,7 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, purchase_cost: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
                 />
               </div>
 
@@ -400,7 +400,7 @@ export const EditAssetModal = ({
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-[0_8px_16px_-6px_rgba(37,99,235,0.4)] transform active:scale-95 transition-all flex justify-center items-center gap-2"
+            className="flex-[2] py-3 bg-[#ff8000] hover:bg-[#e67300] text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

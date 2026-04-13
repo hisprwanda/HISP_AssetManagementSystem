@@ -98,7 +98,7 @@ export const PurchaseOrderModal = ({
           body { font-family: Arial, sans-serif; color: #1e293b; padding: 40px; font-size: 12px; }
           h1 { text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 4px; }
           .subtitle { text-align: center; font-size: 9px; color: #ff8000; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 30px; }
-          .section-header { background: #1e293b; color: white; font-size: 9px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; padding: 6px 12px; }
+          .section-header { background: #fff7ed; color: #ff8000; font-size: 9px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; padding: 6px 12px; border: 1px solid #ffedd5; }
           .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
           .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
           .box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; }
@@ -236,7 +236,7 @@ export const PurchaseOrderModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] transition-opacity"
+        className="fixed inset-0 bg-orange-950/10 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-5xl bg-white shadow-2xl z-[70] animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
@@ -587,7 +587,7 @@ export const PurchaseOrderModal = ({
                   sufficient funds have been verified.
                 </p>
                 <div className="pt-2">
-                  <p className="text-[10px] font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+                  <p className="text-[10px] font-bold text-orange-700 bg-orange-50 p-3 rounded-xl border border-orange-100">
                     HISP ANTI-MOTIVATION POLICY: Staff members are strictly
                     prohibited from receiving motivation in any form from
                     vendors. Report violations to{' '}

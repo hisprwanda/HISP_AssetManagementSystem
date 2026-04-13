@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShieldX,
@@ -9,7 +9,7 @@ import {
   Download,
   CheckCircle2,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { AssetIncident } from '../types/assets';
@@ -17,7 +17,18 @@ import { AssetIncident } from '../types/assets';
 export const Penalties = () => {
   const { isFinanceAdmin, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
+
+  useEffect(() => {
+    setHeaderTitle('Pending Penalties');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
     queryKey: ['asset-incidents'],
@@ -42,8 +53,24 @@ export const Penalties = () => {
       );
     }
 
+    if (startDate) {
+      result = result.filter((i) => {
+        const date = new Date(i.reported_at);
+        return date >= new Date(startDate);
+      });
+    }
+
+    if (endDate) {
+      result = result.filter((i) => {
+        const date = new Date(i.reported_at);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return date <= end;
+      });
+    }
+
     return result;
-  }, [incidents, searchQuery]);
+  }, [incidents, searchQuery, startDate, endDate]);
 
   const getDepartmentName = (inc: AssetIncident) => {
     if (typeof inc.asset?.department === 'string') return inc.asset.department;
@@ -108,8 +135,8 @@ export const Penalties = () => {
   if (!isAdmin && !isFinanceAdmin) {
     return (
       <div className="flex flex-col h-[70vh] items-center justify-center text-center">
-        <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mb-6 border border-red-100">
-          <ShieldX className="w-10 h-10 text-red-500" />
+        <div className="w-20 h-20 bg-orange-50 rounded-[2rem] flex items-center justify-center mb-6 border border-orange-100">
+          <ShieldX className="w-10 h-10 text-[#ff8000]" />
         </div>
         <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">
           Access Restricted
@@ -131,22 +158,43 @@ export const Penalties = () => {
         >
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </button>
-        <div>
-          <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-            <ShieldX className="w-5 h-5 text-red-500" />
-            Pending Penalties
-          </h1>
-          <p className="text-slate-500 text-[10px] font-medium">
-            Financial obligations for denied equipment incidents.
-          </p>
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              Audit Period:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            <span className="text-slate-300 mx-1">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            {(startDate || endDate) && (
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                }}
+                className="ml-2 p-1 hover:bg-white rounded-md transition-colors"
+              >
+                <ShieldX className="w-3 h-3 text-rose-400" />
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex-1" />
         <button
           onClick={handleExportLogs}
           disabled={!filteredPenalties.length}
           className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500 transition-colors" />{' '}
+          <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors" />{' '}
           Export List
         </button>
       </div>
@@ -203,8 +251,8 @@ export const Penalties = () => {
                 >
                   <td className="p-4 py-5 align-top">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center border border-red-100 shrink-0">
-                        <ShieldX className="w-3 h-3 text-red-500" />
+                      <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center border border-orange-100 shrink-0">
+                        <ShieldX className="w-3 h-3 text-[#ff8000]" />
                       </div>
                       <span className="text-[10px] font-black text-slate-900 tracking-wider">
                         #{inc.id.slice(0, 8).toUpperCase()}
@@ -233,10 +281,10 @@ export const Penalties = () => {
                     </p>
                   </td>
                   <td className="p-4 align-top max-w-[200px]">
-                    <div className="bg-red-50/50 rounded-lg p-2.5 border border-red-100/50">
+                    <div className="bg-orange-50/50 rounded-lg p-2.5 border border-orange-100/50">
                       <div className="flex items-start gap-1.5 mb-1">
-                        <AlertCircle className="w-3 h-3 text-red-400 shrink-0 mt-0.5" />
-                        <p className="text-xs font-medium text-red-800/80 leading-snug line-clamp-2">
+                        <AlertCircle className="w-3 h-3 text-orange-400 shrink-0 mt-0.5" />
+                        <p className="text-xs font-medium text-slate-600 leading-snug line-clamp-2">
                           {inc.investigation_remarks || 'No remarks given.'}
                         </p>
                       </div>
@@ -244,7 +292,7 @@ export const Penalties = () => {
                   </td>
                   <td className="p-4 align-top text-right">
                     <div className="inline-flex flex-col items-end">
-                      <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-1 rounded-lg border border-red-100">
+                      <span className="text-sm font-black text-[#ff8000] bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
                         {Number(inc.penalty_amount || 0).toLocaleString()} RWF
                       </span>
                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1.5">
@@ -259,7 +307,7 @@ export const Penalties = () => {
                   <td colSpan={5}>
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                       <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                        <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                        <CheckCircle2 className="w-8 h-8 text-slate-300" />
                       </div>
                       <p className="text-sm font-bold text-slate-900 mb-1">
                         No Pending Penalties

@@ -12,10 +12,6 @@ export class NotificationsService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
-
-  /**
-   * Creates notifications for all relevant parties when CEO makes a decision.
-   */
   async notifyCEODecision(params: {
     status: 'CEO_APPROVED' | 'REJECTED';
     requestId: string;
@@ -34,7 +30,6 @@ export class NotificationsService {
     } = params;
     const isApproved = status === 'CEO_APPROVED';
 
-    // Find all users in the system
     const allUsers = await this.userRepo.find({ relations: ['department'] });
 
     const recipients: { user: User; role: 'staff' | 'hod' | 'admin' }[] = [];
@@ -50,19 +45,13 @@ export class NotificationsService {
       const isCEO =
         roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
 
-      // Skip the CEO itself
       if (isCEO) continue;
 
-      // Original requester
       if (user.id === requestedById) {
         recipients.push({ user, role: 'staff' });
-      }
-      // HOD of the same department
-      else if (isHOD && user.department?.id === departmentId) {
+      } else if (isHOD && user.department?.id === departmentId) {
         recipients.push({ user, role: 'hod' });
-      }
-      // Admin users (all)
-      else if (isAdmin) {
+      } else if (isAdmin) {
         recipients.push({ user, role: 'admin' });
       }
     }
@@ -88,7 +77,6 @@ export class NotificationsService {
           ? `The CEO has approved the procurement request "${requestTitle}" from your directorate. Administration is coordinating the fulfilment.${remarksNote}`
           : `The CEO has declined the procurement request "${requestTitle}" from your directorate. Please inform the requester of this decision.${remarksNote}`;
       } else {
-        // admin
         title = isApproved
           ? `Procurement Approved — Action Required`
           : `Procurement Declined by CEO`;

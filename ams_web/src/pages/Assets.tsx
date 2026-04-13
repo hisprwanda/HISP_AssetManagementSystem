@@ -1,5 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import {
+  useSearchParams,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Laptop,
@@ -70,11 +74,19 @@ const getCategoryIcon = (categoryName?: string) => {
 
 export const Assets = () => {
   const navigate = useNavigate();
+  const { setHeaderTitle } = useOutletContext<{
+    setHeaderTitle: (title: string) => void;
+  }>();
   const { user: currentUser, isAdmin, isHOD, isStaff } = useAuth();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryIdParam = searchParams.get('categoryId');
+
+  useEffect(() => {
+    setHeaderTitle('Asset Masterlist');
+    return () => setHeaderTitle('');
+  }, [setHeaderTitle]);
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
@@ -186,8 +198,15 @@ export const Assets = () => {
 
   const recalculateMutation = useMutation({
     mutationFn: async () => await api.post('/assets/recalculate'),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
+      alert(
+        `Financials synchronized successfully! Updated ${data.data.updated} assets.`,
+      );
+    },
+    onError: (err: unknown) => {
+      console.error('Sync failed:', err);
+      alert('Failed to sync financials. Please check connection.');
     },
   });
 
@@ -205,15 +224,14 @@ export const Assets = () => {
   const getStatusStyle = (status: Asset['status']) => {
     switch (status) {
       case 'IN_STOCK':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
       case 'ASSIGNED':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'BROKEN':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
       case 'MISSING':
-        return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-white text-orange-500 border-orange-100 italic';
       default:
-        return 'bg-slate-50 text-slate-500 border-slate-100';
+        return 'bg-slate-50 text-slate-400 border-slate-100';
     }
   };
 
@@ -222,18 +240,6 @@ export const Assets = () => {
       <div className="flex flex-col h-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-              Asset Masterlist{' '}
-              {isAdmin ? (
-                <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                  ADMIN MODE
-                </span>
-              ) : (
-                <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                  USER MODE
-                </span>
-              )}
-            </h1>
             <p className="text-slate-500 text-sm mt-0.5">
               Select a category to view and manage inventory.
             </p>
@@ -274,7 +280,7 @@ export const Assets = () => {
                           e.stopPropagation();
                           setCatToView(cat);
                         }}
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -317,6 +323,14 @@ export const Assets = () => {
                       </span>
                       <span className="text-sm font-bold text-slate-700">
                         {cat.depreciation_rate ?? 0}% / yr
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                        Disposal Rate
+                      </span>
+                      <span className="text-sm font-bold text-slate-700">
+                        {cat.disposal_rate ?? 0}% / yr
                       </span>
                     </div>
                   </div>
@@ -433,7 +447,7 @@ export const Assets = () => {
                 ) : (
                   <Activity className="w-3.5 h-3.5" />
                 )}
-                Sync Depreciation
+                Sync Financials
               </button>
             )}
             <button
@@ -496,7 +510,10 @@ export const Assets = () => {
                   Status
                 </th>
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Book Value
+                  Depreciation Value
+                </th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Disposal Value
                 </th>
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
                   Actions
@@ -612,10 +629,21 @@ export const Assets = () => {
                             {Number(asset.current_value || 0).toLocaleString()}{' '}
                             RWF
                           </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
                             Cost:{' '}
                             {Number(asset.purchase_cost || 0).toLocaleString()}{' '}
                             RWF
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-[#ff8000]">
+                            {Number(asset.disposal_value || 0).toLocaleString()}{' '}
+                            RWF
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 group">
+                            Est. Recovery
                           </span>
                         </div>
                       </td>
@@ -626,7 +654,7 @@ export const Assets = () => {
                               e.stopPropagation();
                               setAssetToView(asset);
                             }}
-                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
@@ -705,7 +733,7 @@ export const Assets = () => {
       {assetToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-orange-950/20 backdrop-blur-sm"
             onClick={() => setAssetToDelete(null)}
           />
           <div className="relative z-10 bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200 text-center">

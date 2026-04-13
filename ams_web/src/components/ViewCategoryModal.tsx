@@ -75,17 +75,17 @@ export const ViewCategoryModal = ({
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm hover:border-emerald-200 transition-colors group">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center mb-3 group-hover:bg-emerald-500 transition-colors text-emerald-600 group-hover:text-white">
+            <div className="p-5 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm hover:border-orange-200 transition-colors group">
+              <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center mb-3 group-hover:bg-[#ff8000] transition-colors text-[#ff8000] group-hover:text-white">
                 <ArrowDownToLine className="w-4 h-4" />
               </div>
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                Salvage Rate
+                Disposal Rate
               </p>
               <p className="text-sm font-black text-slate-700">
-                {category.salvage_rate ?? 0}%{' '}
+                {category.disposal_rate ?? 0}%{' '}
                 <span className="text-[10px] text-slate-400 font-bold tracking-normal italic ml-0.5">
-                  end value
+                  per year
                 </span>
               </p>
             </div>
