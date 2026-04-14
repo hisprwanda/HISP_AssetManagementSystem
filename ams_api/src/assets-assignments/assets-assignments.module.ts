@@ -5,9 +5,13 @@ import { AssetAssignmentsController } from './assets-assignments.controller';
 import { Asset } from '../assets/entities/asset.entity';
 import { AssetAssignment } from './entities/assets-assignment.entity';
 import { User } from 'src/users/entities/user.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AssetAssignment, Asset, User])],
+  imports: [
+    TypeOrmModule.forFeature([AssetAssignment, Asset, User]),
+    NotificationsModule,
+  ],
   controllers: [AssetAssignmentsController],
   providers: [AssetAssignmentsService],
   exports: [AssetAssignmentsService],

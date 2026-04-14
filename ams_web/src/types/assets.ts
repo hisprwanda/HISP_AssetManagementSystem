@@ -10,15 +10,32 @@ export interface User {
   email: string;
   full_name: string;
   role: string;
+  job_title?: string;
+  phone_number?: string;
   department?: { id: string; name: string };
 }
 
 export interface AssetAssignment {
   id: string;
   user: User;
+  asset: Asset;
   assigned_at: string;
   returned_at?: string;
   condition_on_assign?: string;
+  form_status:
+    | 'DRAFT'
+    | 'PENDING_USER_SIGNATURE'
+    | 'PENDING_ADMIN_REVIEW'
+    | 'APPROVED'
+    | 'REJECTED';
+  form_number?: string;
+  admin_signature_name?: string;
+  admin_signed_at?: string;
+  user_signature_name?: string;
+  user_signed_at?: string;
+  received_from_name?: string;
+  received_at?: string;
+  rejection_reason?: string;
 }
 
 export interface POData {

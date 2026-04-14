@@ -211,28 +211,18 @@ export const CreateAssetModal = ({
               </div>
 
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#ff8000]">
                   Initial Status
                 </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => {
-                    const newStatus = e.target.value;
-                    setFormData({
-                      ...formData,
-                      status: newStatus,
-                      ...(newStatus === 'IN_STOCK'
-                        ? { department_id: '', assigned_to_user_id: '' }
-                        : {}),
-                    });
-                  }}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] transition-all text-sm font-medium appearance-none"
-                >
-                  <option value="IN_STOCK">In Stock (Available)</option>
-                  <option value="ASSIGNED">Assigned / Deployed</option>
-                  <option value="BROKEN">Broken</option>
-                  <option value="MISSING">Missing</option>
-                </select>
+                <div className="relative">
+                  <div className="w-full px-4 py-2.5 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-sm font-black flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                    IN STOCK (PENDING VERIFICATION)
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1.5 font-bold italic">
+                    All new assets start in stock for digital verification.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -292,27 +282,18 @@ export const CreateAssetModal = ({
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <select
-                    required={formData.status !== 'IN_STOCK'}
-                    disabled={formData.status === 'IN_STOCK'}
+                    required={!!formData.assigned_to_user_id}
                     value={formData.department_id}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         department_id: e.target.value,
                         assigned_to_user_id: '',
-                        status:
-                          formData.status === 'ASSIGNED'
-                            ? 'IN_STOCK'
-                            : formData.status,
                       })
                     }
                     className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] transition-all text-sm font-medium appearance-none"
                   >
-                    <option value="" disabled={formData.status !== 'IN_STOCK'}>
-                      {formData.status === 'IN_STOCK'
-                        ? 'Stored in General Inventory'
-                        : 'Select Directorate...'}
-                    </option>
+                    <option value="">Select Directorate...</option>
                     {departments?.map((d: { id: string; name: string }) => (
                       <option key={d.id} value={d.id}>
                         {d.name}
@@ -337,11 +318,7 @@ export const CreateAssetModal = ({
                         status: e.target.value ? 'ASSIGNED' : 'IN_STOCK',
                       });
                     }}
-                    disabled={
-                      !formData.department_id ||
-                      loadingUsers ||
-                      formData.status === 'IN_STOCK'
-                    }
+                    disabled={!formData.department_id || loadingUsers}
                     className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] transition-all text-sm font-medium appearance-none disabled:opacity-40 disabled:bg-slate-100 disabled:cursor-not-allowed"
                   >
                     <option value="">
@@ -491,7 +468,7 @@ export const CreateAssetModal = ({
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                Assign Asset <Laptop className="w-4 h-4" />
+                Save & Initiate Receipt <Laptop className="w-4 h-4" />
               </>
             )}
           </button>

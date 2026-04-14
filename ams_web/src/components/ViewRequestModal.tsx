@@ -141,6 +141,7 @@ export const ViewRequestModal = ({
                 'APPROVED',
                 'CEO_REVIEW',
                 'CEO_APPROVED',
+                'ORDERED',
                 'FULFILLED',
                 'REJECTED',
               ].includes(request.status)
@@ -156,6 +157,7 @@ export const ViewRequestModal = ({
                 'APPROVED',
                 'CEO_REVIEW',
                 'CEO_APPROVED',
+                'ORDERED',
                 'FULFILLED',
                 'REJECTED',
               ].includes(request.status)
@@ -165,19 +167,26 @@ export const ViewRequestModal = ({
     {
       label: 'CEO Approval',
       status: ['APPROVED', 'CEO_REVIEW'].includes(request.status)
-        ? request.status === 'CEO_REVIEW'
-          ? 'current'
-          : 'current'
-        : ['CEO_APPROVED', 'FULFILLED'].includes(request.status)
+        ? 'current'
+        : ['CEO_APPROVED', 'ORDERED', 'FULFILLED'].includes(request.status)
           ? 'completed'
           : request.status === 'REJECTED'
             ? 'rejected'
             : 'pending',
     },
     {
-      label: 'Deployment',
+      label: 'Ordered',
       status:
         request.status === 'CEO_APPROVED'
+          ? 'current'
+          : ['ORDERED', 'FULFILLED'].includes(request.status)
+            ? 'completed'
+            : 'pending',
+    },
+    {
+      label: 'Deployment',
+      status:
+        request.status === 'ORDERED'
           ? 'current'
           : request.status === 'FULFILLED'
             ? 'completed'
@@ -192,7 +201,7 @@ export const ViewRequestModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-[60] transition-opacity"
+        className="fixed inset-0 bg-orange-950/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
 
@@ -245,13 +254,17 @@ export const ViewRequestModal = ({
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black border-2 transition-all ${
                       step.status === 'completed'
                         ? 'bg-slate-800 border-slate-800 text-white'
-                        : step.status === 'current'
-                          ? 'bg-white border-[#ff8000] text-[#ff8000] shadow-[0_0_12px_rgba(255,128,0,0.3)]'
-                          : 'bg-white border-slate-200 text-slate-300'
+                        : step.status === 'rejected'
+                          ? 'bg-rose-50 border-rose-500 text-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.2)]'
+                          : step.status === 'current'
+                            ? 'bg-white border-[#ff8000] text-[#ff8000] shadow-[0_0_12px_rgba(255,128,0,0.3)]'
+                            : 'bg-white border-slate-200 text-slate-300'
                     }`}
                   >
                     {step.status === 'completed' ? (
                       <CheckCircle2 className="w-4 h-4" />
+                    ) : step.status === 'rejected' ? (
+                      <XCircle className="w-4 h-4" />
                     ) : (
                       idx + 1
                     )}
@@ -260,9 +273,11 @@ export const ViewRequestModal = ({
                     className={`mt-2 text-[9px] font-black uppercase tracking-tighter ${
                       step.status === 'completed'
                         ? 'text-slate-600'
-                        : step.status === 'current'
-                          ? 'text-[#ff8000]'
-                          : 'text-slate-400'
+                        : step.status === 'rejected'
+                          ? 'text-rose-600'
+                          : step.status === 'current'
+                            ? 'text-[#ff8000]'
+                            : 'text-slate-400'
                     }`}
                   >
                     {step.label}
@@ -353,30 +368,30 @@ export const ViewRequestModal = ({
           ) : null}
 
           {!isRequesterOnly && (
-            <div className="bg-[#1e293b] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff8000]/10 rounded-full blur-2xl -mr-10 -mt-10" />
               <div className="relative z-10 space-y-4">
-                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#ff8000]/60">
                   <span>Final Authorized Total</span>
-                  <span className="text-emerald-400">Exp. Not to exceed</span>
+                  <span className="text-orange-600">Exp. Not to exceed</span>
                 </div>
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-3xl font-black text-[#ff8000] tracking-tight leading-none">
+                    <p className="text-3xl font-black text-slate-900 tracking-tight leading-none">
                       {grandTotal.toLocaleString()}{' '}
-                      <span className="text-xs text-white opacity-50 ml-1">
+                      <span className="text-xs text-slate-400 font-bold ml-1">
                         RWF
                       </span>
                     </p>
                     {request.financials?.transport_fees ? (
-                      <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-wider italic">
+                      <p className="text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-wider italic">
                         + {request.financials.transport_fees.toLocaleString()}{' '}
                         RWF Transfer Cost
                       </p>
                     ) : null}
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                    <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">
                       Basis:{' '}
                       {request.financials?.cost_basis || 'Standard Market'}
                     </p>

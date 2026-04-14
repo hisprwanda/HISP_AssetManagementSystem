@@ -99,6 +99,125 @@ export class NotificationsService {
     await this.notifRepo.save(notifications);
   }
 
+  async notifyFulfilment(params: {
+    requestId: string;
+    requestTitle: string;
+    requestedById: string;
+    departmentId: string;
+  }): Promise<void> {
+    const { requestId, requestTitle, requestedById, departmentId } = params;
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const recipients: { user: User; role: 'staff' | 'hod' | 'admin' }[] = [];
+
+    for (const user of allUsers) {
+      const roleUpper = user.role.toUpperCase();
+      const isAdmin =
+        roleUpper.includes('SYSTEM_ADMIN') ||
+        roleUpper.includes('ADMIN') ||
+        roleUpper.includes('FINANCE') ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+      const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
+
+      if (user.id === requestedById) {
+        recipients.push({ user, role: 'staff' });
+      } else if (isHOD && user.department?.id === departmentId) {
+        recipients.push({ user, role: 'hod' });
+      } else if (isAdmin) {
+        recipients.push({ user, role: 'admin' });
+      }
+    }
+
+    const notifications = recipients.map(({ user, role }) => {
+      let title: string = `Asset Arrived: ${requestTitle}`;
+      let message: string;
+
+      if (role === 'staff') {
+        message = `Good news! The asset you requested ("${requestTitle}") has arrived and been marked as fulfilled. Please wait for Administration to contact you for the official assignment form and pick-up.`;
+      } else if (role === 'hod') {
+        message = `Information: The asset requested by your department member ("${requestTitle}") has arrived at the facility. Administration is now processing the assignment.`;
+      } else {
+        title = `Action Required: Assign Arrived Asset`;
+        message = `The request "${requestTitle}" has been fulfilled. You should now proceed to assign the asset to the requester and initiate the Digital Receipt Form.`;
+      }
+
+      return this.notifRepo.create({
+        recipient: { id: user.id } as User,
+        title,
+        message,
+        type: 'INFO',
+        request_id: requestId,
+        request_title: requestTitle,
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
+  async notifyAssignmentAction(params: {
+    action: 'SENT_TO_USER' | 'SIGNED_BY_USER' | 'REJECTED' | 'APPROVED';
+    assignmentId: string;
+    assetName: string;
+    userId: string;
+    rejectionReason?: string;
+  }): Promise<void> {
+    const { action, assetName, userId, rejectionReason } = params;
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const targetUser = allUsers.find((u) => u.id === userId);
+
+    if (!targetUser) return;
+
+    const admins = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      return (
+        roleUpper.includes('ADMIN') ||
+        roleUpper.includes('SYSTEM_ADMIN') ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+      );
+    });
+
+    let recipients: User[] = [];
+    let title = '';
+    let message = '';
+
+    switch (action) {
+      case 'SENT_TO_USER':
+        recipients = [targetUser];
+        title = 'Action Required: Sign Asset Receipt Form';
+        message = `Administration has prepared your digital receipt form for "${assetName}". Please log in to your portal, review the details, and provide your digital signature.`;
+        break;
+      case 'SIGNED_BY_USER':
+        recipients = admins;
+        title = 'Form Signed: Review Required';
+        message = `${targetUser.full_name} has signed the receipt form for "${assetName}". Please verify the signature and approve the assignment.`;
+        break;
+      case 'REJECTED':
+        recipients = [targetUser];
+        title = 'Receipt Form Rejected';
+        message = `Your digital receipt for "${assetName}" has been rejected. Reason: "${rejectionReason || 'Details need correction'}". Please review the comments and sign again.`;
+        break;
+      case 'APPROVED':
+        recipients = [targetUser];
+        title = 'Asset Assignment Approved';
+        message = `Your digital receipt for "${assetName}" has been verified and approved. You may now proceed with the physical pick-up if not already done.`;
+        break;
+    }
+
+    const notifications = recipients.map((recipient) => {
+      return this.notifRepo.create({
+        recipient: { id: recipient.id } as User,
+        title,
+        message,
+        type: 'INFO',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
   async getForUser(userId: string): Promise<Notification[]> {
     return this.notifRepo.find({
       where: { recipient: { id: userId } },

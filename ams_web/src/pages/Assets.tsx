@@ -24,10 +24,11 @@ import {
   Monitor,
   Car,
   Box,
-  User,
+  User as UserIcon,
   History,
   Activity,
   Archive,
+  FileCheck,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -38,8 +39,9 @@ import { EditAssetModal } from '../components/EditAssetModal';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { ViewCategoryModal } from '../components/ViewCategoryModal';
 import { DisposeAssetModal } from '../components/DisposeAssetModal';
+import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 
-import { Category, Asset } from '@/types/assets';
+import { Category, Asset, AssetAssignment, User } from '@/types/assets';
 
 const getCategoryIcon = (categoryName?: string) => {
   const name = (categoryName || '').toLowerCase();
@@ -102,6 +104,9 @@ export const Assets = () => {
   const [assetToEdit, setAssetToEdit] = useState<Asset | null>(null);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [assetToDispose, setAssetToDispose] = useState<Asset | null>(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<AssetAssignment | null>(null);
 
   const { data: categories, isLoading: loadingCats } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -601,7 +606,7 @@ export const Assets = () => {
                             </span>
                             {asset.assigned_to && (
                               <span className="text-[10px] text-[#ff8000] font-black uppercase tracking-tight flex items-center gap-1">
-                                <User className="w-3 h-3 shrink-0" />
+                                <UserIcon className="w-3 h-3 shrink-0" />
                                 <span
                                   className="truncate max-w-[120px]"
                                   title={asset.assigned_to.full_name}
@@ -695,6 +700,83 @@ export const Assets = () => {
                               </button>
                             </>
                           )}
+                          {/* Receipt Form Icon - Visible to Admin or the Assigned User */}
+                          {(isAdmin ||
+                            asset.assigned_to?.id === currentUser?.id) &&
+                            ((asset.assignment_history &&
+                              asset.assignment_history.length > 0 &&
+                              asset.assignment_history.some(
+                                (a) => a.form_status !== 'APPROVED' || isAdmin,
+                              )) ||
+                              (isAdmin && asset.status === 'ASSIGNED')) &&
+                            (() => {
+                              const latest =
+                                asset.assignment_history &&
+                                asset.assignment_history.length > 0
+                                  ? [...asset.assignment_history].sort(
+                                      (a, b) =>
+                                        new Date(b.assigned_at).getTime() -
+                                        new Date(a.assigned_at).getTime(),
+                                    )[0]
+                                  : null;
+
+                              const needsAction =
+                                latest &&
+                                ((isAdmin &&
+                                  (latest.form_status === 'DRAFT' ||
+                                    latest.form_status ===
+                                      'PENDING_ADMIN_REVIEW' ||
+                                    latest.form_status === 'REJECTED')) ||
+                                  (!isAdmin &&
+                                    (latest.form_status ===
+                                      'PENDING_USER_SIGNATURE' ||
+                                      latest.form_status === 'REJECTED')));
+
+                              const isUrgent =
+                                latest?.form_status === 'REJECTED';
+
+                              return (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!latest) {
+                                      setSelectedAssignment({
+                                        id: 'legacy-' + asset.id,
+                                        asset,
+                                        user: asset.assigned_to as unknown as User,
+                                        assigned_at: new Date().toISOString(),
+                                        form_status: 'PENDING_USER_SIGNATURE',
+                                        form_number: 'LEGACY-FORM',
+                                        received_from_name: 'Administration',
+                                        received_at: new Date().toISOString(),
+                                      } as AssetAssignment);
+                                    } else {
+                                      setSelectedAssignment({
+                                        ...latest,
+                                        asset,
+                                      });
+                                    }
+                                    setIsReceiptModalOpen(true);
+                                  }}
+                                  className={`p-2 rounded-lg transition-all ${
+                                    needsAction
+                                      ? isUrgent
+                                        ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
+                                        : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
+                                      : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                  }`}
+                                  title={
+                                    !latest
+                                      ? 'Initiate Missing Receipt'
+                                      : latest.form_status === 'REJECTED'
+                                        ? 'Form Rejected - Action Required'
+                                        : 'Asset Receipt Form'
+                                  }
+                                >
+                                  <FileCheck className="w-4 h-4" />
+                                </button>
+                              );
+                            })()}
                         </div>
                       </td>
                     </tr>
@@ -729,6 +811,14 @@ export const Assets = () => {
         isOpen={!!assetToDispose}
         onClose={() => setAssetToDispose(null)}
         asset={assetToDispose}
+      />
+      <AssetReceiptFormModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => {
+          setIsReceiptModalOpen(false);
+          setSelectedAssignment(null);
+        }}
+        assignment={selectedAssignment}
       />
       {assetToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">

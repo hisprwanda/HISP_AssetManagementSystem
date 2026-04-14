@@ -499,32 +499,6 @@ export const CEOOverview = () => {
               </h4>
             </div>
           </div>
-
-          <div className="p-8 bg-orange-50 rounded-3xl relative overflow-hidden group shadow-sm border border-orange-100">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/10 rounded-full blur-[50px] -mr-10 -mt-10 animate-pulse" />
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">
-                Operational Node
-              </p>
-              <div className="flex items-center gap-4 text-slate-900">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#ff8000] animate-pulse shadow-[0_0_15px_rgba(255,128,0,0.5)]" />
-                <span className="text-sm font-black uppercase tracking-[0.2em]">
-                  {new Date().toLocaleTimeString('en-US', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}{' '}
-                  UTC
-                </span>
-              </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-slate-200 px-3 py-1 rounded-lg">
-                HISP-AMS NODE: 01-RWANDA
-              </p>
-              <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mt-4">
-                <div className="h-full bg-orange-500 w-3/4 animate-[shimmer_2s_infinite]" />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

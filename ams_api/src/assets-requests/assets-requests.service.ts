@@ -129,6 +129,43 @@ export class AssetRequestsService {
       }
     }
 
+    // Trigger notifications when request is marked as FULFILLED
+    if (dto.status === 'FULFILLED') {
+      const departmentId =
+        request.department?.id ||
+        (
+          await this.requestRepo.findOne({
+            where: { id },
+            relations: ['department'],
+          })
+        )?.department?.id;
+
+      const requestedById =
+        request.requested_by?.id ||
+        (
+          await this.requestRepo.findOne({
+            where: { id },
+            relations: ['requested_by'],
+          })
+        )?.requested_by?.id;
+
+      if (departmentId && requestedById) {
+        this.notificationsService
+          .notifyFulfilment({
+            requestId: id,
+            requestTitle: request.title,
+            requestedById,
+            departmentId,
+          })
+          .catch((err) =>
+            console.error(
+              '[NotificationsService] Failed to send fulfilment notifications:',
+              err,
+            ),
+          );
+      }
+    }
+
     return saved;
   }
 }

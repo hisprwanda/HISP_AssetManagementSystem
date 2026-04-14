@@ -192,14 +192,35 @@ export const CreateRequestModal = ({
     setIsLoading(true);
     setError('');
 
-    const validItems = items.filter(
-      (i) => i.name.trim() !== '' && i.quantity > 0 && i.unit_price >= 0,
-    );
-    if (validItems.length === 0) {
-      setError('Please add at least one valid item to the request.');
+    if (!departmentId) {
+      setError('Please select a Directorate.');
       setIsLoading(false);
       return;
     }
+
+    if (!requestedById) {
+      setError('Please select a Requester.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (items.length === 0) {
+      setError('Please add at least one item to the request.');
+      setIsLoading(false);
+      return;
+    }
+
+    const hasIncompleteItems = items.some(
+      (i) => !i.name.trim() || i.quantity <= 0 || i.unit_price <= 0,
+    );
+
+    if (hasIncompleteItems) {
+      setError('All line items must have a name, quantity, and unit price.');
+      setIsLoading(false);
+      return;
+    }
+
+    const validItems = items;
 
     try {
       let finalTitle = baseRequest

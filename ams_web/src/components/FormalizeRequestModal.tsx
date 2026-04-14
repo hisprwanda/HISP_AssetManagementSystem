@@ -106,8 +106,20 @@ export const FormalizeRequestModal = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (items.length === 0) {
       setError('Please add at least one item.');
+      return;
+    }
+
+    const hasIncompleteItems = items.some(
+      (i) =>
+        !i.name.trim() || Number(i.quantity) <= 0 || Number(i.unit_price) <= 0,
+    );
+
+    if (hasIncompleteItems) {
+      setError('All line items must have a name, quantity, and unit price.');
       return;
     }
 

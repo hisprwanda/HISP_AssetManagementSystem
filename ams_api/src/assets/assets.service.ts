@@ -41,6 +41,9 @@ export class AssetsService {
         assigned_to: assigned_to_user_id
           ? ({ id: assigned_to_user_id } as User)
           : undefined,
+        status: assigned_to_user_id
+          ? 'IN_STOCK'
+          : assetData.status || 'IN_STOCK',
       });
       if (category_id) {
         const fullCategory = await queryRunner.manager.findOne(Category, {
@@ -62,12 +65,19 @@ export class AssetsService {
       const savedAsset = await queryRunner.manager.save(asset);
 
       if (assigned_to_user_id) {
+        const count = await queryRunner.manager.count(AssetAssignment);
+        const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, '0')}`;
+
         const initialAssignment = queryRunner.manager.create(AssetAssignment, {
           asset: savedAsset,
           user: { id: assigned_to_user_id } as User,
           condition_on_assign: 'Initial Purchase / Brand New',
           assigned_at: new Date(),
-        });
+          form_status: 'DRAFT',
+          form_number: formNumber,
+          received_from_name: 'Administration',
+          received_at: new Date(),
+        } as any);
         await queryRunner.manager.save(initialAssignment);
       }
 
@@ -124,16 +134,61 @@ export class AssetsService {
 
   async update(id: string, updateAssetDto: UpdateAssetDto): Promise<Asset> {
     const asset = await this.findOne(id);
+    const oldAssignedToId = asset.assigned_to?.id;
+    const newAssignedToId = updateAssetDto.assigned_to_user_id;
 
     if (updateAssetDto.category_id)
       asset.category = { id: updateAssetDto.category_id } as Category;
     if (updateAssetDto.department_id)
       asset.department = { id: updateAssetDto.department_id } as Department;
 
-    if (updateAssetDto.assigned_to_user_id !== undefined) {
-      asset.assigned_to = updateAssetDto.assigned_to_user_id
-        ? ({ id: updateAssetDto.assigned_to_user_id } as User)
+    if (newAssignedToId !== undefined) {
+      asset.assigned_to = newAssignedToId
+        ? ({ id: newAssignedToId } as User)
         : null;
+
+      // If we are assigning to a new user, initiate the digital form flow
+      // If we are assigning to a user or changing status to ASSIGNED, initiate the digital form flow
+      const statusChangingToAssigned =
+        updateAssetDto.status === 'ASSIGNED' && asset.status !== 'ASSIGNED';
+      const userChanging =
+        !!newAssignedToId && newAssignedToId !== oldAssignedToId;
+
+      if (userChanging || statusChangingToAssigned) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+          const user = await queryRunner.manager.findOne(User, {
+            where: { id: newAssignedToId },
+          });
+          if (!user) throw new NotFoundException('User not found');
+
+          const count = await queryRunner.manager.count(AssetAssignment);
+          const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, '0')}`;
+
+          const assignment = queryRunner.manager.create(AssetAssignment, {
+            asset: { id: asset.id } as Asset,
+            user: user,
+            condition_on_assign: 'Assigned via System Update',
+            assigned_at: new Date(),
+            form_status: 'DRAFT',
+            form_number: formNumber,
+            received_from_name: 'Administration',
+            received_at: new Date(),
+          });
+          await queryRunner.manager.save(assignment);
+          await queryRunner.commitTransaction();
+
+          // Force status to remain IN_STOCK until form is signed and verified
+          updateAssetDto.status = 'IN_STOCK';
+        } catch (err) {
+          await queryRunner.rollbackTransaction();
+          throw err;
+        } finally {
+          await queryRunner.release();
+        }
+      }
     }
 
     Object.assign(asset, updateAssetDto);

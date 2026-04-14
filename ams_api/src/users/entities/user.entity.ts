@@ -26,6 +26,12 @@ export class User {
   @Column()
   role: string; // 'Staff', 'HOD', 'Admin and Finance Director', 'Finance Officer', 'Operations Officer', 'SYSTEM_ADMIN', 'Office of the CEO'
 
+  @Column({ nullable: true })
+  job_title: string;
+
+  @Column({ nullable: true })
+  phone_number: string;
+
   @ManyToOne(() => Department, (dept) => dept.users)
   @JoinColumn({ name: 'department_id' })
   department: Department;

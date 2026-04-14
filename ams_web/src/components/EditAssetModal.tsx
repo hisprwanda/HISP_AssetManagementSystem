@@ -202,13 +202,24 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={
+                    !!formData.assigned_to_user_id &&
+                    formData.assigned_to_user_id !== asset.assigned_to?.id
+                  }
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-50"
                 >
                   <option value="IN_STOCK">In Stock</option>
                   <option value="ASSIGNED">Assigned</option>
                   <option value="BROKEN">Broken</option>
                   <option value="MISSING">Missing</option>
                 </select>
+                {formData.assigned_to_user_id &&
+                  formData.assigned_to_user_id !== asset.assigned_to?.id && (
+                    <p className="text-[10px] font-bold text-orange-500 mt-1 italic animate-pulse">
+                      Note: Status remains IN_STOCK until assignment form is
+                      signed.
+                    </p>
+                  )}
               </div>
             </div>
           </div>

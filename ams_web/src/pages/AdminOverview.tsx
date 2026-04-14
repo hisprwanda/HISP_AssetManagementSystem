@@ -410,23 +410,6 @@ export const AdminOverview = () => {
               </h4>
             </div>
           </div>
-
-          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-3 leading-none">
-              Node: HISP-RWANDA-HQ
-            </p>
-            <div className="flex items-center justify-center gap-2 text-slate-400">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-black uppercase">
-                {new Date().toLocaleTimeString('en-US', {
-                  hour12: false,
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}{' '}
-                UTC
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
