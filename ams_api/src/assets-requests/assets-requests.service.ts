@@ -13,6 +13,8 @@ export class AssetRequestsService {
   constructor(
     @InjectRepository(AssetRequest)
     private readonly requestRepo: Repository<AssetRequest>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -34,7 +36,15 @@ export class AssetRequestsService {
       status: dto.status || 'PENDING',
     });
 
-    return await this.requestRepo.save(request);
+    const saved = await this.requestRepo.save(request);
+
+    if (dto.logistics?.contact_phone) {
+      await this.userRepo.update(userId, {
+        phone_number: dto.logistics.contact_phone,
+      });
+    }
+
+    return saved;
   }
 
   async findAll(): Promise<AssetRequest[]> {
@@ -90,7 +100,12 @@ export class AssetRequestsService {
 
     const saved = await this.requestRepo.save(request);
 
-    // Trigger notifications when CEO makes a final decision
+    if (dto.logistics?.contact_phone && request.requested_by?.id) {
+      await this.userRepo.update(request.requested_by.id, {
+        phone_number: dto.logistics.contact_phone,
+      });
+    }
+
     if (dto.status === 'CEO_APPROVED' || dto.status === 'REJECTED') {
       const departmentId =
         request.department?.id ||
@@ -129,7 +144,6 @@ export class AssetRequestsService {
       }
     }
 
-    // Trigger notifications when request is marked as FULFILLED
     if (dto.status === 'FULFILLED') {
       const departmentId =
         request.department?.id ||

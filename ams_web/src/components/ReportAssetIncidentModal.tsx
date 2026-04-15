@@ -138,7 +138,6 @@ export const ReportAssetIncidentModal = ({
     setError(null);
 
     try {
-      // Logic for submitting multiple assets sequentially
       for (const assetId of selectedAssetIds) {
         await mutation.mutateAsync({
           asset_id: assetId,
@@ -223,7 +222,6 @@ export const ReportAssetIncidentModal = ({
                 <div
                   className={`grid grid-cols-1 ${showShared ? 'sm:grid-cols-2' : ''} gap-4`}
                 >
-                  {/* Individual Assets Dropdown-like Section */}
                   <div className="space-y-2">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
                       <div className="w-1 h-1 rounded-full bg-[#ff8000]" />
@@ -267,7 +265,6 @@ export const ReportAssetIncidentModal = ({
                     </div>
                   </div>
 
-                  {/* Shared Assets Dropdown-like Section */}
                   {showShared && (
                     <div className="space-y-2">
                       <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">

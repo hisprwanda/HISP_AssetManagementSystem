@@ -102,7 +102,6 @@ export const CreateUserModal = ({
     [isFinanceDept],
   );
 
-  // Reset role when roles change or modal opens
   React.useEffect(() => {
     if (isOpen) {
       setRole(roles[0]);

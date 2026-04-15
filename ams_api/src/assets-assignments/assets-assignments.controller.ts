@@ -63,12 +63,14 @@ export class AssetAssignmentsController {
   @ApiOperation({ summary: 'Admin final approval/rejection of receipt form' })
   verifyByAdmin(
     @Param('id') id: string,
-    @Body() body: { approve: boolean; remarks?: string },
+    @Body()
+    body: { approve: boolean; remarks?: string; adminSignatureName?: string },
   ) {
     return this.assetAssignmentsService.verifyByAdmin(
       id,
       body.approve,
       body.remarks,
+      body.adminSignatureName,
     );
   }
 }

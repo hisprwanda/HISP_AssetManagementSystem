@@ -24,15 +24,12 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-orange-950/20 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div
           className={`px-6 py-6 flex items-center gap-4 ${isApprove ? 'bg-orange-50' : 'bg-slate-50'}`}
         >
@@ -63,7 +60,6 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6">
           <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
             {isApprove

@@ -60,7 +60,6 @@ export const ViewDepartmentModal = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8">
-          {/* Unit Profile */}
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Organizational Profile

@@ -56,9 +56,6 @@ export class AssetsService {
           asset.current_value = dep.current_value;
           asset.accumulated_depreciation = dep.accumulated_depreciation;
           asset.disposal_value = dep.disposal_value;
-          console.log(
-            ` -> New Dep: ${dep.current_value} | New Disp: ${dep.disposal_value}`,
-          );
         }
       }
 
@@ -83,21 +80,10 @@ export class AssetsService {
 
       await queryRunner.commitTransaction();
       return savedAsset;
-    } catch (error) {
+    } catch {
       await queryRunner.rollbackTransaction();
-      console.error('--- ASSET REGISTRATION TRANSACTION FAILED ---');
-      console.error('Error Details:', error);
-
-      const err = error as { code?: string; message?: string };
-
-      if (err.code === '23505') {
-        throw new BadRequestException(
-          'Asset with this serial number or tag ID already exists.',
-        );
-      }
-
       throw new InternalServerErrorException(
-        `Failed to create asset and initial assignment record: ${err.message || 'Unknown error'}`,
+        `Failed to create asset and initial assignment record`,
       );
     } finally {
       await queryRunner.release();
@@ -147,8 +133,6 @@ export class AssetsService {
         ? ({ id: newAssignedToId } as User)
         : null;
 
-      // If we are assigning to a new user, initiate the digital form flow
-      // If we are assigning to a user or changing status to ASSIGNED, initiate the digital form flow
       const statusChangingToAssigned =
         updateAssetDto.status === 'ASSIGNED' && asset.status !== 'ASSIGNED';
       const userChanging =
@@ -180,7 +164,6 @@ export class AssetsService {
           await queryRunner.manager.save(assignment);
           await queryRunner.commitTransaction();
 
-          // Force status to remain IN_STOCK until form is signed and verified
           updateAssetDto.status = 'IN_STOCK';
         } catch (err) {
           await queryRunner.rollbackTransaction();

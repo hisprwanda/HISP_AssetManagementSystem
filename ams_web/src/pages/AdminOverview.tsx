@@ -99,6 +99,11 @@ export const AdminOverview = () => {
       totalUsers: users?.length || 0,
       totalDepreciation,
       topCategories,
+      pendingFormsCount: assets.filter((a) =>
+        a.assignment_history?.some(
+          (h) => h.form_status === 'PENDING_ADMIN_REVIEW',
+        ),
+      ).length,
       recentRequests: [...requests]
         .filter((r) => r.status !== 'PENDING')
         .sort(
@@ -218,7 +223,8 @@ export const AdminOverview = () => {
                       Immediate Action Required
                     </h3>
                     <p className="text-slate-500 text-[10px] font-medium leading-relaxed">
-                      {stats.pendingRequestsCount} Pending Requisitions and{' '}
+                      {stats.pendingRequestsCount} Pending Requisitions,{' '}
+                      {stats.pendingFormsCount} Forms Awaiting Approval, and{' '}
                       {stats.missingAssets + stats.brokenAssets} Security
                       Incidents are awaiting your review.
                     </p>
@@ -226,16 +232,16 @@ export const AdminOverview = () => {
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Link
-                    to="/requests"
+                    to="/assets"
                     className="px-4 py-2 bg-[#ff8000] hover:bg-[#e49f37] text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-md shadow-orange-100"
                   >
-                    Resolve Now
+                    Finish Handover
                   </Link>
                   <Link
-                    to="/incidents"
+                    to="/requests"
                     className="px-4 py-2 bg-white border border-orange-200 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all"
                   >
-                    Audit Security
+                    Resolve Requisitions
                   </Link>
                 </div>
               </div>

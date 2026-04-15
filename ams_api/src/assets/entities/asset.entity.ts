@@ -84,6 +84,9 @@ export class Asset {
   @JoinColumn({ name: 'assigned_to_user_id' })
   assigned_to?: User | null;
 
+  @Column({ type: 'boolean', default: false })
+  is_shared: boolean;
+
   @OneToMany(() => AssetAssignment, (assignment) => assignment.asset)
   assignment_history: AssetAssignment[];
 }

@@ -237,7 +237,7 @@ export const Layout = () => {
         });
         baseItems.push({
           name: 'Audit Trail',
-          path: '/disposal-trail',
+          path: '/audit-trail',
           icon: History,
         });
       }

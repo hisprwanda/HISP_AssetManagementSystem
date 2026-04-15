@@ -36,7 +36,6 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
-  // Search by name route
   @Get('search')
   @ApiOperation({ summary: 'Find a category by its name' })
   @ApiQuery({ name: 'name', required: true, type: String })

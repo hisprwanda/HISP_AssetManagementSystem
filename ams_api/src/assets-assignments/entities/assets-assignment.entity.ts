@@ -5,24 +5,38 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Asset } from '../../assets/entities/asset.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
-@Entity('asset_assignments')
+@Entity('assets_assignments')
 export class AssetAssignment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.assignment_history, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Asset, (asset) => asset.assignment_history)
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 
   @ManyToOne(() => User, (user) => user.asset_assignments)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  assigned_at: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  returned_at: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  condition_on_assign: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  condition_on_return: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  form_number: string | null;
 
   @Column({
     type: 'enum',
@@ -37,36 +51,30 @@ export class AssetAssignment {
   })
   form_status: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  form_number: string;
-
   @Column({ type: 'varchar', nullable: true })
-  admin_signature_name: string;
+  received_from_name: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  admin_signed_at: Date;
+  received_at: Date | null;
 
   @Column({ type: 'varchar', nullable: true })
-  user_signature_name: string;
+  user_signature_name: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  user_signed_at: Date;
+  user_signed_at: Date | null;
 
   @Column({ type: 'varchar', nullable: true })
-  received_from_name: string;
+  admin_signature_name: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  received_at: Date;
+  admin_signed_at: Date | null;
 
   @Column({ type: 'text', nullable: true })
-  rejection_reason: string;
+  rejection_reason: string | null;
 
   @CreateDateColumn()
-  assigned_at: Date;
+  created_at: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  returned_at: Date;
-
-  @Column({ type: 'text', nullable: true })
-  condition_on_assign: string;
+  @UpdateDateColumn()
+  updated_at: Date;
 }

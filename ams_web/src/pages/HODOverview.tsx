@@ -14,13 +14,16 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { Asset, AssetIncident } from '../types/assets';
+import { Asset, AssetIncident, AssetAssignment } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
+import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 
 export const HODOverview = () => {
   const { user: currentUser } = useAuth();
   const [resolutionNotice, setResolutionNotice] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [signingAssignment, setSigningAssignment] =
+    useState<AssetAssignment | null>(null);
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -45,13 +48,22 @@ export const HODOverview = () => {
       (a) => a.department?.id === currentUser?.department?.id,
     );
 
-    const sharedAssets = departmentAssets.filter((a) => !a.assigned_to);
-    const individualAssets = departmentAssets.filter((a) => !!a.assigned_to);
+    const personalAssets = departmentAssets.filter(
+      (a) => a.assigned_to?.id === currentUser?.id && !a.is_shared,
+    );
+    const staffAssets = departmentAssets.filter(
+      (a) =>
+        a.assigned_to && a.assigned_to.id !== currentUser?.id && !a.is_shared,
+    );
+    const sharedAssets = departmentAssets.filter(
+      (a) => a.is_shared || (!a.assigned_to && a.status === 'IN_STOCK'),
+    );
 
     return {
       total: departmentAssets.length,
+      personalAssets,
+      staffAssets,
       sharedAssets,
-      individualAssets,
       recentOutcomes: incidents
         ? incidents
             .filter(
@@ -79,8 +91,16 @@ export const HODOverview = () => {
     return <Box className="w-8 h-8" />;
   };
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
+  const getStatusStyle = (asset: Asset) => {
+    if (
+      asset.status === 'IN_STOCK' &&
+      asset.assignment_history?.some(
+        (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+      )
+    ) {
+      return 'bg-orange-600 text-white border-orange-500 font-black shadow-md';
+    }
+    switch (asset.status) {
       case 'IN_STOCK':
         return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
       case 'ASSIGNED':
@@ -152,30 +172,145 @@ export const HODOverview = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
-              <Laptop className="w-5 h-5 text-orange-500" />
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+              <Laptop className="w-5 h-5 text-[#ff8000]" />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
-                Individual Staff Assets
+                Your Assets
               </p>
               <p className="text-xl font-black text-slate-800 leading-none">
-                {stats.individualAssets.length}
+                {stats.personalAssets.length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
+              <Users className="w-5 h-5 text-[#ff8000]" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+                Staff Assets
+              </p>
+              <p className="text-xl font-black text-slate-800 leading-none">
+                {stats.staffAssets.length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
+              <Building2 className="w-5 h-5 text-slate-500" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+                Shared Resources
+              </p>
+              <p className="text-xl font-black text-slate-800 leading-none">
+                {stats.sharedAssets.length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* Shared Assets Table */}
+        <div className="space-y-12">
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <div className="w-1.5 h-6 bg-[#ff8000] rounded-full" /> Shared
-                Department Resources
+                <div className="w-1.5 h-6 bg-[#ff8000] rounded-full shadow-[0_0_10px_rgba(255,128,0,0.3)]" />
+                Your Personally Assigned Equipment
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-                {stats.sharedAssets.length} Items Total
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+                {stats.personalAssets.length} Personal Items
+              </span>
+            </div>
+
+            <div className="bg-white/60 backdrop-blur-xl border border-white rounded-[2rem] overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-orange-100/30 bg-orange-50/20">
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        Asset Details
+                      </th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        Tag / Serial
+                      </th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                        Status & Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {stats.personalAssets.map((asset) => (
+                      <tr key={asset.id} className="group hover:bg-white/60">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#ff8000]">
+                              {getAssetIcon(asset.name)}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-slate-800 tracking-tight">
+                                {asset.name}
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {asset.category?.name}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-0.5">
+                            <code className="text-xs font-bold text-slate-600 tracking-tighter">
+                              {asset.tag_id || 'NON-TAGGED'}
+                            </code>
+                            <span className="text-[9px] font-medium text-slate-400">
+                              {asset.serial_number}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
+                          <span
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
+                          >
+                            {asset.status.replace('_', ' ')}
+                          </span>
+                          <button
+                            onClick={() => setSelectedAsset(asset)}
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {stats.personalAssets.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="py-12 text-center opacity-40"
+                        >
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            No personal equipment assigned
+                          </p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+                <div className="w-1.5 h-6 bg-slate-400 rounded-full" />
+                Shared Departmental Resources
+              </h3>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                {stats.sharedAssets.length} Resources
               </span>
             </div>
 
@@ -185,13 +320,10 @@ export const HODOverview = () => {
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/50">
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Asset / Model
+                        Resource
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Tag ID
-                      </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Category
+                        Currently Held By
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Location
@@ -206,78 +338,64 @@ export const HODOverview = () => {
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all scale-90">
+                            <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
                               {getAssetIcon(asset.name)}
                             </div>
-                            <span className="text-sm font-black text-slate-800 tracking-tight">
+                            <span className="text-sm font-black text-slate-800 leading-tight">
                               {asset.name}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <code className="text-xs font-bold text-slate-500 font-mono tracking-tighter bg-slate-100 px-2 py-0.5 rounded border border-slate-200/50">
-                            {asset.tag_id || 'NON-TAGGED'}
-                          </code>
+                          {asset.assigned_to ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-600">
+                                {asset.assigned_to.full_name.charAt(0)}
+                              </div>
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">
+                                {asset.assigned_to.full_name}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] font-bold text-slate-300 italic uppercase">
+                              Department Pooled
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
-                            {asset.category?.name || 'Uncategorized'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-xs font-medium text-slate-400 italic">
-                            {asset.location || 'General Stores'}
+                          <span className="text-xs font-medium text-slate-400 italic font-serif">
+                            {asset.location || 'HQ Stores'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                           <span
-                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusStyle(asset.status)}`}
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
                           >
-                            {asset.status === 'ASSIGNED'
-                              ? 'Assigned'
-                              : asset.status === 'BROKEN'
-                                ? 'Broken'
-                                : asset.status === 'MISSING'
-                                  ? 'Missing'
-                                  : asset.status.replace('_', ' ')}
+                            {asset.status.replace('_', ' ')}
                           </span>
                           <button
                             onClick={() => setSelectedAsset(asset)}
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
-                            title="View Asset Details"
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
                     ))}
-                    {stats.sharedAssets.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-20 text-center">
-                          <div className="flex flex-col items-center opacity-40">
-                            <Box className="w-8 h-8 text-slate-400 mb-3" />
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                              No shared inventory items found
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
 
-          {/* Individual Staff Assets Table */}
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <div className="w-1.5 h-6 bg-slate-200 rounded-full" />{' '}
-                Staff-Assigned Equipment
+                <div className="w-1.5 h-6 bg-slate-200 rounded-full shadow-inner" />
+                Directorate Staff Equipment
               </h3>
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-                {stats.individualAssets.length} Staff-Held
+                {stats.staffAssets.length} Staff-Held Items
               </span>
             </div>
 
@@ -287,81 +405,67 @@ export const HODOverview = () => {
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/50">
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Asset Name
+                        Staff Member
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Assigned To
+                        Assigned Asset
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Category
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
-                        Status
+                        Incident Status
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {stats.individualAssets.map((asset) => (
+                    {stats.staffAssets.map((asset) => (
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all scale-90">
-                              {getAssetIcon(asset.name)}
-                            </div>
-                            <span className="text-sm font-black text-slate-800 tracking-tight">
-                              {asset.name}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-black text-[#ff8000]">
+                            <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black text-white shadow-lg">
                               {asset.assigned_to?.full_name?.charAt(0)}
                             </div>
-                            <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
+                            <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">
                               {asset.assigned_to?.full_name}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-[#ff8000]">
+                              {getAssetIcon(asset.name)}
+                            </div>
+                            <span className="text-sm font-black text-slate-800 tracking-tight leading-none">
+                              {asset.name}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
-                            {asset.category?.name || 'System Hardware'}
+                            {asset.category?.name || 'Hardware'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
-                          <span
-                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusStyle(asset.status)}`}
+                          <div
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
                           >
-                            {asset.status === 'ASSIGNED'
-                              ? 'Assigned'
-                              : asset.status === 'BROKEN'
-                                ? 'Broken'
-                                : asset.status === 'MISSING'
-                                  ? 'Missing'
-                                  : asset.status.replace('_', ' ')}
-                          </span>
+                            {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            )
+                              ? 'Signature Required'
+                              : asset.status.replace('_', ' ')}
+                          </div>
                           <button
                             onClick={() => setSelectedAsset(asset)}
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
-                            title="View Asset Details"
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
                     ))}
-                    {stats.individualAssets.length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="py-20 text-center">
-                          <div className="flex flex-col items-center opacity-40">
-                            <Laptop className="w-8 h-8 text-slate-400 mb-3" />
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                              No assigned assets currently tracked
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
@@ -369,7 +473,6 @@ export const HODOverview = () => {
           </div>
         </div>
 
-        {/* Critical Path Outcomes Table - Positioning below Staff-Assigned list as per user request */}
         {stats.recentOutcomes.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
@@ -536,6 +639,12 @@ export const HODOverview = () => {
         isOpen={!!selectedAsset}
         onClose={() => setSelectedAsset(null)}
         asset={selectedAsset}
+      />
+
+      <AssetReceiptFormModal
+        isOpen={!!signingAssignment}
+        onClose={() => setSigningAssignment(null)}
+        assignment={signingAssignment}
       />
     </div>
   );

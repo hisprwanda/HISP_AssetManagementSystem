@@ -80,11 +80,9 @@ export const CreateRequestModal = ({
   const [contactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
 
-  // Auto-fill HOD Logic
   useEffect(() => {
     if (isOpen) {
       if (baseRequest) {
-        // Pre-fill from staff draft
         setDepartmentId(baseRequest.department?.id || '');
         setRequestedById(baseRequest.requested_by?.id || '');
         setUrgency(baseRequest.urgency || 'MEDIUM');
@@ -227,7 +225,6 @@ export const CreateRequestModal = ({
         ? baseRequest.title
         : `Requisition: ${validItems[0].name}${validItems.length > 1 ? ` +${validItems.length - 1} more` : ''}`;
 
-      // Only add 'Formalized:' prefix when HOD is officially formalizing a PENDING staff request
       if (
         isHOD &&
         baseRequest?.status === 'PENDING' &&
@@ -241,11 +238,6 @@ export const CreateRequestModal = ({
         requested_by_id: requestedById,
         department_id: departmentId,
         urgency,
-        // Workflow status transitions:
-        // - HOD formalizing PENDING request → HOD_APPROVED
-        // - Admin editing HOD_APPROVED request → APPROVED (Admin verified)
-        // - Any other edit → preserve existing status
-        // - New HOD request → HOD_APPROVED, New Staff request → PENDING
         status: baseRequest
           ? baseRequest.status === 'PENDING' && isHOD
             ? 'HOD_APPROVED'
@@ -295,7 +287,6 @@ export const CreateRequestModal = ({
       setTimeout(() => {
         setSuccess(false);
         onClose();
-        // Reset form
         setError('');
       }, 2000);
     } catch (err: unknown) {

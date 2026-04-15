@@ -75,6 +75,7 @@ export interface Asset {
   disposal_date?: string;
   disposal_reason?: string;
   assignment_history?: AssetAssignment[];
+  is_shared?: boolean;
   created_at?: string;
   updated_at?: string;
 }

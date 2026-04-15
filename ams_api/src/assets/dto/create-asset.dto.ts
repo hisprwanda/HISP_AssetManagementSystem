@@ -72,4 +72,8 @@ export class CreateAssetDto {
   @IsOptional()
   @IsUUID()
   assigned_to_user_id?: string;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  is_shared?: boolean;
 }

@@ -458,7 +458,7 @@ export const Assets = () => {
             <button
               onClick={() =>
                 navigate(
-                  `/disposal-trail${selectedCategory ? `?categoryId=${selectedCategory.id}` : ''}`,
+                  `/disposal-logs${selectedCategory ? `?categoryId=${selectedCategory.id}` : ''}`,
                 )
               }
               className="bg-white border border-slate-200 text-slate-600 px-3 py-2 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-xs"
@@ -700,7 +700,7 @@ export const Assets = () => {
                               </button>
                             </>
                           )}
-                          {/* Receipt Form Icon - Visible to Admin or the Assigned User */}
+
                           {(isAdmin ||
                             asset.assigned_to?.id === currentUser?.id) &&
                             ((asset.assignment_history &&
@@ -735,6 +735,9 @@ export const Assets = () => {
                               const isUrgent =
                                 latest?.form_status === 'REJECTED';
 
+                              if (latest?.form_status === 'APPROVED')
+                                return null;
+
                               return (
                                 <button
                                   onClick={(e) => {
@@ -745,7 +748,7 @@ export const Assets = () => {
                                         asset,
                                         user: asset.assigned_to as unknown as User,
                                         assigned_at: new Date().toISOString(),
-                                        form_status: 'PENDING_USER_SIGNATURE',
+                                        form_status: 'DRAFT',
                                         form_number: 'LEGACY-FORM',
                                         received_from_name: 'Administration',
                                         received_at: new Date().toISOString(),

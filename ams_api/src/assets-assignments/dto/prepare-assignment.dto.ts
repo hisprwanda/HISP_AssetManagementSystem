@@ -26,6 +26,11 @@ export class PrepareAssignmentDto {
   @IsOptional()
   asset_tag_id?: string;
 
+  @ApiPropertyOptional({ description: 'Corrected Phone Number if typo exists' })
+  @IsString()
+  @IsOptional()
+  user_phone_number?: string;
+
   @ApiPropertyOptional({
     description: 'If true, transitions form to PENDING_USER_SIGNATURE',
   })

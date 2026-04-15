@@ -10,13 +10,16 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { Asset, AssetIncident } from '../types/assets';
+import { Asset, AssetIncident, AssetAssignment } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
+import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 
 export const StaffOverview = () => {
   const { user: currentUser } = useAuth();
   const [resolutionNotice, setResolutionNotice] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [signingAssignment, setSigningAssignment] =
+    useState<AssetAssignment | null>(null);
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -259,29 +262,46 @@ export const StaffOverview = () => {
                         <td className="px-4 py-3">
                           <div
                             className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent shadow-sm ${
-                              asset.status === 'BROKEN'
-                                ? 'bg-orange-50 text-orange-600 border-orange-200'
-                                : asset.status === 'MISSING'
-                                  ? 'bg-orange-50 text-orange-600 border-orange-100 italic'
-                                  : 'bg-slate-50 text-slate-500 border-slate-200'
+                              asset.status === 'IN_STOCK' &&
+                              asset.assignment_history?.some(
+                                (a) =>
+                                  a.form_status === 'PENDING_USER_SIGNATURE',
+                              )
+                                ? 'bg-orange-600 text-white border-orange-500 animate-pulse'
+                                : asset.status === 'BROKEN'
+                                  ? 'bg-orange-50 text-orange-600 border-orange-200'
+                                  : asset.status === 'MISSING'
+                                    ? 'bg-orange-50 text-orange-600 border-orange-100 italic'
+                                    : 'bg-slate-50 text-slate-500 border-slate-200'
                             }`}
                           >
                             <span
                               className={`w-1 h-1 rounded-full ${
-                                asset.status === 'BROKEN'
-                                  ? 'bg-orange-500'
-                                  : asset.status === 'MISSING'
-                                    ? 'bg-orange-400'
-                                    : 'bg-slate-300'
+                                asset.status === 'IN_STOCK' &&
+                                asset.assignment_history?.some(
+                                  (a) =>
+                                    a.form_status === 'PENDING_USER_SIGNATURE',
+                                )
+                                  ? 'bg-white'
+                                  : asset.status === 'BROKEN'
+                                    ? 'bg-orange-500'
+                                    : asset.status === 'MISSING'
+                                      ? 'bg-orange-400'
+                                      : 'bg-slate-300'
                               }`}
                             />
-                            {asset.status === 'ASSIGNED'
-                              ? 'Assigned'
-                              : asset.status === 'BROKEN'
-                                ? 'Broken'
-                                : asset.status === 'MISSING'
-                                  ? 'Missing'
-                                  : asset.status.replace('_', ' ')}
+                            {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            )
+                              ? 'Signature Required'
+                              : asset.status === 'ASSIGNED'
+                                ? 'Assigned'
+                                : asset.status === 'BROKEN'
+                                  ? 'Broken'
+                                  : asset.status === 'MISSING'
+                                    ? 'Missing'
+                                    : asset.status.replace('_', ' ')}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -300,7 +320,31 @@ export const StaffOverview = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
+                          {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            ) && (
+                              <button
+                                onClick={() => {
+                                  const pending =
+                                    asset.assignment_history?.find(
+                                      (a) =>
+                                        a.form_status ===
+                                        'PENDING_USER_SIGNATURE',
+                                    );
+                                  if (pending)
+                                    setSigningAssignment({
+                                      ...pending,
+                                      asset,
+                                    } as unknown as AssetAssignment);
+                                }}
+                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors"
+                                title="Sign Receipt Form"
+                              >
+                                Sign Form
+                              </button>
+                            )}
                           <button
                             onClick={() => setSelectedAsset(asset)}
                             className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
@@ -378,6 +422,12 @@ export const StaffOverview = () => {
         isOpen={!!selectedAsset}
         onClose={() => setSelectedAsset(null)}
         asset={selectedAsset}
+      />
+
+      <AssetReceiptFormModal
+        isOpen={!!signingAssignment}
+        onClose={() => setSigningAssignment(null)}
+        assignment={signingAssignment}
       />
     </div>
   );

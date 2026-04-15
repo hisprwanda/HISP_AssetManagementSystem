@@ -596,7 +596,6 @@ export const Requests = () => {
                           <FileText className="w-4 h-4" />
                         </button>
 
-                        {/* ADMIN ONLY ACTIONS - Verification (edit HOD_APPROVED) */}
                         {isAdmin && req.status === 'HOD_APPROVED' && (
                           <button
                             onClick={() => {
@@ -611,7 +610,6 @@ export const Requests = () => {
                           </button>
                         )}
 
-                        {/* ADMIN ONLY ACTIONS - Forward verified request to CEO */}
                         {isAdmin && req.status === 'APPROVED' && (
                           <>
                             <button
@@ -640,7 +638,6 @@ export const Requests = () => {
                           </>
                         )}
 
-                        {/* CEO ONLY ACTIONS - Final decision */}
                         {isCEO && req.status === 'CEO_REVIEW' && (
                           <>
                             <button
@@ -669,7 +666,6 @@ export const Requests = () => {
                         )}
                         {isAdmin && req.status === 'CEO_APPROVED' && (
                           <>
-                            {/* For CEO-initiated requests, require Admin verification (edit) first */}
                             {(req.requested_by?.role === 'CEO' ||
                               req.department?.name?.trim().toUpperCase() ===
                                 'OFFICE OF THE CEO') &&
