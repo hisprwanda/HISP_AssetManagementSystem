@@ -19,6 +19,7 @@ import {
   UserCheck,
   FilePlus,
   PackageCheck,
+  Filter,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -338,9 +339,9 @@ export const Requests = () => {
       </div>
 
       <div
-        className={`grid grid-cols-1 ${isRequesterOnly ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-3 mb-4`}
+        className={`grid grid-cols-1 ${isRequesterOnly ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-3 items-stretch`}
       >
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 h-full">
           <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
             <Clock className="w-5 h-5 text-amber-500" />
           </div>
@@ -356,7 +357,7 @@ export const Requests = () => {
         </div>
 
         {!isRequesterOnly && (
-          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 h-full">
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100 shadow-inner">
               <Banknote className="w-5 h-5 text-[#ff8000]" />
             </div>
@@ -372,7 +373,7 @@ export const Requests = () => {
           </div>
         )}
 
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 h-full">
           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
             <CheckCircle2 className="w-5 h-5 text-slate-400" />
           </div>
@@ -390,34 +391,24 @@ export const Requests = () => {
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-4 flex flex-col md:flex-row gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search requests..."
-            className="w-full bg-transparent border-none pl-9 pr-4 py-1.5 text-sm focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
-          />
-        </div>
-        <div className="flex flex-col md:flex-row gap-2 items-center">
-          <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-              Date Range:
-            </span>
+      <div className="flex justify-end mt-3 mb-6">
+        <div className="bg-white/40 backdrop-blur-md border border-white p-2 rounded-xl shadow-sm flex items-center gap-2 max-w-sm">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap pl-1">
+            Date Range:
+          </span>
+          <div className="flex items-center gap-1.5 flex-1 justify-end">
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+              className="bg-white/50 border border-slate-100 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-600 outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all"
             />
-            <span className="text-slate-300 mx-1">—</span>
+            <span className="text-slate-300 mx-0.5">—</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+              className="bg-white/50 border border-slate-100 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-600 outline-none cursor-pointer focus:ring-2 focus:ring-orange-500/20 transition-all"
             />
             {(startDate || endDate) && (
               <button
@@ -425,14 +416,38 @@ export const Requests = () => {
                   setStartDate('');
                   setEndDate('');
                 }}
-                className="ml-2 p-1 hover:bg-white rounded-md transition-colors"
+                className="ml-1 p-1 hover:bg-rose-50 rounded-md transition-colors"
                 title="Clear Dates"
               >
                 <X className="w-3 h-3 text-rose-400" />
               </button>
             )}
           </div>
-          <div className="flex gap-1 overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
+        </div>
+      </div>
+
+      <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-4 flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by title, department, or requester..."
+            className="w-full bg-transparent border-none pl-9 pr-4 py-1.5 text-sm focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
+          />
+        </div>
+
+        <div className="h-6 w-px bg-slate-200 hidden md:block" />
+
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+          <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
+            <Filter className="w-4 h-4 text-[#ff8000]" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Filters:
+            </span>
+          </div>
+          <div className="flex gap-1">
             {[
               'ALL',
               'PENDING',
@@ -446,7 +461,7 @@ export const Requests = () => {
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap transition-colors ${filterStatus === status ? 'bg-orange-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}
+                className={`px-3 py-1.5 text-[10px] font-bold rounded-lg whitespace-nowrap transition-all ${filterStatus === status ? 'bg-orange-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100 hover:text-orange-600'}`}
               >
                 {status}
               </button>
@@ -455,8 +470,8 @@ export const Requests = () => {
         </div>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col">
-        <div className="overflow-x-auto flex-1">
+      <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[600px]">
+        <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100/50">

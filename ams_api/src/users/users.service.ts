@@ -102,12 +102,106 @@ export class UsersService implements OnModuleInit {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { department_id, ...userData } = createUserDto;
+    const { department_id, password_hash, ...userData } = createUserDto;
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password_hash, salt);
+
     const user = this.userRepo.create({
       ...userData,
+      password_hash: hashedPassword,
       department: { id: department_id } as Department,
     });
     return await this.userRepo.save(user);
+  }
+
+  async bulkCreate(
+    usersData: Record<string, any>[],
+  ): Promise<{ success: number; failed: number; errors: string[] }> {
+    const results: { success: number; failed: number; errors: string[] } = {
+      success: 0,
+      failed: 0,
+      errors: [],
+    };
+    const deptRepo = this.dataSource.getRepository(Department);
+
+    for (const data of usersData) {
+      try {
+        const {
+          full_name,
+          email,
+          role,
+          department_name,
+          password,
+          phone_number,
+        } = data as {
+          full_name: string;
+          email: string;
+          role: string;
+          department_name: string;
+          password?: string;
+          phone_number: string;
+        };
+        if (
+          !full_name ||
+          !email ||
+          !role ||
+          !department_name ||
+          !phone_number
+        ) {
+          results.failed++;
+          results.errors.push(
+            `Missing mandatory fields for user: ${email || 'Unknown'} (Check name, email, phone, role, and department)`,
+          );
+          continue;
+        }
+
+        const existing = await this.userRepo.findOne({ where: { email } });
+        if (existing) {
+          results.failed++;
+          results.errors.push(`User already exists: ${email}`);
+          continue;
+        }
+
+        let department: Department | undefined = undefined;
+        if (department_name) {
+          department =
+            (await deptRepo.findOne({ where: { name: department_name } })) ||
+            undefined;
+          if (!department) {
+            results.errors.push(
+              `Department not found: ${department_name} for user ${email}. Using unassigned.`,
+            );
+          }
+        }
+        const rawPassword = password || 'Welcome@123';
+        const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+        const newUser = this.userRepo.create({
+          full_name,
+          email,
+          role,
+          phone_number,
+          password_hash: hashedPassword,
+          department: department,
+        });
+
+        await this.userRepo.save(newUser);
+        results.success++;
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown error';
+        const userEmail =
+          typeof data?.email === 'string' ? data.email : 'Unknown';
+
+        results.failed++;
+        results.errors.push(
+          `Error creating user ${userEmail}: ${errorMessage}`,
+        );
+      }
+    }
+
+    return results;
   }
 
   async findAll(departmentId?: string): Promise<User[]> {

@@ -331,41 +331,63 @@ export const Layout = () => {
               );
             }
 
+            const isAuditItem = item.name === 'Audit Trail';
+            const auditPaths = [
+              '/audit-trail',
+              '/system-trail',
+              '/incident-trail',
+              '/procurement-trail',
+              '/disposal-logs',
+              '/assignment-history',
+              '/request-trail',
+            ];
+            const isAuditActive =
+              isAuditItem && auditPaths.includes(location.pathname);
+
             return (
               <NavLink
                 key={item.name}
                 to={item.path!}
-                className={({ isActive }) => commonClasses(isActive)}
+                className={({ isActive }) =>
+                  commonClasses(isActive || isAuditActive)
+                }
               >
-                {({ isActive }) => (
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2.5">
-                      <item.icon
-                        className={`w-4 h-4 transition-transform duration-300 ${
-                          isActive ? 'scale-110' : 'group-hover:scale-110'
-                        }`}
-                      />
-                      <span className="text-xs font-semibold">{item.name}</span>
+                {({ isActive }) => {
+                  const effectivelyActive = isActive || isAuditActive;
+                  return (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5">
+                        <item.icon
+                          className={`w-4 h-4 transition-transform duration-300 ${
+                            effectivelyActive
+                              ? 'scale-110'
+                              : 'group-hover:scale-110'
+                          }`}
+                        />
+                        <span className="text-xs font-semibold">
+                          {item.name}
+                        </span>
+                      </div>
+                      {item.name === 'Incident Reports' &&
+                        pendingIncidentsCount > 0 && (
+                          <span
+                            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}
+                          >
+                            {pendingIncidentsCount}
+                          </span>
+                        )}
+                      {(item.name === 'Asset Requests' ||
+                        item.name === 'Procurement') &&
+                        pendingRequestsCount > 0 && (
+                          <span
+                            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-950' : 'bg-orange-950 text-white shadow-sm'}`}
+                          >
+                            {pendingRequestsCount}
+                          </span>
+                        )}
                     </div>
-                    {item.name === 'Incident Reports' &&
-                      pendingIncidentsCount > 0 && (
-                        <span
-                          className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}
-                        >
-                          {pendingIncidentsCount}
-                        </span>
-                      )}
-                    {(item.name === 'Asset Requests' ||
-                      item.name === 'Procurement') &&
-                      pendingRequestsCount > 0 && (
-                        <span
-                          className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white text-orange-950' : 'bg-orange-950 text-white shadow-sm'}`}
-                        >
-                          {pendingRequestsCount}
-                        </span>
-                      )}
-                  </div>
-                )}
+                  );
+                }}
               </NavLink>
             );
           })}

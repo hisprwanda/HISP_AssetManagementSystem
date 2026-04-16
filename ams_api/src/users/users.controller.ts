@@ -18,6 +18,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Post('bulk')
+  @ApiOperation({ summary: 'Bulk register users' })
+  bulkCreate(@Body() users: Record<string, any>[]) {
+    console.log(
+      `[UsersController] Bulk create request received with ${users?.length || 0} users`,
+    );
+    return this.usersService.bulkCreate(users);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Register a new user' })
   create(@Body() createUserDto: CreateUserDto) {

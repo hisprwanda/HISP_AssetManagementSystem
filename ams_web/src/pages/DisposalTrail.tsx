@@ -122,9 +122,11 @@ export const DisposalTrail = () => {
 
   const handleBackToOverview = () => {
     if (selectedCategory) {
-      navigate(`/assets?categoryId=${selectedCategory.id}`);
+      setSelectedCategory(null);
+      // Remove query param without full navigation if possible, or navigate to path
+      navigate('/disposal-logs');
     } else {
-      navigate('/assets');
+      navigate('/audit-trail');
     }
   };
 
@@ -309,14 +311,15 @@ export const DisposalTrail = () => {
     <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <div>
-          {selectedCategory && (
-            <button
-              onClick={handleBackToOverview}
-              className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
-            >
-              <ArrowLeft className="w-3 h-3" /> Back to Assets
-            </button>
-          )}
+          <button
+            onClick={handleBackToOverview}
+            className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            {selectedCategory
+              ? 'Back to All Disposal Logs'
+              : 'Back to Audit Hub'}
+          </button>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
           <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md p-1 px-2 rounded-lg border border-white shadow-sm">

@@ -11,6 +11,10 @@ import { DisposalTrail } from './pages/DisposalTrail';
 import { AuditTrail } from './pages/AuditTrail';
 import { AssignmentHistory } from './pages/AssignmentHistory';
 import { Penalties } from './pages/Penalties';
+import { ProcurementTrail } from './pages/ProcurementTrail';
+import { IncidentTrail } from './pages/IncidentTrail';
+import { SystemTrail } from './pages/SystemTrail';
+import { RequestTrail } from './pages/RequestTrail';
 
 import { Profile } from './pages/Profile';
 import { Overview } from './pages/Overview';
@@ -31,6 +35,10 @@ function App() {
             <Route path="/directorate" element={<Directorate />} />
             <Route path="/disposal-logs" element={<DisposalTrail />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
+            <Route path="/procurement-trail" element={<ProcurementTrail />} />
+            <Route path="/incident-trail" element={<IncidentTrail />} />
+            <Route path="/system-trail" element={<SystemTrail />} />
+            <Route path="/request-trail" element={<RequestTrail />} />
             <Route path="/assignment-history" element={<AssignmentHistory />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/penalties" element={<Penalties />} />

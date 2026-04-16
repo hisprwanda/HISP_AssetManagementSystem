@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   Activity,
   ChevronRight,
+  ShoppingCart,
+  FileClock,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
@@ -87,15 +89,31 @@ export const AuditTrail = () => {
       description:
         'Record of damages, repairs, and administrative resolutions.',
       icon: ShieldCheck,
-      link: '/incidents',
+      link: '/incident-trail',
       type: 'incident',
     },
     {
-      title: 'System Activity Logs',
+      title: 'Procurement Archive',
       description:
-        'Audit trail of administrative actions, edits, and system changes.',
+        'Official Purchase Orders, vendor acceptance logs, and fulfillment records.',
+      icon: ShoppingCart,
+      link: '/procurement-trail',
+      type: 'procurement',
+    },
+    {
+      title: 'Request Logs',
+      description:
+        'Comprehensive history of all procurement requisitions, approval timelines, and requester details.',
+      icon: FileClock,
+      link: '/request-trail',
+      type: 'requests',
+    },
+    {
+      title: 'System Directory Audit',
+      description:
+        'Full user registry with automated bulk provisioning and CSV directory export.',
       icon: Activity,
-      link: '#',
+      link: '/system-trail',
       type: 'audit',
     },
   ];
