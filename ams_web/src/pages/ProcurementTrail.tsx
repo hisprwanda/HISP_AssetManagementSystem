@@ -7,18 +7,23 @@ import {
   Banknote,
   Search,
   ArrowLeft,
-  X,
+  History,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { AssetRequest } from '../types/assets';
 import { useState, useMemo, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { ConfirmActionModal } from '../components/ConfirmActionModal';
 
 export const ProcurementTrail = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
+  const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
@@ -229,6 +234,65 @@ export const ProcurementTrail = () => {
     printWindow.document.close();
   };
 
+  const handleExportLogs = () => {
+    if (!startDate && !endDate) {
+      setShowExportConfirm(true);
+    } else {
+      executeDownload();
+    }
+  };
+
+  const executeDownload = () => {
+    if (!poRequests.length) return;
+
+    const headers = [
+      'PO Number',
+      'Vendor Details',
+      'Original Requisition',
+      'Total Value (RWF)',
+      'Status',
+      'Date Ordered',
+    ];
+
+    const escapeCSV = (val: string | number | undefined) => {
+      if (val === null || val === undefined) return '""';
+      return `"${String(val).replace(/"/g, '""')}"`;
+    };
+
+    const rows = poRequests.map((req) => {
+      return [
+        escapeCSV(req.purchase_order?.po_number),
+        escapeCSV(req.purchase_order?.vendor_details?.replace(/\n/g, ' ')),
+        escapeCSV(req.title),
+        escapeCSV(req.purchase_order?.grand_total),
+        escapeCSV(req.status),
+        escapeCSV(req.purchase_order?.order_date),
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.join(',')),
+    ].join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename =
+      startDate && endDate
+        ? `procurement_archive_${startDate}_to_${endDate}.csv`
+        : `procurement_archive_full_export_${dateStr}.csv`;
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportConfirm(false);
+  };
+
   return (
     <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
@@ -239,32 +303,47 @@ export const ProcurementTrail = () => {
           <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
         </button>
 
-        <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md p-1 px-2 rounded-lg border border-white shadow-sm">
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-            Audit Period:
-          </span>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
-          />
-          <span className="text-slate-300 mx-1">—</span>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
-          />
+        <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              Audit Period:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            <span className="text-slate-300 mx-1">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+          </div>
           {(startDate || endDate) && (
             <button
               onClick={() => {
                 setStartDate('');
                 setEndDate('');
               }}
-              className="ml-2 p-0.5 hover:bg-white rounded-md transition-colors"
+              className="p-1 hover:bg-slate-100 rounded-md transition-colors"
             >
-              <X className="w-3 h-3 text-rose-400" />
+              <Trash2 className="w-3 h-3 text-rose-400" />
+            </button>
+          )}
+
+          <div className="w-px h-4 bg-slate-200 mx-1" />
+
+          {(isAdmin || isFinanceAdmin || isCEO) && (
+            <button
+              onClick={handleExportLogs}
+              disabled={!poRequests.length}
+              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              title="Download CSV Export"
+            >
+              <History className="w-3.5 h-3.5 text-[#ff8000]" /> Procurement log
             </button>
           )}
         </div>
@@ -283,7 +362,7 @@ export const ProcurementTrail = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col min-h-[600px]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -407,6 +486,16 @@ export const ProcurementTrail = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={showExportConfirm}
+        onClose={() => setShowExportConfirm(false)}
+        onConfirm={executeDownload}
+        title="Confirm Full Archive Export"
+        message="You haven't selected a specific audit period. This will export the entire Procurement Archive. This may take a few moments depending on the volume of data."
+        confirmText="Proceed with Full Export"
+        variant="warning"
+      />
     </div>
   );
 };

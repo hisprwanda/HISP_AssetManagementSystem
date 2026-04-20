@@ -44,7 +44,7 @@ export const Directorate = () => {
   }>();
 
   useEffect(() => {
-    setHeaderTitle('Directorate Units');
+    setHeaderTitle('Organisational Units');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
 
@@ -139,7 +139,7 @@ export const Directorate = () => {
               className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
             >
               <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-              New Directorate
+              NEW ORGANIZATIONAL UNIT
             </button>
           )}
         </div>
@@ -161,16 +161,16 @@ export const Directorate = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {departments?.map((dept) => (
               <div
                 key={dept.id}
                 onClick={() => setSelectedDept(dept)}
-                className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(255,128,0,0.1)] hover:border-[#ff8000]/30 cursor-pointer transition-all group transform hover:-translate-y-1 flex flex-col h-full"
+                className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(255,128,0,0.1)] hover:border-[#ff8000]/30 cursor-pointer transition-all group transform hover:-translate-y-1 flex flex-col h-full"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-inner">
-                    <Building2 className="w-6 h-6 text-[#ff8000] group-hover:text-white transition-colors" />
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-sm">
+                    <Building2 className="w-5 h-5 text-[#ff8000] group-hover:text-white transition-colors" />
                   </div>
 
                   <div className="flex gap-1 transition-opacity">
@@ -191,14 +191,14 @@ export const Directorate = () => {
                         <button
                           onClick={(e) => handleEditClick(e, dept)}
                           className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
-                          title="Edit Directorate"
+                          title="Edit Organisation Unit"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteClick(e, dept)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete Directorate"
+                          title="Delete Organisation Unit"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -207,10 +207,13 @@ export const Directorate = () => {
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-slate-800 mb-1">
+                <h3
+                  className="text-lg font-black text-slate-800 mb-0.5 truncate"
+                  title={dept.name}
+                >
                   {dept.name}
                 </h3>
-                <p className="text-sm font-medium text-slate-500 mb-6 flex-1">
+                <p className="text-[11px] font-bold text-slate-400 mb-4 flex-1 uppercase tracking-wider">
                   {dept.type}
                 </p>
 
@@ -228,9 +231,9 @@ export const Directorate = () => {
                       {dept.status || 'Active'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
-                    <span className="text-xs font-bold text-[#ff8000] uppercase tracking-wider">
-                      Manage Personnel &rarr;
+                  <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
+                    <span className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest">
+                      Personnel &rarr;
                     </span>
                   </div>
                 </div>
@@ -270,7 +273,7 @@ export const Directorate = () => {
                 <AlertTriangle className="w-7 h-7 text-red-500" />
               </div>
               <h2 className="text-xl font-black text-slate-800 text-center mb-2">
-                Delete Directorate?
+                Delete Organisation Unit?
               </h2>
               <p className="text-slate-500 text-sm font-medium text-center mb-6">
                 Are you sure you want to delete{' '}
@@ -315,7 +318,7 @@ export const Directorate = () => {
           className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#ff8000] transition-colors mb-3 group"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          Back to Directorates
+          Back to Organisation Units
         </button>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">

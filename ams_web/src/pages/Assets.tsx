@@ -1,16 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
-import {
-  useSearchParams,
-  useNavigate,
-  useOutletContext,
-} from 'react-router-dom';
+import { useSearchParams, useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Laptop,
   Search,
   Building2,
   Tag,
-  ShieldCheck,
   AlertCircle,
   Plus,
   ArrowLeft,
@@ -25,10 +20,12 @@ import {
   Car,
   Box,
   User as UserIcon,
-  History,
   Activity,
   Archive,
   FileCheck,
+  Upload,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -40,8 +37,15 @@ import { ViewAssetModal } from '../components/ViewAssetModal';
 import { ViewCategoryModal } from '../components/ViewCategoryModal';
 import { DisposeAssetModal } from '../components/DisposeAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { UploadScannedFormModal } from '../components/UploadScannedFormModal';
 
-import { Category, Asset, AssetAssignment, User } from '@/types/assets';
+import {
+  Category,
+  Asset,
+  AssetAssignment,
+  User,
+  RequestableItem,
+} from '@/types/assets';
 
 const getCategoryIcon = (categoryName?: string) => {
   const name = (categoryName || '').toLowerCase();
@@ -75,11 +79,10 @@ const getCategoryIcon = (categoryName?: string) => {
 };
 
 export const Assets = () => {
-  const navigate = useNavigate();
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
-  const { user: currentUser, isAdmin, isHOD, isStaff } = useAuth();
+  const { user: currentUser, isAdmin, isHOD, isStaff, isCEO } = useAuth();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
@@ -107,12 +110,60 @@ export const Assets = () => {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] =
     useState<AssetAssignment | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [assignmentToUpload, setAssignmentToUpload] =
+    useState<AssetAssignment | null>(null);
+  const [newItemName, setNewItemName] = useState('');
+  const [isRequestableSidebarOpen, setIsRequestableSidebarOpen] =
+    useState(true);
 
   const { data: categories, isLoading: loadingCats } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await api.get('/categories');
       return response.data;
+    },
+  });
+
+  const { data: requestableItems, isLoading: loadingItems } = useQuery<
+    RequestableItem[]
+  >({
+    queryKey: ['requestable-items', selectedCategory?.id],
+    queryFn: async () => {
+      const response = await api.get(
+        `/categories/${selectedCategory?.id}/requestable-items`,
+      );
+      return response.data;
+    },
+    enabled: !!selectedCategory?.id,
+  });
+
+  const addItemMutation = useMutation({
+    mutationFn: async (name: string) =>
+      api.post(`/categories/${selectedCategory?.id}/requestable-items`, {
+        name,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['requestable-items', selectedCategory?.id],
+      });
+      setNewItemName('');
+    },
+    onError: (err: unknown) => {
+      console.error('[RequestableItems] Failed to add item:', err);
+    },
+  });
+
+  const deleteItemMutation = useMutation({
+    mutationFn: async (itemId: string) =>
+      api.delete(`/requestable-items/${itemId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['requestable-items', selectedCategory?.id],
+      });
+    },
+    onError: (err: unknown) => {
+      console.error('[RequestableItems] Failed to delete item:', err);
     },
   });
 
@@ -175,14 +226,18 @@ export const Assets = () => {
     currentUser,
   ]);
 
-  const categoryAssetsCount = useMemo(() => {
+  const { counts: categoryAssetsCount, uncategorizedCount } = useMemo(() => {
     const counts: Record<string, number> = {};
+    let uncategorized = 0;
     assets?.forEach((asset) => {
+      if (asset.status === 'DISPOSED') return;
       if (asset.category?.id) {
         counts[asset.category.id] = (counts[asset.category.id] || 0) + 1;
+      } else {
+        uncategorized++;
       }
     });
-    return counts;
+    return { counts, uncategorizedCount: uncategorized };
   }, [assets]);
   const deleteCatMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -265,7 +320,7 @@ export const Assets = () => {
             <div className="w-8 h-8 border-4 border-[#ff8000]/30 border-t-[#ff8000] rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {categories?.map((cat) => {
               const CategoryIcon = getCategoryIcon(cat.name);
 
@@ -273,80 +328,105 @@ export const Assets = () => {
                 <div
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat)}
-                  className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(255,128,0,0.1)] hover:border-[#ff8000]/30 cursor-pointer transition-all group transform hover:-translate-y-1 flex flex-col h-full"
+                  className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(255,128,0,0.1)] hover:border-[#ff8000]/30 cursor-pointer transition-all group transform hover:-translate-y-1 flex flex-col h-full"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-inner">
-                      <CategoryIcon className="w-6 h-6 text-[#ff8000] group-hover:text-white transition-colors" />
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-inner shrink-0">
+                      <CategoryIcon className="w-5 h-5 text-[#ff8000] group-hover:text-white transition-colors" />
                     </div>
-                    <div className="flex gap-1 transition-opacity">
+                    <div className="flex gap-0.5 transition-opacity">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setCatToView(cat);
                         }}
-                        className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
                         title="View Details"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
                       {isAdmin && (
                         <>
                           <button
                             onClick={(e) => handleEditClick(e, cat)}
-                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
                             title="Edit Category"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => handleDeleteClick(e, cat)}
-                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
                             title="Delete Category"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </>
                       )}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-1">
+                  <h3 className="text-lg font-black text-slate-800 mb-1 line-clamp-1 group-hover:text-[#ff8000] transition-colors">
                     {cat.name}
                   </h3>
-                  <div className="flex gap-4 mt-2 mb-6">
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-2 mb-5">
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
                         Inventory
                       </span>
-                      <span className="text-sm font-bold text-slate-700">
+                      <span className="text-xs font-bold text-slate-700">
                         {categoryAssetsCount[cat.id] || 0} Items
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                        Depreciation
+                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                        Depr. Rate
                       </span>
-                      <span className="text-sm font-bold text-slate-700">
+                      <span className="text-xs font-bold text-slate-700">
                         {cat.depreciation_rate ?? 0}% / yr
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                        Disposal Rate
+                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                        Disposal
                       </span>
-                      <span className="text-sm font-bold text-slate-700">
+                      <span className="text-xs font-bold text-slate-700">
                         {cat.disposal_rate ?? 0}% / yr
                       </span>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#ff8000] uppercase tracking-wider">
+                  <div className="pt-3 border-t border-slate-100 mt-auto flex items-center justify-between">
+                    <span className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest">
                       Explore Collection &rarr;
                     </span>
                   </div>
                 </div>
               );
             })}
+
+            {uncategorizedCount > 0 && isAdmin && (
+              <div
+                onClick={() => setAssetSearch(' ')}
+                className="bg-orange-50/50 backdrop-blur-xl border border-orange-200 border-dashed rounded-[1.5rem] p-5 shadow-sm hover:shadow-md cursor-pointer transition-all group flex flex-col h-full border-2"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-orange-200 flex items-center justify-center shadow-sm shrink-0">
+                    <AlertCircle className="w-5 h-5 text-orange-500" />
+                  </div>
+                </div>
+                <h3 className="text-base font-black text-orange-800 mb-1">
+                  Uncategorized Assets
+                </h3>
+                <p className="text-[10px] font-bold text-orange-600/70 mb-4 leading-relaxed line-clamp-2">
+                  {uncategorizedCount} assets were found without a category.
+                  Verify matching names.
+                </p>
+                <div className="mt-auto pt-4 border-t border-orange-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-orange-600 uppercase tracking-wider">
+                    Fix Records &rarr;
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -455,23 +535,16 @@ export const Assets = () => {
                 Sync Financials
               </button>
             )}
-            <button
-              onClick={() =>
-                navigate(
-                  `/disposal-logs${selectedCategory ? `?categoryId=${selectedCategory.id}` : ''}`,
-                )
-              }
-              className="bg-white border border-slate-200 text-slate-600 px-3 py-2 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-xs"
-            >
-              <History className="w-3.5 h-3.5" /> Disposal Logs
-            </button>
-            <button
-              onClick={() => setIsAssetModalOpen(true)}
-              className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm"
-            >
-              <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
-              Assign Asset
-            </button>
+
+            {!isCEO && (
+              <button
+                onClick={() => setIsAssetModalOpen(true)}
+                className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transform active:scale-95 transition-all flex items-center gap-2 group text-sm"
+              >
+                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />{' '}
+                Assign Asset
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -497,304 +570,412 @@ export const Assets = () => {
         </div>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex-1 flex flex-col">
-        <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Asset Details
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Tag / Serial
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Classification
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Depreciation Value
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Disposal Value
-                </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100/50">
-              {loadingAssets && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-slate-400 font-bold"
-                  >
-                    Synchronizing...
-                  </td>
-                </tr>
-              )}
-              {!loadingAssets && filteredAssets.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-20 text-center text-slate-400 font-bold"
-                  >
-                    No assets found.
-                  </td>
-                </tr>
-              )}
-
-              {!loadingAssets &&
-                filteredAssets.map((asset) => {
-                  const RowIcon = getCategoryIcon(asset.category?.name);
-
-                  return (
-                    <tr
-                      key={asset.id}
-                      className="hover:bg-white/60 transition-colors group"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
-                            <RowIcon className="w-5 h-5 text-[#ff8000]" />
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-slate-800 truncate">
-                              {asset.name}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              {asset.category?.name}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-bold text-slate-600">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1.5">
-                            <Tag className="w-3 h-3 text-slate-400" />
-                            {asset.tag_id || 'N/A'}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
-                            <ShieldCheck className="w-3 h-3" />
-                            {asset.serial_number}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {asset.status === 'IN_STOCK' ? (
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                              Classification
-                            </span>
-                            <span className="text-xs font-bold text-slate-400 italic">
-                              In Store / N/A
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-xs font-bold text-slate-600 flex flex-col gap-1">
-                            <span
-                              className="flex items-center gap-1"
-                              title={asset.department?.name || 'HISP Rwanda'}
-                            >
-                              <Building2 className="w-3 h-3 shrink-0" />
-                              <span className="truncate max-w-[120px]">
-                                {asset.department?.name || 'HISP Rwanda'}
-                              </span>
-                            </span>
-                            {asset.assigned_to && (
-                              <span className="text-[10px] text-[#ff8000] font-black uppercase tracking-tight flex items-center gap-1">
-                                <UserIcon className="w-3 h-3 shrink-0" />
-                                <span
-                                  className="truncate max-w-[120px]"
-                                  title={asset.assigned_to.full_name}
-                                >
-                                  {asset.assigned_to.full_name}
-                                </span>
-                              </span>
-                            )}
-                            <span className="text-[10px] text-slate-400 font-medium italic">
-                              {asset.location || 'HQ Storage'}
-                            </span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div
-                          className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${getStatusStyle(asset.status)}`}
-                        >
-                          {asset.status.replace('_', ' ')}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-slate-700">
-                            {Number(asset.current_value || 0).toLocaleString()}{' '}
-                            RWF
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                            Cost:{' '}
-                            {Number(asset.purchase_cost || 0).toLocaleString()}{' '}
-                            RWF
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-[#ff8000]">
-                            {Number(asset.disposal_value || 0).toLocaleString()}{' '}
-                            RWF
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 group">
-                            Est. Recovery
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAssetToView(asset);
-                            }}
-                            className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {isAdmin && (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAssetToEdit(asset);
-                                }}
-                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                title="Edit Asset"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              {asset.status !== 'DISPOSED' && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAssetToDispose(asset);
-                                  }}
-                                  className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                                  title="Dispose Asset"
-                                >
-                                  <Archive className="w-4 h-4" />
-                                </button>
-                              )}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAssetToDelete(asset);
-                                }}
-                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Delete Asset"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-
-                          {(isAdmin ||
-                            asset.assigned_to?.id === currentUser?.id) &&
-                            ((asset.assignment_history &&
-                              asset.assignment_history.length > 0 &&
-                              asset.assignment_history.some(
-                                (a) => a.form_status !== 'APPROVED' || isAdmin,
-                              )) ||
-                              (isAdmin && asset.status === 'ASSIGNED')) &&
-                            (() => {
-                              const latest =
-                                asset.assignment_history &&
-                                asset.assignment_history.length > 0
-                                  ? [...asset.assignment_history].sort(
-                                      (a, b) =>
-                                        new Date(b.assigned_at).getTime() -
-                                        new Date(a.assigned_at).getTime(),
-                                    )[0]
-                                  : null;
-
-                              const needsAction =
-                                latest &&
-                                ((isAdmin &&
-                                  (latest.form_status === 'DRAFT' ||
-                                    latest.form_status ===
-                                      'PENDING_ADMIN_REVIEW' ||
-                                    latest.form_status === 'REJECTED')) ||
-                                  (!isAdmin &&
-                                    (latest.form_status ===
-                                      'PENDING_USER_SIGNATURE' ||
-                                      latest.form_status === 'REJECTED')));
-
-                              const isUrgent =
-                                latest?.form_status === 'REJECTED';
-
-                              if (latest?.form_status === 'APPROVED')
-                                return null;
-
-                              return (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!latest) {
-                                      setSelectedAssignment({
-                                        id: 'legacy-' + asset.id,
-                                        asset,
-                                        user: asset.assigned_to as unknown as User,
-                                        assigned_at: new Date().toISOString(),
-                                        form_status: 'DRAFT',
-                                        form_number: 'LEGACY-FORM',
-                                        received_from_name: 'Administration',
-                                        received_at: new Date().toISOString(),
-                                      } as AssetAssignment);
-                                    } else {
-                                      setSelectedAssignment({
-                                        ...latest,
-                                        asset,
-                                      });
-                                    }
-                                    setIsReceiptModalOpen(true);
-                                  }}
-                                  className={`p-2 rounded-lg transition-all ${
-                                    needsAction
-                                      ? isUrgent
-                                        ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
-                                        : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
-                                      : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
-                                  }`}
-                                  title={
-                                    !latest
-                                      ? 'Initiate Missing Receipt'
-                                      : latest.form_status === 'REJECTED'
-                                        ? 'Form Rejected - Action Required'
-                                        : 'Asset Receipt Form'
-                                  }
-                                >
-                                  <FileCheck className="w-4 h-4" />
-                                </button>
-                              );
-                            })()}
-                        </div>
+      <div className="flex gap-4 flex-1 min-h-0 relative">
+        <div className="flex-1 min-w-0 flex flex-col focus-within:z-10">
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex-1 flex flex-col relative">
+            <div className="overflow-x-auto flex-1">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Asset Details
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Tag / Serial
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Classification
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Depreciation Value
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Disposal Value
+                    </th>
+                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/50">
+                  {loadingAssets && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-12 text-center text-slate-400 font-bold"
+                      >
+                        Synchronizing...
                       </td>
                     </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
-        <div className="px-6 py-4 border-t border-slate-100/50 bg-white/40 flex items-center justify-between text-xs font-bold text-slate-400">
-          <span>
-            Showing {filteredAssets.length} of {assets?.length || 0} items
-          </span>
-        </div>
-      </div>
+                  )}
+                  {!loadingAssets && filteredAssets.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-20 text-center text-slate-400 font-bold"
+                      >
+                        No assets found.
+                      </td>
+                    </tr>
+                  )}
 
+                  {!loadingAssets &&
+                    filteredAssets.map((asset) => {
+                      const RowIcon = getCategoryIcon(asset.category?.name);
+
+                      return (
+                        <tr
+                          key={asset.id}
+                          className="hover:bg-white/60 transition-colors group"
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
+                                <RowIcon className="w-5 h-5 text-[#ff8000]" />
+                              </div>
+                              <div>
+                                <div className="text-xs font-black text-slate-700 leading-none mb-1">
+                                  {asset.name}
+                                </div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                                  {asset.category?.name}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-bold text-slate-600">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-slate-600 transition-colors">
+                                <Tag className="w-3 h-3" />
+                                <span className="text-[9px] font-black uppercase tracking-wider">
+                                  {asset.tag_id || 'N/A'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-slate-300 group-hover:text-slate-400 transition-colors">
+                                <Activity className="w-3 h-3" />
+                                <span className="text-[9px] font-bold">
+                                  {asset.serial_number}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-1.5 text-slate-500 whitespace-nowrap">
+                                <Building2 className="w-3 h-3 text-slate-400" />
+                                <span className="text-[9px] font-black uppercase tracking-tight">
+                                  {asset.location || 'HQ Storage'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-orange-500 whitespace-nowrap">
+                                <UserIcon className="w-3 h-3" />
+                                <span className="text-[9px] font-black uppercase tracking-tight">
+                                  {asset.assigned_to?.full_name || 'Unassigned'}
+                                </span>
+                              </div>
+                              {asset.department?.name && (
+                                <div className="text-[8px] font-medium text-slate-400 italic pl-4.5">
+                                  {asset.department.name}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-[8px] border shrink-0 ${getStatusStyle(asset.status)}`}
+                            >
+                              {asset.status.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-slate-700">
+                                {Number(
+                                  asset.current_value || 0,
+                                ).toLocaleString()}{' '}
+                                RWF
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                                Cost:{' '}
+                                {Number(
+                                  asset.purchase_cost || 0,
+                                ).toLocaleString()}{' '}
+                                RWF
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-[#ff8000]">
+                                {Number(
+                                  asset.disposal_value || 0,
+                                ).toLocaleString()}{' '}
+                                RWF
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 group">
+                                Est. Recovery
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-1 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAssetToView(asset);
+                                }}
+                                className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              {isAdmin && (
+                                <>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAssetToEdit(asset);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Edit Asset"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </button>
+                                  {asset.status !== 'DISPOSED' && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAssetToDispose(asset);
+                                      }}
+                                      className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                      title="Dispose Asset"
+                                    >
+                                      <Archive className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAssetToDelete(asset);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Delete Asset"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </>
+                              )}
+
+                              {(isAdmin ||
+                                asset.assigned_to?.id === currentUser?.id) &&
+                                (() => {
+                                  const latest =
+                                    asset.assignment_history &&
+                                    asset.assignment_history.length > 0
+                                      ? [...asset.assignment_history].sort(
+                                          (a, b) =>
+                                            new Date(b.assigned_at).getTime() -
+                                            new Date(a.assigned_at).getTime(),
+                                        )[0]
+                                      : null;
+
+                                  const showFormIcon =
+                                    (isAdmin &&
+                                      !latest &&
+                                      asset.status === 'ASSIGNED') ||
+                                    (latest &&
+                                      latest.form_status !== 'APPROVED');
+
+                                  if (!showFormIcon) return null;
+
+                                  const needsAction =
+                                    latest &&
+                                    ((isAdmin &&
+                                      (latest.form_status === 'DRAFT' ||
+                                        latest.form_status ===
+                                          'PENDING_ADMIN_REVIEW' ||
+                                        latest.form_status === 'REJECTED')) ||
+                                      (!isAdmin &&
+                                        (latest.form_status ===
+                                          'PENDING_USER_SIGNATURE' ||
+                                          latest.form_status === 'REJECTED')));
+
+                                  const isUrgent =
+                                    latest?.form_status === 'REJECTED';
+
+                                  return (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!latest) {
+                                          setAssignmentToUpload({
+                                            id: 'legacy-' + asset.id,
+                                            asset,
+                                            user: asset.assigned_to as unknown as User,
+                                          } as AssetAssignment);
+                                          setIsUploadModalOpen(true);
+                                        } else {
+                                          setSelectedAssignment({
+                                            ...latest,
+                                            asset,
+                                          });
+                                          setIsReceiptModalOpen(true);
+                                        }
+                                      }}
+                                      className={`p-2 rounded-lg transition-all ${
+                                        needsAction
+                                          ? isUrgent
+                                            ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
+                                            : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
+                                          : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                      }`}
+                                      title={
+                                        !latest
+                                          ? 'Upload Scanned PDF (Paper Trail)'
+                                          : latest.form_status === 'REJECTED'
+                                            ? 'Form Rejected - Action Required'
+                                            : 'Asset Receipt Form'
+                                      }
+                                    >
+                                      {!latest ? (
+                                        <Upload className="w-4 h-4" />
+                                      ) : (
+                                        <FileCheck className="w-4 h-4" />
+                                      )}
+                                    </button>
+                                  );
+                                })()}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100/50 bg-white/40 flex items-center justify-between text-xs font-bold text-slate-400">
+              <span>
+                Showing {filteredAssets.length} of{' '}
+                {assets?.filter((a) => a.status !== 'DISPOSED').length || 0}{' '}
+                items
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {isAdmin && selectedCategory && (
+          <div
+            className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${
+              isRequestableSidebarOpen
+                ? 'w-72 opacity-100'
+                : 'w-0 opacity-0 overflow-hidden'
+            }`}
+          >
+            <button
+              onClick={() => setIsRequestableSidebarOpen(false)}
+              className="absolute -left-3 top-10 w-6 h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-md hover:bg-slate-50 transition-all z-20 group"
+              title="Collapse Sidebar"
+            >
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+            </button>
+
+            <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-sm p-4 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">
+                    Requestable Items
+                  </h3>
+                  <p className="text-[10px] font-medium text-slate-400 mt-0.5 leading-tight">
+                    Items staff can select when requesting assets from this
+                    category.
+                  </p>
+                </div>
+                <span className="text-[9px] font-black text-[#ff8000] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg whitespace-nowrap">
+                  {requestableItems?.length || 0} items
+                </span>
+              </div>
+
+              <div className="flex gap-1.5 mb-3">
+                <input
+                  type="text"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newItemName.trim()) {
+                      e.preventDefault();
+                      addItemMutation.mutate(newItemName.trim());
+                    }
+                  }}
+                  placeholder="e.g. Laptop..."
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all"
+                />
+                <button
+                  onClick={() => {
+                    if (newItemName.trim())
+                      addItemMutation.mutate(newItemName.trim());
+                  }}
+                  disabled={!newItemName.trim() || addItemMutation.isPending}
+                  className="bg-[#ff8000] hover:bg-[#e49f37] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 transition-all shrink-0"
+                >
+                  {addItemMutation.isPending ? (
+                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Plus className="w-3 h-3" />
+                  )}
+                  Add
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto max-h-[600px] pr-1 scrollbar-thin">
+                {loadingItems ? (
+                  <div className="flex items-center justify-center py-6">
+                    <div className="w-4 h-4 border-2 border-[#ff8000]/30 border-t-[#ff8000] rounded-full animate-spin" />
+                  </div>
+                ) : requestableItems && requestableItems.length > 0 ? (
+                  <div className="flex flex-col gap-1.5">
+                    {requestableItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 group hover:border-slate-200 transition-colors"
+                      >
+                        <span className="text-xs font-bold text-slate-700 truncate">
+                          {item.name}
+                        </span>
+                        <button
+                          onClick={() => deleteItemMutation.mutate(item.id)}
+                          className="text-slate-200 hover:text-rose-500 transition-colors ml-2 shrink-0"
+                          title="Remove"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-6 text-center">
+                    <p className="text-[10px] text-slate-400 font-medium italic">
+                      No items yet. Add one above.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAdmin && selectedCategory && !isRequestableSidebarOpen && (
+          <button
+            onClick={() => setIsRequestableSidebarOpen(true)}
+            className="absolute right-0 top-10 w-6 h-12 bg-white border border-slate-200 border-r-0 rounded-l-full flex items-center justify-center shadow-md hover:bg-slate-50 transition-all z-20 group"
+            title="Expand Sidebar"
+          >
+            <ChevronLeft className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </button>
+        )}
+      </div>
       <CreateAssetModal
         isOpen={isAssetModalOpen}
         onClose={() => setIsAssetModalOpen(false)}
@@ -823,14 +1004,19 @@ export const Assets = () => {
         }}
         assignment={selectedAssignment}
       />
+      <UploadScannedFormModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        assignment={assignmentToUpload}
+      />
       {assetToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-orange-950/20 backdrop-blur-sm"
             onClick={() => setAssetToDelete(null)}
           />
-          <div className="relative z-10 bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
+          <div className="relative z-10 bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200 text-center">
+            <div className="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
               <AlertCircle className="w-7 h-7 text-red-500" />
             </div>
             <h2 className="text-xl font-black text-slate-800 mb-2">

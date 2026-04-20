@@ -45,19 +45,18 @@ export const HODOverview = () => {
     if (!assets || !currentUser?.department?.id) return null;
 
     const departmentAssets = assets.filter(
-      (a) => a.department?.id === currentUser?.department?.id,
+      (a) =>
+        a.department?.id === currentUser?.department?.id &&
+        a.status !== 'DISPOSED',
     );
 
     const personalAssets = departmentAssets.filter(
       (a) => a.assigned_to?.id === currentUser?.id && !a.is_shared,
     );
     const staffAssets = departmentAssets.filter(
-      (a) =>
-        a.assigned_to && a.assigned_to.id !== currentUser?.id && !a.is_shared,
+      (a) => a.assigned_to?.id !== currentUser?.id && !a.is_shared,
     );
-    const sharedAssets = departmentAssets.filter(
-      (a) => a.is_shared || (!a.assigned_to && a.status === 'IN_STOCK'),
-    );
+    const sharedAssets = departmentAssets.filter((a) => a.is_shared);
 
     return {
       total: departmentAssets.length,
@@ -116,11 +115,8 @@ export const HODOverview = () => {
   if (!stats) return null;
 
   return (
-    <div className="relative min-h-screen -m-6 p-6 overflow-hidden bg-slate-50/50">
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-200/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-[140px] translate-y-1/2 pointer-events-none" />
-
-      <div className="relative z-10 space-y-8">
+    <div className="relative min-h-screen -m-6 p-6 bg-slate-50/50">
+      <div className="space-y-8">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
           <div>
             <div className="flex items-center gap-3 mb-3">
@@ -142,7 +138,7 @@ export const HODOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
               <Box className="w-5 h-5 text-[#ff8000]" />
@@ -195,20 +191,6 @@ export const HODOverview = () => {
               </p>
               <p className="text-xl font-black text-slate-800 leading-none">
                 {stats.staffAssets.length}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-              <Building2 className="w-5 h-5 text-slate-500" />
-            </div>
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
-                Shared Resources
-              </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
-                {stats.sharedAssets.length}
               </p>
             </div>
           </div>
@@ -424,10 +406,11 @@ export const HODOverview = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black text-white shadow-lg">
-                              {asset.assigned_to?.full_name?.charAt(0)}
+                              {asset.assigned_to?.full_name?.charAt(0) || '?'}
                             </div>
                             <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">
-                              {asset.assigned_to?.full_name}
+                              {asset.assigned_to?.full_name ||
+                                'Pooled / In Stock'}
                             </span>
                           </div>
                         </td>
@@ -548,17 +531,31 @@ export const HODOverview = () => {
                               </p>
                               {incident.investigation_status === 'DENIED' && (
                                 <div className="mt-1.5 flex items-center gap-3">
-                                  <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
-                                    <AlertCircle className="w-3 h-3" /> Penalty:{' '}
-                                    {Number(
-                                      incident.penalty_amount || 0,
-                                    ).toLocaleString()}{' '}
-                                    RWF
-                                  </div>
+                                  {incident.penalty_resolved_at ? (
+                                    <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm">
+                                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                      CLEARED:{' '}
+                                      {Number(
+                                        incident.penalty_amount || 0,
+                                      ).toLocaleString()}{' '}
+                                      RWF
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
+                                      <AlertCircle className="w-3 h-3" />{' '}
+                                      Penalty:{' '}
+                                      {Number(
+                                        incident.penalty_amount || 0,
+                                      ).toLocaleString()}{' '}
+                                      RWF
+                                    </div>
+                                  )}
                                   <button
                                     onClick={() =>
                                       setResolutionNotice(
-                                        'Please contact the Directorate of Finance and Administration (DFA) penalty resolution and asset clearance.',
+                                        incident.penalty_resolved_at
+                                          ? 'This penalty has been fully settled and cleared from your record.'
+                                          : 'Please contact the Directorate of Finance and Administration (DFA) regarding penalty resolution and asset clearance.',
                                       )
                                     }
                                     className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"

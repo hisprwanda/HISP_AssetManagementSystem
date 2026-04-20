@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Category } from 'src/categories/entities/category.entity';
 import { Department } from 'src/departments/entities/department.entity';
@@ -19,7 +21,7 @@ export class Asset {
   @Column({ unique: true, nullable: true })
   tag_id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   serial_number: string;
 
   @Column()
@@ -62,23 +64,23 @@ export class Asset {
   accumulated_depreciation: number;
 
   @Column({ nullable: true })
-  category_id: string;
+  category_id: string | null;
 
-  @ManyToOne(() => Category, (category) => category.assets)
+  @ManyToOne(() => Category, (category) => category.assets, { nullable: true })
   @JoinColumn({ name: 'category_id' })
-  category: Category;
+  category: Category | null;
 
   @Column({ nullable: true })
-  department_id: string;
+  department_id: string | null;
 
   @ManyToOne(() => Department, (department) => department.assets, {
     nullable: true,
   })
   @JoinColumn({ name: 'department_id' })
-  department: Department;
+  department: Department | null;
 
   @Column({ nullable: true })
-  assigned_to_user_id: string;
+  assigned_to_user_id: string | null;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'assigned_to_user_id' })
@@ -89,4 +91,10 @@ export class Asset {
 
   @OneToMany(() => AssetAssignment, (assignment) => assignment.asset)
   assignment_history: AssetAssignment[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

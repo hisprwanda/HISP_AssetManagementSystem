@@ -4,9 +4,14 @@ import { AssetIncidentsService } from './asset-incidents.service';
 import { AssetIncidentsController } from './asset-incidents.controller';
 import { AssetIncident } from './entities/asset-incident.entity';
 import { AssetsModule } from '../assets/assets.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AssetIncident]), AssetsModule],
+  imports: [
+    TypeOrmModule.forFeature([AssetIncident]),
+    AssetsModule,
+    NotificationsModule,
+  ],
   controllers: [AssetIncidentsController],
   providers: [AssetIncidentsService],
 })

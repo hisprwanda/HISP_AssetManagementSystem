@@ -1,4 +1,4 @@
-import { X, Tag, Percent, ArrowDownToLine } from 'lucide-react';
+import { Tag, Percent, ArrowDownToLine } from 'lucide-react';
 import { Category } from '@/types/assets';
 import {
   Dialog,
@@ -37,12 +37,6 @@ export const ViewCategoryModal = ({
           <DialogDescription className="text-slate-500 font-medium">
             Overview of the classification and its financial rules.
           </DialogDescription>
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </DialogHeader>
 
         <div className="space-y-6 py-4">

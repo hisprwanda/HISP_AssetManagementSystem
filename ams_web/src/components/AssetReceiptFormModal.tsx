@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  X,
   FileCheck,
   Signature,
   Calendar,
@@ -225,21 +224,7 @@ export const AssetReceiptFormModal = ({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className="p-3 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-2xl transition-all active:scale-90"
-              title="Print Form"
-            >
-              <Printer className="w-5 h-5" />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all active:scale-90"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <div className="flex items-center gap-2"></div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#fafbfd] print:bg-white print:p-0">
           <div className="flex justify-between items-center max-w-lg mx-auto print:hidden bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
@@ -609,7 +594,7 @@ export const AssetReceiptFormModal = ({
                     setSignatureName(e.target.value);
                     setError('');
                   }}
-                  placeholder='e.g. "I agree and John Doe"'
+                  placeholder="Enter your full name"
                   className={`w-full px-6 py-4 bg-slate-50 border ${error ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10' : 'border-slate-200 focus:border-orange-500 focus:ring-orange-500/10'} rounded-2xl outline-none focus:ring-4 text-lg font-['Dancing_Script',_cursive] transition-all placeholder:font-sans placeholder:text-sm`}
                 />
                 {error && (
@@ -621,9 +606,8 @@ export const AssetReceiptFormModal = ({
                   </div>
                 )}
                 <p className="text-[10px] font-bold text-slate-400 italic">
-                  By typing your name above (starting with "I agree and"), you
-                  are creating a legally binding digital signature to the
-                  declaration above.
+                  By typing your full names above, you are creating a legally
+                  binding digital signature to the declaration above.
                 </p>
               </div>
               <button

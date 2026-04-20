@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, Laptop, Hash, Building2, Save, Trash2 } from 'lucide-react';
+import { Laptop, Hash, Building2, Save, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Category, Asset } from '@/types/assets';
 
@@ -134,12 +134,6 @@ export const EditAssetModal = ({
               Tag: {asset.tag_id || asset.serial_number}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <form
@@ -202,10 +196,7 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  disabled={
-                    !!formData.assigned_to_user_id &&
-                    formData.assigned_to_user_id !== asset.assigned_to?.id
-                  }
+                  disabled={false}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-50"
                 >
                   <option value="IN_STOCK">In Stock</option>
@@ -214,10 +205,18 @@ export const EditAssetModal = ({
                   <option value="MISSING">Missing</option>
                 </select>
                 {formData.assigned_to_user_id &&
-                  formData.assigned_to_user_id !== asset.assigned_to?.id && (
+                  formData.assigned_to_user_id !== asset.assigned_to?.id &&
+                  formData.status === 'IN_STOCK' && (
                     <p className="text-[10px] font-bold text-orange-500 mt-1 italic animate-pulse">
                       Note: Status remains IN_STOCK until assignment form is
                       signed.
+                    </p>
+                  )}
+                {formData.assigned_to_user_id &&
+                  formData.status === 'ASSIGNED' && (
+                    <p className="text-[10px] font-bold text-blue-500 mt-1 italic">
+                      Legacy Override: Asset will be marked as ASSIGNED
+                      immediately (skipping digital signature).
                     </p>
                   )}
               </div>
@@ -232,10 +231,9 @@ export const EditAssetModal = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
-                  Serial Number *
+                  Serial Number
                 </label>
                 <input
-                  required
                   type="text"
                   value={formData.serial_number}
                   onChange={(e) =>
@@ -246,9 +244,10 @@ export const EditAssetModal = ({
               </div>
               <div className="space-y-2 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
-                  Internal Tag ID
+                  Internal Tag ID *
                 </label>
                 <input
+                  required
                   type="text"
                   value={formData.tag_id}
                   onChange={(e) =>

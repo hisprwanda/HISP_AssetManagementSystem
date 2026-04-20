@@ -14,7 +14,6 @@ import {
   User as UserIcon,
   X,
   Settings2,
-  Download,
   Send,
   UserCheck,
   FilePlus,
@@ -230,59 +229,6 @@ export const Requests = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleExportLogs = () => {
-    if (!filteredRequests.length) return;
-
-    const headers = [
-      'Request Title',
-      'Requested By',
-      'Directorate',
-      'Total Est. Cost (RWF)',
-      'Urgency',
-      'Status',
-      'Date Requested',
-    ];
-
-    const escapeCSV = (val: string | number | undefined) => {
-      if (val === null || val === undefined) return '""';
-      return `"${String(val).replace(/"/g, '""')}"`;
-    };
-
-    const rows = filteredRequests.map((req) => {
-      const cost =
-        req.financials?.grand_total ??
-        (req.quantity || 0) * (req.estimated_unit_cost || 0);
-      return [
-        escapeCSV(req.title),
-        escapeCSV(req.requested_by?.full_name),
-        escapeCSV(req.department?.name),
-        escapeCSV(cost),
-        escapeCSV(req.urgency),
-        escapeCSV(req.status),
-        escapeCSV(
-          req.created_at ? new Date(req.created_at).toLocaleDateString() : '',
-        ),
-      ];
-    });
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n');
-    const blob = new Blob(['\ufeff' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.setAttribute('download', `procurement_requests_${dateStr}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -290,15 +236,6 @@ export const Requests = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {!isRequesterOnly && (
             <>
-              <button
-                onClick={handleExportLogs}
-                disabled={!filteredRequests.length}
-                className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2 text-sm rounded-xl font-bold shadow-sm transform active:scale-95 transition-all flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
-              >
-                <Download className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" />{' '}
-                Request log
-              </button>
-
               {isHOD ? (
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button

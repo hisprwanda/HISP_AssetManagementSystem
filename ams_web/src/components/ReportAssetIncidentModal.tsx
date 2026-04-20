@@ -54,17 +54,30 @@ export const ReportAssetIncidentModal = ({
 
   const myAssets = assets || [];
 
-  const individualAssets = myAssets.filter(
-    (a) => a.assigned_to?.id === currentUser?.id && a.status === 'ASSIGNED',
+  const departmentAssets = myAssets.filter(
+    (a) => a.department?.id === currentUser?.department?.id,
   );
 
-  const sharedAssets = myAssets.filter(
-    (a) =>
-      (isHOD || isAdmin) &&
-      a.department?.id === currentUser?.department?.id &&
-      !a.assigned_to &&
-      (a.status === 'ASSIGNED' || a.status === 'IN_STOCK'),
-  );
+  const individualAssets = departmentAssets.filter((a) => {
+    const isMine = a.assigned_to?.id === currentUser?.id;
+    const isIndividual = !a.is_shared;
+    const isReportable = a.status === 'ASSIGNED' || a.status === 'IN_STOCK';
+
+    if (isHOD || isAdmin) {
+      return isIndividual && isReportable;
+    }
+    return isMine && isIndividual && a.status === 'ASSIGNED';
+  });
+
+  const sharedAssets = departmentAssets.filter((a) => {
+    const isShared = a.is_shared;
+    const isReportable = a.status === 'ASSIGNED' || a.status === 'IN_STOCK';
+
+    if (isHOD || isAdmin) {
+      return isShared && isReportable;
+    }
+    return isShared && a.assigned_to?.id === currentUser?.id;
+  });
 
   const showShared = isHOD || isAdmin;
 
@@ -439,18 +452,11 @@ export const ReportAssetIncidentModal = ({
                 )}
               </div>
 
-              <DialogFooter className="pt-2 gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl font-bold text-slate-400 hover:bg-slate-100 transition-colors text-xs"
-                >
-                  Discard
-                </button>
+              <DialogFooter className="pt-2">
                 <button
                   type="submit"
                   disabled={isSubmitting || isReadingFile}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
                   {isSubmitting || isReadingFile ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

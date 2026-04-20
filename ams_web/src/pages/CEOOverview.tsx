@@ -94,6 +94,7 @@ export const CEOOverview = () => {
 
     const missingAssets = assets.filter((a) => a.status === 'MISSING').length;
     const brokenAssets = assets.filter((a) => a.status === 'BROKEN').length;
+    const liveAssets = assets.filter((a) => a.status !== 'DISPOSED');
 
     const ceoPending = requests.filter((r) => r.status === 'CEO_REVIEW');
     const ceoPendingValue = ceoPending.reduce((sum, r: AssetRequest) => {
@@ -104,7 +105,7 @@ export const CEOOverview = () => {
     }, 0);
 
     const departments: Record<string, { count: number; value: number }> = {};
-    assets.forEach((a) => {
+    liveAssets.forEach((a) => {
       const deptName = a.department?.name || 'Unassigned';
       if (!departments[deptName])
         departments[deptName] = { count: 0, value: 0 };
@@ -117,7 +118,7 @@ export const CEOOverview = () => {
       .slice(0, 5);
 
     const categories: Record<string, { count: number; value: number }> = {};
-    assets.forEach((a) => {
+    liveAssets.forEach((a) => {
       const catName = a.category?.name || 'Uncategorized';
       if (!categories[catName]) categories[catName] = { count: 0, value: 0 };
       categories[catName].count++;
@@ -126,7 +127,7 @@ export const CEOOverview = () => {
 
     return {
       totalValue,
-      inventoryCount: assets.length,
+      inventoryCount: liveAssets.length,
       ceoPendingCount: ceoPending.length,
       ceoPendingValue,
       missingAssets,
@@ -268,22 +269,22 @@ export const CEOOverview = () => {
           <Link
             key={i}
             to={stat.path}
-            className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block relative overflow-hidden"
+            className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block relative overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
-                <stat.icon className="w-6 h-6 text-slate-600 group-hover:text-white transition-colors" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
+                <stat.icon className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" />
               </div>
-              <ArrowRight className="w-5 h-5 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-4 h-4 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-1 transition-all" />
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1 leading-none">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
             </p>
-            <div className="flex items-baseline gap-2 leading-none">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
                 {stat.value}
               </h3>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">
                 {stat.unit}
               </span>
             </div>

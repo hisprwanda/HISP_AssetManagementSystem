@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldAlert,
   ShieldCheck,
@@ -12,17 +12,19 @@ import {
   Laptop,
   Clock,
   Trash2,
-  Download,
   CheckCircle2,
+  Banknote,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
 import { ViewIncidentModal } from '../components/ViewIncidentModal';
 import { useAuth } from '../hooks/useAuth';
 import { AssetIncident } from '../types/assets';
+import { ConfirmActionModal } from '../components/ConfirmActionModal';
 
 export const Incidents = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isFinanceAdmin, isAdmin, isHOD, isCEO, user } = useAuth();
   const { openIncident } = useOutletContext<{ openIncident: () => void }>();
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +36,8 @@ export const Incidents = () => {
     null,
   );
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+  const [incidentToSettle, setIncidentToSettle] =
+    useState<AssetIncident | null>(null);
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
@@ -51,6 +55,15 @@ export const Incidents = () => {
     queryFn: async () => {
       const response = await api.get('/asset-incidents');
       return response.data;
+    },
+  });
+
+  const penaltyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/asset-incidents/${id}/resolve-penalty`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
     },
   });
 
@@ -126,16 +139,25 @@ export const Incidents = () => {
       );
     }
 
+    const deniedIncidents = filteredForStats.filter(
+      (i) => i.investigation_status === 'DENIED',
+    );
+    const resolvedPenalties = deniedIncidents.filter(
+      (i) => i.penalty_resolved_at,
+    ).length;
+
     return {
       investigating: filteredForStats.filter(
         (i) => i.investigation_status === 'INVESTIGATING',
       ).length,
+      ceo_review: filteredForStats.filter(
+        (i) => i.investigation_status === 'CEO_REVIEW',
+      ).length,
       accepted: filteredForStats.filter(
         (i) => i.investigation_status === 'ACCEPTED',
       ).length,
-      denied: filteredForStats.filter(
-        (i) => i.investigation_status === 'DENIED',
-      ).length,
+      denied_pending: deniedIncidents.length - resolvedPenalties,
+      resolved_penalties: resolvedPenalties,
     };
   }, [incidents, isHOD, isAdmin, isFinanceAdmin, user]);
 
@@ -145,6 +167,8 @@ export const Incidents = () => {
         return 'bg-slate-50 text-slate-950 border-slate-200 font-black';
       case 'DENIED':
         return 'bg-orange-50 text-orange-600 border-orange-100 italic';
+      case 'CEO_REVIEW':
+        return 'bg-amber-50 text-amber-600 border-amber-100 font-bold';
       default:
         return 'bg-slate-50 text-slate-500 border-slate-200';
     }
@@ -168,61 +192,6 @@ export const Incidents = () => {
 
   const getInvestigationRemarks = (inc: AssetIncident) => {
     return inc.investigation_remarks || '';
-  };
-
-  const handleExportLogs = () => {
-    if (!filteredIncidents.length) return;
-
-    const headers = [
-      'Incident ID',
-      'Date Reported',
-      'Incident Type',
-      'Asset Name',
-      'Tag ID',
-      'Serial Number',
-      'Reporter',
-      'Department',
-      'Investigation Status',
-      'Explanation',
-      'Resolution Remarks',
-    ];
-
-    const escapeCSV = (val: string) => {
-      if (val === null || val === undefined) return '';
-      const stringified = String(val);
-      return `"${stringified.replace(/"/g, '""')}"`;
-    };
-
-    const rows = filteredIncidents.map((inc) => [
-      escapeCSV(`#${inc.id.slice(0, 8).toUpperCase()}`),
-      escapeCSV(new Date(inc.reported_at).toLocaleDateString()),
-      escapeCSV(inc.incident_type),
-      escapeCSV(inc.asset?.name || 'N/A'),
-      escapeCSV(inc.asset?.tag_id || 'N/A'),
-      escapeCSV(inc.asset?.serial_number || 'N/A'),
-      escapeCSV(inc.reported_by?.full_name || 'N/A'),
-      escapeCSV(getDepartmentName(inc)),
-      escapeCSV(inc.investigation_status),
-      escapeCSV(inc.explanation || ''),
-      escapeCSV(getInvestigationRemarks(inc)),
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n');
-    const blob = new Blob(['\ufeff' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.setAttribute('download', `investigation_logs_${dateStr}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   if (!isAdmin && !isFinanceAdmin && !isHOD && !isCEO) {
@@ -256,16 +225,10 @@ export const Incidents = () => {
               Incident
             </button>
           )}
-          <button
-            onClick={handleExportLogs}
-            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group"
-          >
-            <Download className="w-3.5 h-3.5 text-[#ff8000]" /> Export Logs
-          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100">
@@ -273,12 +236,28 @@ export const Incidents = () => {
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
-                Open Cases
+                Investigating
               </p>
               <h3 className="text-lg font-black text-slate-800 leading-none">
                 {stats.investigating}{' '}
-                <span className="text-[9px] font-bold text-slate-400">
-                  PENDING
+                <span className="text-[9px] font-bold text-slate-400">ADM</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-amber-100 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
+              <ShieldAlert className="w-4 h-4 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                CEO Review
+              </p>
+              <h3 className="text-lg font-black text-slate-800 leading-none animate-pulse">
+                {stats.ceo_review}{' '}
+                <span className="text-[9px] font-bold text-amber-300">
+                  EXEC
                 </span>
               </h3>
             </div>
@@ -302,9 +281,17 @@ export const Incidents = () => {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/penalties')}
-          className="bg-white p-3 rounded-xl border border-orange-100 shadow-sm flex items-center justify-between hover:scale-105 hover:shadow-md transition-all group text-left cursor-pointer"
+        <div
+          onClick={
+            isAdmin || isFinanceAdmin || isCEO
+              ? () => navigate('/penalties')
+              : undefined
+          }
+          className={`bg-white p-3 rounded-xl border border-orange-100 shadow-sm flex items-center justify-between transition-all group text-left ${
+            isAdmin || isFinanceAdmin || isCEO
+              ? 'hover:scale-105 hover:shadow-md cursor-pointer'
+              : ''
+          }`}
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-orange-100 transition-colors">
@@ -315,14 +302,32 @@ export const Incidents = () => {
                 Denied
               </p>
               <h3 className="text-lg font-black text-slate-800 leading-none">
-                {stats.denied}{' '}
+                {stats.denied_pending}{' '}
                 <span className="text-[9px] font-bold text-orange-200">
-                  PENALTIES
+                  PENDING
                 </span>
               </h3>
             </div>
           </div>
-        </button>
+        </div>
+        <div className="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm flex items-center justify-between group">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                Settled
+              </p>
+              <h3 className="text-lg font-black text-slate-800 leading-none text-emerald-600">
+                {stats.resolved_penalties}{' '}
+                <span className="text-[9px] font-bold text-emerald-300">
+                  PAID
+                </span>
+              </h3>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-3 flex flex-col md:flex-row gap-3">
@@ -339,7 +344,7 @@ export const Incidents = () => {
         <div className="flex flex-col md:flex-row gap-2 items-center">
           <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-              Audit Period:
+              DATE RANGE:
             </span>
             <input
               type="date"
@@ -503,14 +508,42 @@ export const Incidents = () => {
 
                     <td className="px-8 py-5">
                       <div className="flex items-center justify-end gap-2 pr-2">
-                        {inc.investigation_status === 'INVESTIGATING' &&
-                          (isAdmin || isFinanceAdmin || isCEO) && (
+                        {((inc.investigation_status === 'INVESTIGATING' &&
+                          (isAdmin || isFinanceAdmin)) ||
+                          (inc.investigation_status === 'CEO_REVIEW' &&
+                            isCEO)) && (
+                          <button
+                            onClick={() => handleResolve(inc)}
+                            className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
+                            title={
+                              isCEO
+                                ? 'Strategic Review'
+                                : 'Resolve Investigation'
+                            }
+                          >
+                            <ShieldAlert className="w-4 h-4" />
+                          </button>
+                        )}
+                        {inc.investigation_status === 'DENIED' &&
+                          (isAdmin || isFinanceAdmin) && (
                             <button
-                              onClick={() => handleResolve(inc)}
-                              className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
-                              title="Resolve Investigation"
+                              onClick={() => setIncidentToSettle(inc)}
+                              className={`p-2 rounded-lg transition-all border shadow-sm ${
+                                inc.penalty_resolved_at
+                                  ? 'bg-emerald-50 border-emerald-100 text-emerald-500'
+                                  : 'bg-orange-50 border-orange-100 text-orange-500 hover:bg-orange-100'
+                              }`}
+                              title={
+                                inc.penalty_resolved_at
+                                  ? 'Penalty Fully Settled'
+                                  : 'Resolve Penalty'
+                              }
                             >
-                              <ShieldAlert className="w-4 h-4" />
+                              {inc.penalty_resolved_at ? (
+                                <CheckCircle2 className="w-4 h-4" />
+                              ) : (
+                                <Banknote className="w-4 h-4" />
+                              )}
                             </button>
                           )}
                         <button
@@ -576,6 +609,22 @@ export const Incidents = () => {
         isOpen={!!incidentToView}
         onClose={() => setIncidentToView(null)}
         incident={incidentToView}
+      />
+
+      <ConfirmActionModal
+        isOpen={!!incidentToSettle}
+        onClose={() => setIncidentToSettle(null)}
+        onConfirm={() => {
+          if (incidentToSettle) {
+            penaltyMutation.mutate(incidentToSettle.id);
+          }
+        }}
+        title="Confirm Action"
+        message={`Confirm that the penalty for #${incidentToSettle?.id.slice(0, 8).toUpperCase()} has been fully settled by the personnel?`}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        variant="info"
+        isLoading={penaltyMutation.isPending}
       />
     </div>
   );

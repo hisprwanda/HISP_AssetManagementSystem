@@ -16,7 +16,7 @@ interface Notification {
   title: string;
   message: string;
   is_read: boolean;
-  type: 'CEO_APPROVED' | 'CEO_REJECTED' | 'INFO';
+  type: 'CEO_APPROVED' | 'CEO_REJECTED' | 'INFO' | 'ALERT' | 'INCIDENT';
   request_id?: string;
   request_title?: string;
   created_at: string;
@@ -76,7 +76,10 @@ export const NotificationBell = () => {
       case 'CEO_APPROVED':
         return <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />;
       case 'CEO_REJECTED':
+      case 'ALERT':
         return <XCircle className="w-4 h-4 text-red-500 shrink-0" />;
+      case 'INCIDENT':
+        return <Bell className="w-4 h-4 text-orange-500 shrink-0" />;
       default:
         return <ShoppingCart className="w-4 h-4 text-orange-500 shrink-0" />;
     }

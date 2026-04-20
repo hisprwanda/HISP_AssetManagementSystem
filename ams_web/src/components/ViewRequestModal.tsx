@@ -1,5 +1,4 @@
 import {
-  X,
   FileText,
   Banknote,
   Building2,
@@ -205,15 +204,8 @@ export const ViewRequestModal = ({
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
+      <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl z-50 flex flex-col border-l border-slate-100">
         <div className="px-8 py-8 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white relative">
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
           <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-5 shadow-inner">
             <FileText className="w-7 h-7 text-[#ff8000]" />
           </div>
@@ -367,7 +359,7 @@ export const ViewRequestModal = ({
             </div>
           ) : null}
 
-          {!isRequesterOnly && (
+          {(isAdmin || isCEO) && (
             <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff8000]/10 rounded-full blur-2xl -mr-10 -mt-10" />
               <div className="relative z-10 space-y-4">

@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Asset } from '../../assets/entities/asset.entity';
+import { RequestableItem } from '../../requestable-items/entities/requestable-item.entity';
 
 @Entity('categories')
 export class Category {
@@ -16,4 +17,7 @@ export class Category {
 
   @OneToMany(() => Asset, (asset) => asset.category)
   assets: Asset[];
+
+  @OneToMany(() => RequestableItem, (item) => item.category)
+  requestable_items: RequestableItem[];
 }

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { Category } from '../types/assets';
+import { Category, RequestableItem } from '../types/assets';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,17 @@ export const SimpleRequestModal = ({
       const response = await api.get('/categories');
       return response.data;
     },
+  });
+
+  const { data: requestableItems } = useQuery<RequestableItem[]>({
+    queryKey: ['requestable-items', categoryId],
+    queryFn: async () => {
+      const response = await api.get(
+        `/categories/${categoryId}/requestable-items`,
+      );
+      return response.data;
+    },
+    enabled: !!categoryId,
   });
 
   const mutation = useMutation({
@@ -213,41 +224,19 @@ export const SimpleRequestModal = ({
                 </label>
                 <div>
                   {(() => {
-                    const selectedCat = categories?.find(
-                      (c) => c.id === categoryId,
-                    );
-                    const catName = selectedCat?.name.toLowerCase() || '';
-
-                    let options: string[] = [];
-                    if (
-                      catName.includes('computer') ||
-                      catName.includes('laptop') ||
-                      catName.includes('electronics')
-                    ) {
-                      options = ['Laptop', 'Monitor', 'Charger', 'Mouse'];
-                    } else if (
-                      catName.includes('furniture') ||
-                      catName.includes('fixture')
-                    ) {
-                      options = ['Chair', 'Desk', 'Filling Cabinet'];
-                    } else if (
-                      catName.includes('office') ||
-                      catName.includes('stationary') ||
-                      catName.includes('equipment')
-                    ) {
-                      options = [
-                        'Printer',
-                        'Photocopier',
-                        'Paper Shredder',
-                        'Stappling Machine',
-                      ];
-                    }
-
-                    const showDropdown = options.length > 0;
+                    const hasItems =
+                      requestableItems && requestableItems.length > 0;
 
                     return (
                       <div className="space-y-3">
-                        {showDropdown && (
+                        {categoryId && !hasItems && (
+                          <p className="text-[10px] text-slate-400 font-medium italic px-1">
+                            No preset items for this category — describe what
+                            you need below.
+                          </p>
+                        )}
+
+                        {hasItems && (
                           <div className="relative">
                             <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
                             <select
@@ -270,9 +259,9 @@ export const SimpleRequestModal = ({
                                   ? 'Select a category first...'
                                   : 'Select an item...'}
                               </option>
-                              {options.map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
+                              {requestableItems?.map((item) => (
+                                <option key={item.id} value={item.name}>
+                                  {item.name}
                                 </option>
                               ))}
                               {categoryId && (
@@ -284,7 +273,7 @@ export const SimpleRequestModal = ({
                           </div>
                         )}
 
-                        {categoryId && (isOther || !showDropdown) && (
+                        {categoryId && (isOther || !hasItems) && (
                           <div className="animate-in fade-in slide-in-from-top-2 duration-300 relative">
                             <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none" />
                             <input
@@ -292,7 +281,7 @@ export const SimpleRequestModal = ({
                               value={itemName}
                               onChange={(e) => setItemName(e.target.value)}
                               placeholder={
-                                !showDropdown
+                                !hasItems
                                   ? 'Specify the item you need...'
                                   : 'Type the item name manually...'
                               }
@@ -320,18 +309,11 @@ export const SimpleRequestModal = ({
                 />
               </div>
 
-              <DialogFooter className="pt-2 gap-3 sm:gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
-                >
-                  Discard
-                </button>
+              <DialogFooter className="pt-2">
                 <button
                   type="submit"
                   disabled={mutation.isPending}
-                  className="flex-[2] bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  className="w-full bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
                   {mutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

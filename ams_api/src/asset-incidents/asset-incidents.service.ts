@@ -9,6 +9,7 @@ import { AssetIncident } from './entities/asset-incident.entity';
 import { Asset } from 'src/assets/entities/asset.entity';
 import { AssetRequest } from 'src/assets-requests/entities/assets-request.entity';
 import { AssetsService } from 'src/assets/assets.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class AssetIncidentsService {
@@ -17,6 +18,7 @@ export class AssetIncidentsService {
     private readonly incidentRepo: Repository<AssetIncident>,
     private readonly assetsService: AssetsService,
     private readonly dataSource: DataSource,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async reportIncident(dto: {
@@ -76,10 +78,39 @@ export class AssetIncidentsService {
       order: { reported_at: 'DESC' },
     });
   }
+  async forwardToCEO(incidentId: string, remarks: string) {
+    const incident = await this.incidentRepo.findOne({
+      where: { id: incidentId },
+      relations: ['asset'],
+    });
+    if (!incident) throw new NotFoundException('Incident not found');
+    if (incident.investigation_status !== 'INVESTIGATING') {
+      throw new BadRequestException(
+        'Only items in current investigation can be forwarded.',
+      );
+    }
+
+    incident.investigation_status = 'CEO_REVIEW';
+    incident.investigation_remarks = remarks;
+    const saved = await this.incidentRepo.save(incident);
+    try {
+      await this.notificationsService.notifyIncidentForwarded({
+        incidentId: saved.id,
+        assetName: saved.asset?.name || 'Assigned Asset',
+        adminRemarks: remarks,
+      });
+    } catch (e) {
+      console.error('Forward notification failed:', e);
+    }
+
+    return saved;
+  }
+
   async resolveIncident(
     incidentId: string,
     resolution: 'ACCEPTED' | 'DENIED',
     remarks: string,
+    isCEOAction = false,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -97,21 +128,28 @@ export class AssetIncidentsService {
       });
 
       if (!incident) throw new NotFoundException('Incident not found');
-      if (incident.investigation_status !== 'INVESTIGATING') {
+
+      const currentStatus = incident.investigation_status;
+      if (currentStatus === 'ACCEPTED' || currentStatus === 'DENIED') {
         throw new BadRequestException(
           'This incident has already been resolved.',
         );
       }
 
+      if (currentStatus === 'CEO_REVIEW') {
+        incident.ceo_remarks = remarks;
+      } else {
+        incident.investigation_remarks = remarks;
+      }
+
       incident.investigation_status = resolution;
-      incident.investigation_remarks = remarks;
 
       if (resolution === 'ACCEPTED') {
         const request = queryRunner.manager.create(AssetRequest, {
           requested_by: incident.reported_by,
           department: incident.reported_by.department,
           title: `Replacement for ${incident.asset.name}`,
-          description: `[AUTO-GENERATED REPLACEMENT] Previous asset (${incident.asset.tag_id}) was ${incident.incident_type}. Reason: ${remarks}`,
+          description: `[AUTO-GENERATED REPLACEMENT] Previous asset (${incident.asset.tag_id}) was ${incident.incident_type}. Outcome: ${remarks}`,
           status: 'PENDING',
           items: [
             {
@@ -134,6 +172,29 @@ export class AssetIncidentsService {
 
       const updatedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
+
+      try {
+        await this.notificationsService.notifyIncidentVerdict({
+          incidentId: updatedIncident.id,
+          resolution: updatedIncident.investigation_status as
+            | 'ACCEPTED'
+            | 'DENIED',
+          assetName: updatedIncident.asset?.name || 'Assigned Asset',
+          reporterId: updatedIncident.reported_by?.id,
+          departmentId: updatedIncident.reported_by?.department?.id,
+          remarks:
+            updatedIncident.investigation_status === 'ACCEPTED' ||
+            updatedIncident.investigation_status === 'DENIED'
+              ? isCEOAction
+                ? updatedIncident.ceo_remarks
+                : updatedIncident.investigation_remarks
+              : remarks,
+          isCEO: isCEOAction,
+        });
+      } catch (e) {
+        console.error('Verdict notification failed:', e);
+      }
+
       return updatedIncident;
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -141,5 +202,38 @@ export class AssetIncidentsService {
     } finally {
       await queryRunner.release();
     }
+  }
+  async togglePenaltyResolution(incidentId: string) {
+    const incident = await this.incidentRepo.findOne({
+      where: { id: incidentId },
+      relations: ['asset', 'reported_by'],
+    });
+
+    if (!incident) throw new NotFoundException('Incident not found');
+    if (incident.investigation_status !== 'DENIED') {
+      throw new BadRequestException(
+        'Resolution only applicable to denied incidents with penalties.',
+      );
+    }
+
+    incident.penalty_resolved_at = incident.penalty_resolved_at
+      ? null
+      : new Date();
+
+    const saved = await this.incidentRepo.save(incident);
+
+    try {
+      await this.notificationsService.notifyPenaltyResolution({
+        incidentId: saved.id,
+        assetName: saved.asset?.name || 'Assigned Asset',
+        recipientId: saved.reported_by?.id,
+        amount: saved.penalty_amount || 0,
+        isResolved: !!saved.penalty_resolved_at,
+      });
+    } catch (error) {
+      console.error('Failed to send penalty resolution notification:', error);
+    }
+
+    return saved;
   }
 }

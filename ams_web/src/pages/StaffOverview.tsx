@@ -168,17 +168,31 @@ export const StaffOverview = () => {
                               </p>
                               {incident.investigation_status === 'DENIED' && (
                                 <div className="mt-1.5 flex items-center gap-3">
-                                  <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
-                                    <AlertCircle className="w-3 h-3" /> Penalty:{' '}
-                                    {Number(
-                                      incident.penalty_amount || 0,
-                                    ).toLocaleString()}{' '}
-                                    RWF
-                                  </div>
+                                  {incident.penalty_resolved_at ? (
+                                    <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm animate-in zoom-in duration-300">
+                                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                      CLEARED:{' '}
+                                      {Number(
+                                        incident.penalty_amount || 0,
+                                      ).toLocaleString()}{' '}
+                                      RWF
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
+                                      <AlertCircle className="w-3 h-3" />{' '}
+                                      Penalty:{' '}
+                                      {Number(
+                                        incident.penalty_amount || 0,
+                                      ).toLocaleString()}{' '}
+                                      RWF
+                                    </div>
+                                  )}
                                   <button
                                     onClick={() =>
                                       setResolutionNotice(
-                                        'Please contact the Directorate of Finance and Administration (DFA) penalty resolution and asset clearance.',
+                                        incident.penalty_resolved_at
+                                          ? 'This penalty has been fully settled and cleared from your record.'
+                                          : 'Please contact the Directorate of Finance and Administration (DFA) regarding penalty resolution and asset clearance.',
                                       )
                                     }
                                     className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"

@@ -72,6 +72,9 @@ export class AssetAssignment {
   @Column({ type: 'text', nullable: true })
   rejection_reason: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  scanned_form_url: string | null;
+
   @CreateDateColumn()
   created_at: Date;
 

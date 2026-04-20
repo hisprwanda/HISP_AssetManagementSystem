@@ -85,13 +85,16 @@ export const EditDepartmentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]">
+      <DialogContent
+        hideClose
+        className="sm:max-w-[425px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]"
+      >
         <DialogHeader>
           <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
             <Building2 className="w-6 h-6 text-[#ff8000]" />
           </div>
           <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
-            Edit Directorate
+            Edit Organisational Unit
           </DialogTitle>
           <DialogDescription className="text-slate-500 font-medium">
             Update the details of this organizational unit.
@@ -108,7 +111,7 @@ export const EditDepartmentModal = ({
 
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
-              Directorate Name *
+              Organisational Unit Name *
             </label>
             <input
               type="text"
@@ -122,7 +125,7 @@ export const EditDepartmentModal = ({
 
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
-              Directorate Type *
+              Organisational Unit Type *
             </label>
             <select
               value={type}

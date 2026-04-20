@@ -18,6 +18,18 @@ import { DisposeAssetDto } from './dto/dispose-asset.dto';
 export class AssetsController {
   constructor(private readonly assetsService: AssetsService) {}
 
+  @Get('ping')
+  ping() {
+    return { status: 'ok', module: 'Assets' };
+  }
+
+  @Post('/batch-update')
+  @ApiOperation({ summary: 'Bulk register assets' })
+  bulkCreate(@Body() assets: Record<string, any>[]) {
+    console.log(`[AssetsController] RECEIVING BATCH: ${assets?.length} items`);
+    return this.assetsService.bulkCreate(assets);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Register a new physical asset' })
   create(@Body() createAssetDto: CreateAssetDto) {

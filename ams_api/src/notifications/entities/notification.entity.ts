@@ -28,7 +28,7 @@ export class Notification {
 
   @Column({
     type: 'enum',
-    enum: ['CEO_APPROVED', 'CEO_REJECTED', 'INFO'],
+    enum: ['CEO_APPROVED', 'CEO_REJECTED', 'INFO', 'ALERT', 'INCIDENT'],
     default: 'INFO',
   })
   type: string;

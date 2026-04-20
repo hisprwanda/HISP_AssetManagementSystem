@@ -38,7 +38,7 @@ export class AssetIncident {
 
   @Column({
     type: 'enum',
-    enum: ['INVESTIGATING', 'ACCEPTED', 'DENIED'],
+    enum: ['INVESTIGATING', 'CEO_REVIEW', 'ACCEPTED', 'DENIED'],
     default: 'INVESTIGATING',
   })
   investigation_status: string;
@@ -49,9 +49,15 @@ export class AssetIncident {
   @Column({ type: 'text', nullable: true })
   investigation_remarks: string;
 
+  @Column({ type: 'text', nullable: true })
+  ceo_remarks: string;
+
   @OneToOne(() => AssetRequest, { nullable: true })
   @JoinColumn({ name: 'replacement_request_id' })
   replacement_request: AssetRequest;
+
+  @Column({ type: 'timestamp', nullable: true })
+  penalty_resolved_at: Date | null;
 
   @CreateDateColumn()
   reported_at: Date;

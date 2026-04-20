@@ -1,9 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AssetAssignmentsService } from './assets-assignments.service';
 import { CreateAssetAssignmentDto } from './dto/create-assets-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-assets-assignment.dto';
 import { PrepareAssignmentDto } from './dto/prepare-assignment.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+
+interface MulterFile {
+  filename: string;
+  mimetype: string;
+}
 
 @ApiTags('Asset Assignments')
 @Controller('asset-assignments')
@@ -11,6 +29,39 @@ export class AssetAssignmentsController {
   constructor(
     private readonly assetAssignmentsService: AssetAssignmentsService,
   ) {}
+
+  @Post(':id/upload-scanned')
+  @ApiOperation({ summary: 'Upload a scanned PDF paper form' })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  uploadScanned(
+    @Param('id') id: string,
+    @UploadedFile()
+    file: MulterFile,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (file.mimetype !== 'application/pdf') {
+      throw new BadRequestException(
+        `Invalid file type: ${file.mimetype}. Only PDF files are allowed.`,
+      );
+    }
+
+    const fileUrl = `/uploads/${file.filename}`;
+    return this.assetAssignmentsService.uploadScannedForm(id, fileUrl);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Assign an asset to a user (Check-out)' })

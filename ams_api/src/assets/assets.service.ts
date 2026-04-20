@@ -15,6 +15,20 @@ import { User } from 'src/users/entities/user.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
 import { DisposeAssetDto } from './dto/dispose-asset.dto';
 
+interface BulkAssetData {
+  serial_number?: string;
+  tag_id?: string;
+  category_name?: string;
+  Category?: string;
+  department_name?: string;
+  Department?: string;
+  Personnel?: string;
+  personnel_name?: string;
+  status?: string;
+  purchase_cost?: number | string;
+  [key: string]: any;
+}
+
 @Injectable()
 export class AssetsService {
   constructor(
@@ -90,6 +104,114 @@ export class AssetsService {
     }
   }
 
+  async bulkCreate(assetsData: BulkAssetData[]): Promise<{
+    success: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const results = { success: 0, failed: 0, errors: [] as string[] };
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      for (const data of assetsData) {
+        try {
+          // Manual Duplicate Check to avoid transaction poisoning
+          if (data.serial_number) {
+            const existingSerial = await queryRunner.manager.findOne(Asset, {
+              where: { serial_number: data.serial_number },
+            });
+            if (existingSerial) {
+              throw new Error(
+                `Serial Number '${data.serial_number}' already registered`,
+              );
+            }
+          }
+
+          if (data.tag_id) {
+            const existingTag = await queryRunner.manager.findOne(Asset, {
+              where: { tag_id: data.tag_id },
+            });
+            if (existingTag) {
+              throw new Error(`Tag ID '${data.tag_id}' already registered`);
+            }
+          }
+          let category: Category | null = null;
+          if (data.category_name || data.Category) {
+            category = await queryRunner.manager.findOne(Category, {
+              where: { name: data.category_name || data.Category },
+            });
+          }
+
+          let department: Department | null = null;
+          if (data.department_name || data.Department) {
+            department = await queryRunner.manager.findOne(Department, {
+              where: { name: data.department_name || data.Department },
+            });
+          }
+
+          let assigned_to: User | null = null;
+          const personnelName = data.Personnel || data.personnel_name;
+          if (personnelName) {
+            assigned_to = await queryRunner.manager.findOne(User, {
+              where: { full_name: personnelName },
+            });
+          }
+
+          const entityFields = { ...data };
+          delete entityFields.category_name;
+          delete entityFields.Category;
+          delete entityFields.department_name;
+          delete entityFields.Department;
+          delete entityFields.Personnel;
+          delete entityFields.personnel_name;
+          delete entityFields.purchase_cost;
+          delete entityFields.status;
+
+          const rawCost = data.purchase_cost;
+
+          const asset = queryRunner.manager.create(Asset, {
+            ...entityFields,
+            purchase_cost: Number(rawCost || 0),
+            category,
+            department,
+            assigned_to,
+            status: data.status || (assigned_to ? 'ASSIGNED' : 'IN_STOCK'),
+          });
+
+          if (category) {
+            const dep = this.calculateDepreciation(asset);
+            asset.current_value = dep.current_value;
+            asset.accumulated_depreciation = dep.accumulated_depreciation;
+            asset.disposal_value = dep.disposal_value;
+          } else {
+            asset.current_value = Number(data.purchase_cost || 0);
+            asset.accumulated_depreciation = 0;
+          }
+
+          await queryRunner.manager.save(asset);
+          results.success++;
+        } catch (err) {
+          results.failed++;
+          results.errors.push(
+            `Row ${results.success + results.failed}: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        }
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(
+        `Bulk operation failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+
+    return results;
+  }
+
   async findAll(): Promise<Asset[]> {
     return await this.assetRepo.find({
       relations: [
@@ -119,69 +241,122 @@ export class AssetsService {
   }
 
   async update(id: string, updateAssetDto: UpdateAssetDto): Promise<Asset> {
-    const asset = await this.findOne(id);
-    const oldAssignedToId = asset.assigned_to?.id;
-    const newAssignedToId = updateAssetDto.assigned_to_user_id;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (updateAssetDto.category_id)
-      asset.category = { id: updateAssetDto.category_id } as Category;
-    if (updateAssetDto.department_id)
-      asset.department = { id: updateAssetDto.department_id } as Department;
+    try {
+      const asset = await queryRunner.manager.findOne(Asset, {
+        where: { id },
+        relations: ['category', 'department', 'assigned_to'],
+      });
 
-    if (newAssignedToId !== undefined) {
-      asset.assigned_to = newAssignedToId
-        ? ({ id: newAssignedToId } as User)
-        : null;
+      if (!asset) throw new NotFoundException(`Asset with ID ${id} not found`);
 
-      const statusChangingToAssigned =
-        updateAssetDto.status === 'ASSIGNED' && asset.status !== 'ASSIGNED';
-      const userChanging =
-        !!newAssignedToId && newAssignedToId !== oldAssignedToId;
+      const oldAssignedToId = asset.assigned_to?.id;
+      const newAssignedToId = updateAssetDto.assigned_to_user_id;
 
-      if (userChanging || statusChangingToAssigned) {
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
+      const isValidUUID = (id: unknown): boolean =>
+        typeof id === 'string' && id.length === 36;
+
+      if (
+        updateAssetDto.category_id !== undefined &&
+        updateAssetDto.category_id !== asset.category?.id
+      ) {
+        if (isValidUUID(updateAssetDto.category_id)) {
+          const category = await queryRunner.manager.findOne(Category, {
+            where: { id: updateAssetDto.category_id },
+          });
+          if (category) {
+            asset.category = category;
+            asset.category_id = category.id;
+          }
+        } else if (updateAssetDto.category_id === null) {
+          asset.category = null;
+          asset.category_id = null;
+        }
+      }
+
+      if (
+        updateAssetDto.department_id !== undefined &&
+        updateAssetDto.department_id !== asset.department?.id
+      ) {
+        if (isValidUUID(updateAssetDto.department_id)) {
+          const department = await queryRunner.manager.findOne(Department, {
+            where: { id: updateAssetDto.department_id },
+          });
+          if (department) {
+            asset.department = department;
+            asset.department_id = department.id;
+          }
+        } else if (updateAssetDto.department_id === null) {
+          asset.department = null;
+          asset.department_id = null;
+        }
+      }
+
+      if (newAssignedToId !== undefined) {
+        const userChanging =
+          isValidUUID(newAssignedToId) && newAssignedToId !== oldAssignedToId;
+        const statusChangingToAssigned =
+          updateAssetDto.status === 'ASSIGNED' && asset.status !== 'ASSIGNED';
+
+        if (userChanging || statusChangingToAssigned) {
           const user = await queryRunner.manager.findOne(User, {
             where: { id: newAssignedToId },
           });
-          if (!user) throw new NotFoundException('User not found');
+          if (!user) throw new NotFoundException('Target user not found');
 
-          const count = await queryRunner.manager.count(AssetAssignment);
-          const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, '0')}`;
+          const isManualOverride = updateAssetDto.status === 'ASSIGNED';
 
-          const assignment = queryRunner.manager.create(AssetAssignment, {
-            asset: { id: asset.id } as Asset,
-            user: user,
-            condition_on_assign: 'Assigned via System Update',
-            assigned_at: new Date(),
-            form_status: 'DRAFT',
-            form_number: formNumber,
-            received_from_name: 'Administration',
-            received_at: new Date(),
-          });
-          await queryRunner.manager.save(assignment);
-          await queryRunner.commitTransaction();
+          if (!isManualOverride) {
+            const count = await queryRunner.manager.count(AssetAssignment);
+            const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, '0')}`;
 
-          updateAssetDto.status = 'IN_STOCK';
-        } catch (err) {
-          await queryRunner.rollbackTransaction();
-          throw err;
-        } finally {
-          await queryRunner.release();
+            const assignment = queryRunner.manager.create(AssetAssignment, {
+              asset: { id: asset.id } as Asset,
+              user: user,
+              condition_on_assign: 'Assigned via System Update',
+              assigned_at: new Date(),
+              form_status: 'DRAFT',
+              form_number: formNumber,
+              received_from_name: 'Administration',
+              received_at: new Date(),
+            });
+            await queryRunner.manager.save(assignment);
+
+            updateAssetDto.status = 'IN_STOCK';
+          }
+
+          asset.assigned_to = user;
+          asset.assigned_to_user_id = user.id;
+        } else if (newAssignedToId === null) {
+          asset.assigned_to = null;
+          asset.assigned_to_user_id = null;
         }
       }
+
+      const otherData = { ...updateAssetDto };
+      delete otherData.category_id;
+      delete otherData.department_id;
+      delete otherData.assigned_to_user_id;
+      Object.assign(asset, otherData);
+      const dep = this.calculateDepreciation(asset);
+      asset.current_value = dep.current_value;
+      asset.accumulated_depreciation = dep.accumulated_depreciation;
+      asset.disposal_value = dep.disposal_value;
+
+      const savedAsset = await queryRunner.manager.save(asset);
+      await queryRunner.commitTransaction();
+
+      return await this.findOne(savedAsset.id);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.error('[AssetsService] Update Error:', err);
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    Object.assign(asset, updateAssetDto);
-
-    const dep = this.calculateDepreciation(asset);
-    asset.current_value = dep.current_value;
-    asset.accumulated_depreciation = dep.accumulated_depreciation;
-    asset.disposal_value = dep.disposal_value;
-
-    return await this.assetRepo.save(asset);
   }
 
   async remove(id: string): Promise<void> {

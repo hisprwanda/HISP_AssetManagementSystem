@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  X,
   Laptop,
   Hash,
   Tag as TagIcon,
@@ -145,12 +144,6 @@ export const CreateAssetModal = ({
               Inventory Management
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <form
@@ -235,10 +228,9 @@ export const CreateAssetModal = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
-                  Serial Number *
+                  Serial Number
                 </label>
                 <input
-                  required
                   type="text"
                   placeholder="SN-XXXX-YYYY"
                   value={formData.serial_number}
@@ -250,11 +242,12 @@ export const CreateAssetModal = ({
               </div>
               <div className="space-y-2 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
-                  Internal Tag ID
+                  Internal Tag ID *
                 </label>
                 <div className="relative">
                   <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
+                    required
                     type="text"
                     placeholder="HISP-RWA-001"
                     value={formData.tag_id}

@@ -95,12 +95,18 @@ export const Layout = () => {
   });
 
   const pendingIncidentsCount = useMemo(() => {
-    if (!allIncidents) return 0;
+    if (!allIncidents || !user) return 0;
+    if (isCEO) {
+      return allIncidents.filter(
+        (i: { investigation_status: string }) =>
+          i.investigation_status === 'CEO_REVIEW',
+      ).length;
+    }
     return allIncidents.filter(
       (i: { investigation_status: string }) =>
         i.investigation_status === 'INVESTIGATING',
     ).length;
-  }, [allIncidents]);
+  }, [allIncidents, isCEO, user]);
 
   const { data: hodRequests } = useQuery({
     queryKey: ['assets-requests', 'badge'],
@@ -231,15 +237,17 @@ export const Layout = () => {
           icon: AlertTriangle,
         });
         baseItems.push({
-          name: 'Directorate',
+          name: 'Organisational Unit',
           path: '/directorate',
           icon: Users,
         });
-        baseItems.push({
-          name: 'Audit Trail',
-          path: '/audit-trail',
-          icon: History,
-        });
+        if (isAdmin) {
+          baseItems.push({
+            name: 'Audit Trail',
+            path: '/audit-trail',
+            icon: History,
+          });
+        }
       }
 
       baseItems.push({ name: 'My Profile', path: '/profile', icon: UserIcon });
@@ -340,20 +348,26 @@ export const Layout = () => {
               '/disposal-logs',
               '/assignment-history',
               '/request-trail',
+              '/asset-trail',
             ];
             const isAuditActive =
               isAuditItem && auditPaths.includes(location.pathname);
+            const isIncidentActive =
+              item.name === 'Incident Reports' &&
+              (location.pathname === '/incidents' ||
+                location.pathname === '/penalties');
 
             return (
               <NavLink
                 key={item.name}
                 to={item.path!}
                 className={({ isActive }) =>
-                  commonClasses(isActive || isAuditActive)
+                  commonClasses(isActive || isAuditActive || isIncidentActive)
                 }
               >
                 {({ isActive }) => {
-                  const effectivelyActive = isActive || isAuditActive;
+                  const effectivelyActive =
+                    isActive || isAuditActive || isIncidentActive;
                   return (
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2.5">

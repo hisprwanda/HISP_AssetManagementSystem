@@ -1,8 +1,14 @@
+export interface RequestableItem {
+  id: string;
+  name: string;
+}
+
 export interface Category {
   id: string;
   name: string;
   depreciation_rate?: number;
   disposal_rate?: number;
+  requestable_items?: RequestableItem[];
 }
 
 export interface User {
@@ -36,6 +42,7 @@ export interface AssetAssignment {
   received_from_name?: string;
   received_at?: string;
   rejection_reason?: string;
+  scanned_form_url?: string;
 }
 
 export interface POData {
@@ -131,9 +138,10 @@ export interface AssetIncident {
   incident_type: 'BROKEN' | 'MISSING';
   explanation: string;
   evidence_url?: string;
-  investigation_status: 'INVESTIGATING' | 'ACCEPTED' | 'DENIED';
+  investigation_status: 'INVESTIGATING' | 'CEO_REVIEW' | 'ACCEPTED' | 'DENIED';
   investigation_remarks?: string;
   penalty_amount?: number;
+  penalty_resolved_at?: string | null;
   resolved_at?: string;
   reported_at: string;
 }

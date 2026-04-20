@@ -10,6 +10,7 @@ import {
   Clock,
   Calendar,
 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 import { Asset } from '@/types/assets';
 
 interface ViewAssetModalProps {
@@ -23,6 +24,7 @@ export const ViewAssetModal = ({
   onClose,
   asset,
 }: ViewAssetModalProps) => {
+  const { isAdmin, isCEO } = useAuth();
   if (!isOpen || !asset) return null;
 
   const calculateMonths = () => {
@@ -130,25 +132,27 @@ export const ViewAssetModal = ({
             </div>
           </div>
 
-          <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100 grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] mb-1 flex items-center gap-1">
-                Current Book Value
-              </p>
-              <p className="text-lg font-black text-slate-800">
-                {Number(asset.current_value || 0).toLocaleString()} RWF
-              </p>
+          {(isAdmin || isCEO) && (
+            <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] mb-1 flex items-center gap-1">
+                  Current Book Value
+                </p>
+                <p className="text-lg font-black text-slate-800">
+                  {Number(asset.current_value || 0).toLocaleString()} RWF
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
+                  Accumulated Depr.
+                </p>
+                <p className="text-lg font-bold text-slate-500">
+                  {Number(asset.accumulated_depreciation || 0).toLocaleString()}{' '}
+                  RWF
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
-                Accumulated Depr.
-              </p>
-              <p className="text-lg font-bold text-slate-500">
-                {Number(asset.accumulated_depreciation || 0).toLocaleString()}{' '}
-                RWF
-              </p>
-            </div>
-          </div>
+          )}
 
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">

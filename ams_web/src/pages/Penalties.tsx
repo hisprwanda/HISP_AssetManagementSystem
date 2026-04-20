@@ -8,11 +8,14 @@ import {
   ArrowLeft,
   Download,
   CheckCircle2,
+  Banknote,
 } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { AssetIncident } from '../types/assets';
+import { ConfirmActionModal } from '../components/ConfirmActionModal';
 
 export const Penalties = () => {
   const { isFinanceAdmin, isAdmin } = useAuth();
@@ -29,12 +32,24 @@ export const Penalties = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [incidentToSettle, setIncidentToSettle] =
+    useState<AssetIncident | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
     queryKey: ['asset-incidents'],
     queryFn: async () => {
       const response = await api.get('/asset-incidents');
       return response.data;
+    },
+  });
+
+  const settleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/asset-incidents/${id}/resolve-penalty`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
     },
   });
 
@@ -151,17 +166,18 @@ export const Penalties = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center justify-between gap-4 mb-4">
         <button
           onClick={() => navigate(-1)}
           className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-sm"
         >
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </button>
-        <div className="flex-1 flex justify-center">
-          <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md p-1.5 px-4 rounded-xl border border-slate-200 shadow-sm">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-              Audit Period:
+              Date Range:
             </span>
             <input
               type="date"
@@ -182,21 +198,21 @@ export const Penalties = () => {
                   setStartDate('');
                   setEndDate('');
                 }}
-                className="ml-2 p-1 hover:bg-white rounded-md transition-colors"
+                className="ml-2 p-1 hover:bg-slate-100 rounded-md transition-colors"
               >
                 <ShieldX className="w-3 h-3 text-rose-400" />
               </button>
             )}
           </div>
+          <button
+            onClick={handleExportLogs}
+            disabled={!filteredPenalties.length}
+            className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors" />{' '}
+            Export List
+          </button>
         </div>
-        <button
-          onClick={handleExportLogs}
-          disabled={!filteredPenalties.length}
-          className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors" />{' '}
-          Export List
-        </button>
       </div>
 
       <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-3">
@@ -291,13 +307,25 @@ export const Penalties = () => {
                     </div>
                   </td>
                   <td className="p-4 align-top text-right">
-                    <div className="inline-flex flex-col items-end">
+                    <div className="inline-flex flex-col items-end gap-2">
                       <span className="text-sm font-black text-[#ff8000] bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
                         {Number(inc.penalty_amount || 0).toLocaleString()} RWF
                       </span>
-                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1.5">
-                        PENDING PAYMENT
-                      </span>
+                      {inc.penalty_resolved_at ? (
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[8px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 italic">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> PAID ON{' '}
+                          {new Date(
+                            inc.penalty_resolved_at,
+                          ).toLocaleDateString()}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setIncidentToSettle(inc)}
+                          className="flex items-center gap-1.5 text-orange-600 font-black text-[8px] uppercase tracking-widest bg-orange-50 px-2 py-1 rounded border border-orange-100 hover:bg-orange-100 transition-all shadow-sm active:scale-95 text-nowrap"
+                        >
+                          <Banknote className="w-3 h-3" /> SETTLE NOW
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -324,6 +352,22 @@ export const Penalties = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={!!incidentToSettle}
+        onClose={() => setIncidentToSettle(null)}
+        onConfirm={() => {
+          if (incidentToSettle) {
+            settleMutation.mutate(incidentToSettle.id);
+          }
+        }}
+        title="Confirm Settlement"
+        message={`Confirm that the penalty for #${incidentToSettle?.id.slice(0, 8).toUpperCase()} has been fully settled?`}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        variant="info"
+        isLoading={settleMutation.isPending}
+      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AssetIncidentsService } from './asset-incidents.service';
 import { ReportIncidentDto } from './dto/report-asset-incident.dto';
 import { ResolveIncidentDto } from './dto/resolve-asset-incident.dto';
+import { ForwardIncidentDto } from './dto/forward-asset-incident.dto';
 
 @ApiTags('Asset Incidents & Investigations')
 @Controller('asset-incidents')
@@ -21,6 +22,12 @@ export class AssetIncidentsController {
     return this.assetIncidentsService.findAll();
   }
 
+  @Patch(':id/forward')
+  @ApiOperation({ summary: 'Forward investigation to CEO' })
+  forwardToCEO(@Param('id') id: string, @Body() dto: ForwardIncidentDto) {
+    return this.assetIncidentsService.forwardToCEO(id, dto.remarks);
+  }
+
   @Patch(':id/resolve')
   @ApiOperation({ summary: 'Resolve an investigation (Accept or Deny)' })
   resolveIncident(@Param('id') id: string, @Body() dto: ResolveIncidentDto) {
@@ -29,5 +36,11 @@ export class AssetIncidentsController {
       dto.resolution,
       dto.remarks,
     );
+  }
+
+  @Patch(':id/resolve-penalty')
+  @ApiOperation({ summary: 'Mark a penalty as resolved' })
+  resolvePenalty(@Param('id') id: string) {
+    return this.assetIncidentsService.togglePenaltyResolution(id);
   }
 }

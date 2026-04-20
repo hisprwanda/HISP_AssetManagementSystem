@@ -67,7 +67,10 @@ export const ViewIncidentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] bg-white border-white/20 shadow-2xl rounded-2xl overflow-hidden p-0 gap-0">
+      <DialogContent
+        hideClose
+        className="sm:max-w-[550px] bg-white border-white/20 shadow-2xl rounded-2xl overflow-hidden p-0 gap-0"
+      >
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -215,35 +218,88 @@ export const ViewIncidentModal = ({
 
           {(incident.investigation_remarks ||
             incident.investigation_status !== 'INVESTIGATING') && (
-            <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" /> Investigation Remarks
+                <FileText className="w-3.5 h-3.5" /> Investigation Audit Trail
               </h4>
-              <div
-                className={`p-5 ${status.bg} border-2 ${status.border} rounded-2xl relative shadow-sm`}
-              >
-                <div className={`absolute top-2 right-3 ${status.color}`}>
-                  <StatusIcon className="w-5 h-5 opacity-20" />
-                </div>
-                <p
-                  className={`text-xs ${status.color} font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+              <div className="space-y-3">
+                {/* Admin Findings */}
+                <div
+                  className={`p-5 bg-white border border-slate-200 rounded-2xl relative shadow-sm border-l-4 border-l-slate-400`}
                 >
-                  Investigation Verdict
-                </p>
-                <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {incident.investigation_remarks ||
-                    'The investigation resulted in the case being ' +
-                      incident.investigation_status.toLowerCase() +
-                      '.'}
-                </p>
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-black/5">
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full ${status.bg} border ${status.border}`}
-                  />
-                  <span className="text-[9px] font-bold text-slate-400">
-                    RESOLVED ON {new Date().toLocaleDateString()}
-                  </span>
+                  <p
+                    className={`text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" /> Administrative
+                    Findings
+                  </p>
+                  <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {parseAdminRemarks(incident.investigation_remarks) ||
+                      'The initial investigation was completed by the administration.'}
+                  </p>
                 </div>
+
+                {/* CEO Verdict (if exists) */}
+                {incident.investigation_remarks?.includes('CEO:') && (
+                  <div
+                    className={`p-5 ${status.bg} border-2 ${status.border} rounded-2xl relative shadow-sm border-l-4 border-l-orange-500`}
+                  >
+                    <p
+                      className={`text-[9px] ${status.color} font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                    >
+                      <ShieldAlert className="w-3.5 h-3.5" /> Executive
+                      Strategic Review
+                    </p>
+                    <p className="text-[11px] font-black text-slate-900 leading-relaxed whitespace-pre-wrap italic">
+                      "
+                      {parseCEORemarks(incident.investigation_remarks) ||
+                        'Final decision rendered.'}
+                      "
+                    </p>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-black/5">
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${status.bg} border ${status.border}`}
+                      />
+                      <span className="text-[9px] font-bold text-slate-400">
+                        FINAL VERDICT RENDERED
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Penalty Details */}
+                {incident.investigation_status === 'DENIED' && (
+                  <div
+                    className={`p-5 ${incident.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100' : 'bg-orange-50 border-orange-100'} border-2 rounded-2xl relative shadow-sm border-l-4 ${incident.penalty_resolved_at ? 'border-l-emerald-500' : 'border-l-orange-500'} mt-4`}
+                  >
+                    <p
+                      className={`text-[9px] ${incident.penalty_resolved_at ? 'text-emerald-600' : 'text-orange-600'} font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                    >
+                      <ShieldAlert className="w-3.5 h-3.5" /> Financial Penalty
+                      Details
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[14px] font-black text-slate-900">
+                          {Number(
+                            incident.penalty_amount || 0,
+                          ).toLocaleString()}{' '}
+                          RWF
+                        </p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          Assessed Penalty Amount
+                        </p>
+                      </div>
+                      <span
+                        className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${incident.penalty_resolved_at ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}
+                      >
+                        {incident.penalty_resolved_at
+                          ? `CLEARED ON ${new Date(incident.penalty_resolved_at).toLocaleDateString()}`
+                          : 'PENDING PAYMENT'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -260,4 +316,17 @@ export const ViewIncidentModal = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+const parseAdminRemarks = (remarks?: string) => {
+  if (!remarks) return '';
+  if (remarks.includes('ADMIN:')) {
+    return remarks.split('ADMIN:')[1]?.split('CEO:')[0]?.trim() || remarks;
+  }
+  return remarks;
+};
+
+const parseCEORemarks = (remarks?: string) => {
+  if (!remarks || !remarks.includes('CEO:')) return '';
+  return remarks.split('CEO:')[1]?.trim() || '';
 };

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetIncident } from '../types/assets';
+import { useAuth } from '../hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,7 @@ export const ResolveIncidentModal = ({
   incident,
 }: ResolveIncidentModalProps) => {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
   const [resolution, setResolution] = useState<'ACCEPTED' | 'DENIED'>(
     'ACCEPTED',
   );
@@ -40,12 +42,14 @@ export const ResolveIncidentModal = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const isCEOReviewStatus = incident.investigation_status === 'CEO_REVIEW';
+
   const mutation = useMutation({
     mutationFn: async (payload: { resolution: string; remarks: string }) => {
-      const response = await api.patch(
-        `/asset-incidents/${incident.id}/resolve`,
-        payload,
-      );
+      const endpoint = isCEOReviewStatus
+        ? `/asset-incidents/${incident.id}/ceo-resolve`
+        : `/asset-incidents/${incident.id}/resolve`;
+      const response = await api.patch(endpoint, payload);
       return response.data;
     },
     onSuccess: () => {
@@ -64,10 +68,38 @@ export const ResolveIncidentModal = ({
     },
   });
 
+  const forwardMutation = useMutation({
+    mutationFn: async () => {
+      if (!remarks.trim())
+        throw new Error(
+          'Investigation findings are required before forwarding.',
+        );
+      const response = await api.patch(
+        `/asset-incidents/${incident.id}/forward`,
+        { remarks },
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+      }, 2000);
+    },
+    onError: (err: unknown) => {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(
+        axiosError.response?.data?.message || 'Failed to forward incident.',
+      );
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!remarks.trim()) {
-      setError('Please provide investigation remarks.');
+      setError('Please provide findings/remarks.');
       return;
     }
     mutation.mutate({ resolution, remarks });
@@ -77,7 +109,7 @@ export const ResolveIncidentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[520px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-2xl overflow-hidden p-0 gap-0">
+      <DialogContent className="sm:max-w-[520px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem] overflow-hidden p-0 gap-0">
         {success ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
             <div
@@ -94,11 +126,12 @@ export const ResolveIncidentModal = ({
               )}
             </div>
             <h2 className="text-xl font-black text-slate-800 tracking-tight mb-2 uppercase tracking-widest">
-              Logged
+              {forwardMutation.isSuccess ? 'Forwarded' : 'Logged'}
             </h2>
             <p className="text-slate-500 font-medium px-8 text-xs">
-              The incident has been {resolution.toLowerCase()} and the
-              corresponding actions have been triggered.
+              {forwardMutation.isSuccess
+                ? 'The incident has been forwarded to the CEO for strategic executive review.'
+                : `The incident has been ${resolution.toLowerCase()} and the corresponding actions have been triggered.`}
             </p>
           </div>
         ) : (
@@ -110,7 +143,9 @@ export const ResolveIncidentModal = ({
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-black text-slate-800 tracking-tight">
-                    Resolve Investigation
+                    {isCEOReviewStatus
+                      ? 'Strategic Executive Review'
+                      : 'Investigation Resolution'}
                   </DialogTitle>
                   <DialogDescription className="text-slate-500 font-medium text-[10px]">
                     Case{' '}
@@ -155,10 +190,22 @@ export const ResolveIncidentModal = ({
                   </div>
                 </div>
 
+                {isCEOReviewStatus && (
+                  <div className="pt-3 border-t-2 border-amber-100 mt-2 bg-amber-50/30 p-3 rounded-lg border border-amber-100">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-[#ff8000] mb-1.5 flex items-center gap-2">
+                      <ShieldAlert className="w-3 h-3" /> Administrative
+                      Findings
+                    </p>
+                    <p className="text-xs font-bold text-slate-700 leading-relaxed">
+                      {getAdminRemarks(incident)}
+                    </p>
+                  </div>
+                )}
+
                 {incident.explanation && (
-                  <div className="pt-3 border-t border-slate-200/60">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
-                      Explanation
+                  <div className="pt-3 border-t border-slate-200/60 mt-2">
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-2">
+                      <MessageSquare className="w-3 h-3" /> Reporter Explanation
                     </p>
                     <p className="text-xs font-medium text-slate-600 bg-white/60 p-2.5 rounded-lg border border-slate-200/50 leading-relaxed italic">
                       "{incident.explanation}"
@@ -279,14 +326,20 @@ export const ResolveIncidentModal = ({
 
               <div className="space-y-2">
                 <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                  Investigation Remarks
+                  {isCEOReviewStatus
+                    ? 'Executive Verdict'
+                    : 'Administrative Findings'}
                 </h4>
                 <div className="relative">
                   <MessageSquare className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-300" />
                   <textarea
                     value={remarks}
                     onChange={(e) => setRemarks(e.target.value)}
-                    placeholder="Enter detailed outcome of the investigation..."
+                    placeholder={
+                      isCEOReviewStatus
+                        ? 'Provide the final executive decision...'
+                        : 'Enter detailed investigation findings...'
+                    }
                     className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-3 text-[11px] font-bold min-h-[80px] focus:ring-2 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none"
                     required
                   />
@@ -311,10 +364,27 @@ export const ResolveIncidentModal = ({
               >
                 Cancel
               </button>
+              {!isCEOReviewStatus && isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => forwardMutation.mutate()}
+                  disabled={forwardMutation.isPending || !remarks.trim()}
+                  className="px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest bg-amber-500 hover:bg-amber-600 text-white shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                >
+                  {forwardMutation.isPending ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Forward to CEO
+                    </>
+                  )}
+                </button>
+              )}
               <button
                 type="submit"
                 onClick={handleSubmit}
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || !remarks.trim()}
                 className={`flex-1 px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group ${
                   resolution === 'ACCEPTED'
                     ? 'bg-orange-950 hover:bg-orange-900 shadow-orange-100'
@@ -325,8 +395,8 @@ export const ResolveIncidentModal = ({
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Send className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    Finalize Log
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    {isCEOReviewStatus ? 'Submit Verdict' : 'Finalize Log'}
                   </>
                 )}
               </button>
@@ -336,4 +406,15 @@ export const ResolveIncidentModal = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+const getAdminRemarks = (incident: AssetIncident) => {
+  if (!incident.investigation_remarks) return '';
+  if (incident.investigation_remarks.includes('ADMIN:')) {
+    const adminPart = incident.investigation_remarks
+      .split('ADMIN:')[1]
+      ?.split('CEO:')[0];
+    return adminPart?.trim() || incident.investigation_remarks;
+  }
+  return incident.investigation_remarks;
 };

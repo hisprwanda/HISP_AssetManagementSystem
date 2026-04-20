@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Department } from '../../departments/entities/department.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
@@ -38,4 +40,10 @@ export class User {
 
   @OneToMany(() => AssetAssignment, (assignment) => assignment.user)
   asset_assignments: AssetAssignment[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

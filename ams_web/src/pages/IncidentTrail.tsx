@@ -10,10 +10,13 @@ import {
   ArrowLeft,
   Printer,
   Trash2,
+  History,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetIncident } from '../types/assets';
 import { ViewIncidentModal } from '../components/ViewIncidentModal';
+import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { useAuth } from '../hooks/useAuth';
 
 export const IncidentTrail = () => {
   const navigate = useNavigate();
@@ -25,6 +28,8 @@ export const IncidentTrail = () => {
   const [incidentToView, setIncidentToView] = useState<AssetIncident | null>(
     null,
   );
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
+  const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -42,6 +47,74 @@ export const IncidentTrail = () => {
       return response.data;
     },
   });
+
+  const handleExportLogs = () => {
+    if (!filteredIncidents.length) return;
+
+    if (!startDate && !endDate && !showExportConfirm) {
+      setShowExportConfirm(true);
+      return;
+    }
+
+    const headers = [
+      'Incident ID',
+      'Date Reported',
+      'Incident Type',
+      'Asset Name',
+      'Tag ID',
+      'Serial Number',
+      'Reporter',
+      'Department',
+      'Investigation Status',
+      'Explanation',
+      'Resolution Remarks',
+      'Penalty Outcome',
+    ];
+
+    const escapeCSV = (val: string | number | null | undefined) => {
+      if (val === null || val === undefined) return '""';
+      const clean = String(val).replace(/"/g, '""');
+      return `"${clean}"`;
+    };
+
+    const rows = filteredIncidents.map((inc) => [
+      escapeCSV(`#${inc.id.slice(0, 8).toUpperCase()}`),
+      escapeCSV(new Date(inc.reported_at).toLocaleDateString()),
+      escapeCSV(inc.incident_type),
+      escapeCSV(inc.asset?.name || 'N/A'),
+      escapeCSV(inc.asset?.tag_id || 'N/A'),
+      escapeCSV(inc.asset?.serial_number || 'N/A'),
+      escapeCSV(inc.reported_by?.full_name || 'N/A'),
+      escapeCSV(inc.reported_by?.department?.name || 'N/A'),
+      escapeCSV(inc.investigation_status),
+      escapeCSV(inc.explanation || ''),
+      escapeCSV(inc.investigation_remarks || ''),
+      escapeCSV(
+        inc.penalty_resolved_at
+          ? 'Resolved'
+          : inc.penalty_amount
+            ? 'Unresolved'
+            : 'N/A',
+      ),
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.join(',')),
+    ].join('\n');
+    const blob = new Blob(['\ufeff' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.download = `incident_logs_${dateStr}.csv`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filteredIncidents = useMemo(() => {
     if (!incidents) return [];
@@ -270,7 +343,7 @@ export const IncidentTrail = () => {
         <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              Period:
+              Audit Period:
             </span>
             <input
               type="date"
@@ -297,18 +370,29 @@ export const IncidentTrail = () => {
               <Trash2 className="w-3 h-3 text-rose-400" />
             </button>
           )}
+          <div className="w-px h-4 bg-slate-200 mx-2" />
+          {(isAdmin || isFinanceAdmin || isCEO) && (
+            <button
+              onClick={handleExportLogs}
+              disabled={filteredIncidents.length === 0}
+              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              title="Download CSV Export"
+            >
+              <History className="w-3.5 h-3.5 text-[#ff8000]" /> Incident logs
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-md border border-white p-2 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="bg-white/60 backdrop-blur-md border border-white p-2 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="relative flex-1 max-w-md pl-2 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search incident trail by asset, personnel, or keywords..."
+            placeholder="Search incident trail records..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none pl-12 pr-4 py-2 text-sm focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
+            className="w-full bg-transparent border-none pl-10 pr-4 py-2 focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
           />
         </div>
         <div className="flex gap-2">
@@ -334,7 +418,7 @@ export const IncidentTrail = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden flex-1 flex flex-col min-h-[500px]">
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[600px]">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -353,6 +437,9 @@ export const IncidentTrail = () => {
                 </th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   Outcome
+                </th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Penalty Outcome
                 </th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
                   Certificate
@@ -458,6 +545,22 @@ export const IncidentTrail = () => {
                         )}
                       </div>
                     </td>
+                    <td className="px-8 py-6">
+                      {inc.investigation_status === 'DENIED' &&
+                      (inc.penalty_amount || 0) > 0 ? (
+                        <span
+                          className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                            inc.penalty_resolved_at
+                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                              : 'bg-rose-50 text-rose-600 border-rose-100'
+                          }`}
+                        >
+                          {inc.penalty_resolved_at ? 'Resolved' : 'Unresolved'}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300">-</span>
+                      )}
+                    </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
@@ -499,6 +602,20 @@ export const IncidentTrail = () => {
         isOpen={!!incidentToView}
         onClose={() => setIncidentToView(null)}
         incident={incidentToView}
+      />
+
+      <ConfirmActionModal
+        isOpen={showExportConfirm}
+        onClose={() => setShowExportConfirm(false)}
+        onConfirm={() => {
+          setShowExportConfirm(false);
+          setTimeout(() => handleExportLogs(), 100);
+        }}
+        title="Confirm Full Export"
+        message="No Audit Period is currently selected. This export will include ALL historical investigation records. Do you wish to continue?"
+        confirmText="Download All"
+        cancelText="Cancel"
+        variant="info"
       />
     </div>
   );

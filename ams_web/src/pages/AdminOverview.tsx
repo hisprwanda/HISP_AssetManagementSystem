@@ -51,7 +51,9 @@ export const AdminOverview = () => {
   const stats = useMemo(() => {
     if (!assets || !requests) return null;
 
-    const totalValue = assets.reduce(
+    const activeAssets = assets.filter((a) => a.status !== 'DISPOSED');
+
+    const totalValue = activeAssets.reduce(
       (sum, a) => sum + (Number(a.current_value) || 0),
       0,
     );
@@ -78,7 +80,7 @@ export const AdminOverview = () => {
     );
 
     const categories: Record<string, { count: number; value: number }> = {};
-    assets.forEach((a) => {
+    activeAssets.forEach((a) => {
       const catName = a.category?.name || 'Uncategorized';
       if (!categories[catName]) categories[catName] = { count: 0, value: 0 };
       categories[catName].count++;
@@ -91,7 +93,7 @@ export const AdminOverview = () => {
 
     return {
       totalValue,
-      inventoryCount: assets.length,
+      inventoryCount: activeAssets.length,
       pendingRequestsCount: pendingRequests.length,
       pendingRequestsValue,
       missingAssets,
@@ -179,27 +181,27 @@ export const AdminOverview = () => {
           <Link
             key={i}
             to={stat.path}
-            className="bg-white border border-slate-100 rounded-xl p-3.5 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block"
+            className="bg-white border border-slate-100 rounded-lg p-3 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block"
           >
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
-                <stat.icon className="w-4 h-4 text-[#ff8000] group-hover:text-white transition-colors" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
+                <stat.icon className="w-3.5 h-3.5 text-[#ff8000] group-hover:text-white transition-colors" />
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-3 h-3 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
+            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
             </p>
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
+            <div className="flex items-baseline gap-1 leading-none">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
                 {stat.value}
               </h3>
-              <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-tight">
+              <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tight">
                 {stat.unit}
               </span>
             </div>
             <p
-              className={`mt-2.5 text-[8.5px] font-bold uppercase tracking-widest ${stat.color === 'slate' && stats.missingAssets + stats.brokenAssets > 0 && i === 0 ? 'text-[#ff8000]' : 'text-slate-400'}`}
+              className={`mt-2 text-[8px] font-bold uppercase tracking-widest ${stat.color === 'slate' && stats.missingAssets + stats.brokenAssets > 0 && i === 0 ? 'text-[#ff8000]' : 'text-slate-400'}`}
             >
               {stat.trend}
             </p>

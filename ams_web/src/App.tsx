@@ -15,6 +15,7 @@ import { ProcurementTrail } from './pages/ProcurementTrail';
 import { IncidentTrail } from './pages/IncidentTrail';
 import { SystemTrail } from './pages/SystemTrail';
 import { RequestTrail } from './pages/RequestTrail';
+import { AssetTrail } from './pages/AssetTrail';
 
 import { Profile } from './pages/Profile';
 import { Overview } from './pages/Overview';
@@ -35,6 +36,7 @@ function App() {
             <Route path="/directorate" element={<Directorate />} />
             <Route path="/disposal-logs" element={<DisposalTrail />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
+            <Route path="/asset-trail" element={<AssetTrail />} />
             <Route path="/procurement-trail" element={<ProcurementTrail />} />
             <Route path="/incident-trail" element={<IncidentTrail />} />
             <Route path="/system-trail" element={<SystemTrail />} />

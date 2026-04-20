@@ -133,14 +133,8 @@ export class AssetAssignmentsService {
         throw new BadRequestException('Form is not awaiting your signature.');
       }
 
-      const expectedSignatureStart = 'I agree and ';
-      if (
-        !signatureName.startsWith(expectedSignatureStart) ||
-        signatureName.length <= expectedSignatureStart.length
-      ) {
-        throw new BadRequestException(
-          'Signature must be in the format: "I agree and Full Names"',
-        );
+      if (!signatureName || signatureName.trim().length === 0) {
+        throw new BadRequestException('Signature full name is required.');
       }
 
       assignment.user_signature_name = signatureName;
@@ -224,5 +218,49 @@ export class AssetAssignmentsService {
     }
 
     return assignment;
+  }
+
+  async uploadScannedForm(id: string, fileUrl: string) {
+    let assignment: AssetAssignment;
+
+    if (id.startsWith('legacy-')) {
+      const assetId = id.replace('legacy-', '');
+      const asset = await this.assetRepo.findOne({
+        where: { id: assetId },
+        relations: ['assigned_to'],
+      });
+
+      if (!asset) throw new NotFoundException('Asset not found');
+      if (!asset.assigned_to) {
+        throw new BadRequestException(
+          'Cannot upload form for unassigned asset.',
+        );
+      }
+
+      const count = await this.assignmentRepo.count();
+      const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1)
+        .toString()
+        .padStart(3, '0')}`;
+
+      assignment = this.assignmentRepo.create({
+        asset: asset,
+        user: asset.assigned_to,
+        assigned_at: new Date(),
+        condition_on_assign: 'Legacy Scanned Form',
+        form_number: formNumber,
+        form_status: 'APPROVED',
+        scanned_form_url: fileUrl,
+        admin_signature_name: 'HISP Administration',
+        admin_signed_at: new Date(),
+        user_signature_name: 'Paper Signed',
+        user_signed_at: new Date(),
+      });
+    } else {
+      assignment = await this.findOne(id);
+      assignment.scanned_form_url = fileUrl;
+      assignment.form_status = 'APPROVED';
+    }
+
+    return await this.assignmentRepo.save(assignment);
   }
 }

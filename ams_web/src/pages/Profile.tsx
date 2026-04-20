@@ -10,7 +10,6 @@ import {
   Laptop,
   CheckCircle2,
   AlertCircle,
-  Edit,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
@@ -80,11 +79,6 @@ export const Profile = () => {
               </div>
             </div>
           </div>
-
-          <button className="relative z-10 px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-2 group">
-            <Edit className="w-3.5 h-3.5" />
-            Edit Profile
-          </button>
         </div>
       </div>
 

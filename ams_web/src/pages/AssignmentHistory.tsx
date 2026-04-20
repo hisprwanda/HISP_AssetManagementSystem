@@ -6,22 +6,27 @@ import {
   ClipboardCheck,
   Eye,
   ArrowLeft,
-  Download,
   Calendar,
   CheckCircle2,
   FileCheck,
   User as UserIcon,
   Laptop,
+  History,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetAssignment } from '../types/assets';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { ConfirmActionModal } from '../components/ConfirmActionModal';
 
 export const AssignmentHistory = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAssignment, setSelectedAssignment] =
     useState<AssetAssignment | null>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -43,11 +48,29 @@ export const AssignmentHistory = () => {
   const validAssignments = useMemo(() => {
     if (!assignments) return [];
 
-    return assignments.sort(
+    let filtered = [...assignments];
+
+    if (startDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.assigned_at);
+        return date >= new Date(startDate);
+      });
+    }
+
+    if (endDate) {
+      filtered = filtered.filter((a) => {
+        const date = new Date(a.assigned_at);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return date <= end;
+      });
+    }
+
+    return filtered.sort(
       (a, b) =>
         new Date(b.assigned_at).getTime() - new Date(a.assigned_at).getTime(),
     );
-  }, [assignments]);
+  }, [assignments, startDate, endDate]);
 
   const filteredAssignments = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -64,6 +87,11 @@ export const AssignmentHistory = () => {
 
   const handleExportLogs = () => {
     if (!validAssignments.length) return;
+
+    if (!startDate && !endDate && !showExportConfirm) {
+      setShowExportConfirm(true);
+      return;
+    }
 
     const headers = [
       'Form Number',
@@ -122,30 +150,64 @@ export const AssignmentHistory = () => {
             <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
           </button>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="bg-white/60 backdrop-blur-md border border-white p-1 rounded-xl shadow-sm text-sm">
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search assignments..."
-                className="w-full bg-transparent border-none pl-10 pr-4 py-2 focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
-              />
-            </div>
+        <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              Audit Period:
+            </span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
+            <span className="text-slate-300 mx-1">—</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+            />
           </div>
+          {(startDate || endDate) && (
+            <button
+              onClick={() => {
+                setStartDate('');
+                setEndDate('');
+              }}
+              className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+            >
+              <Trash2 className="w-3 h-3 text-rose-400" />
+            </button>
+          )}
+
+          <div className="w-px h-4 bg-slate-200 mx-2" />
+
           <button
             onClick={handleExportLogs}
             disabled={validAssignments.length === 0}
-            className="bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            title="Download CSV Export"
           >
-            <Download className="w-4 h-4" /> Export
+            <History className="w-3.5 h-3.5 text-[#ff8000]" /> Assignment logs
           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[2rem] shadow-sm overflow-hidden flex-1 flex flex-col">
+      <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-2 flex items-center justify-between">
+        <div className="relative flex-1 max-w-md pl-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search assignments by asset, serial number, or recipient..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-transparent border-none pl-10 pr-4 py-2 rounded-xl text-sm font-medium focus:ring-0 outline-none transition-all w-full"
+          />
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[600px]">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -260,13 +322,26 @@ export const AssignmentHistory = () => {
                       </span>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <button
-                        onClick={() => setSelectedAssignment(assignment)}
-                        className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-xl transition-all"
-                        title="View Asset Receipt Form"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        {assignment.scanned_form_url && (
+                          <a
+                            href={`${api.defaults.baseURL}${assignment.scanned_form_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                            title="View Scanned PDF"
+                          >
+                            <FileCheck className="w-5 h-5" />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => setSelectedAssignment(assignment)}
+                          className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-xl transition-all"
+                          title="View Asset Receipt Form"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -280,6 +355,20 @@ export const AssignmentHistory = () => {
         isOpen={!!selectedAssignment}
         onClose={() => setSelectedAssignment(null)}
         assignment={selectedAssignment}
+      />
+
+      <ConfirmActionModal
+        isOpen={showExportConfirm}
+        onClose={() => setShowExportConfirm(false)}
+        onConfirm={() => {
+          setShowExportConfirm(false);
+          setTimeout(() => handleExportLogs(), 100);
+        }}
+        title="Confirm Full Export"
+        message="No Audit Period is currently selected. This export will include ALL historical assignment records. Do you wish to continue?"
+        confirmText="Download All"
+        cancelText="Cancel"
+        variant="info"
       />
     </div>
   );

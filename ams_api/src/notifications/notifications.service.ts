@@ -99,6 +99,99 @@ export class NotificationsService {
     await this.notifRepo.save(notifications);
   }
 
+  async notifyIncidentForwarded(params: {
+    incidentId: string;
+    assetName: string;
+    adminRemarks: string;
+  }): Promise<void> {
+    const { assetName, adminRemarks } = params;
+
+    const allUsers = await this.userRepo.find();
+    const ceos = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      return (
+        roleUpper.includes('CEO') || roleUpper.includes('OFFICE OF THE CEO')
+      );
+    });
+
+    if (ceos.length === 0) return;
+
+    const notifications = ceos.map((ceo) => {
+      return this.notifRepo.create({
+        recipient: { id: ceo.id } as User,
+        title: 'Investigation Forwarded for Executive Review',
+        message: `An incident involving "${assetName}" has been forwarded to your office for strategic review. Administrative Findings: "${adminRemarks}"`,
+        type: 'INCIDENT',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
+  async notifyIncidentVerdict(params: {
+    incidentId: string;
+    resolution: 'ACCEPTED' | 'DENIED';
+    assetName: string;
+    reporterId: string;
+    departmentId: string;
+    remarks: string;
+    isCEO: boolean;
+  }): Promise<void> {
+    const { resolution, assetName, reporterId, departmentId, remarks, isCEO } =
+      params;
+    const isAccepted = resolution === 'ACCEPTED';
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const recipients: { user: User; role: 'reporter' | 'hod' | 'admin' }[] = [];
+
+    for (const user of allUsers) {
+      const roleUpper = user.role.toUpperCase();
+      const isAdmin =
+        roleUpper.includes('SYSTEM_ADMIN') ||
+        roleUpper.includes('ADMIN') ||
+        roleUpper.includes('FINANCE') ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+      const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
+
+      if (user.id === reporterId) {
+        recipients.push({ user, role: 'reporter' });
+      } else if (isHOD && user.department?.id === departmentId) {
+        recipients.push({ user, role: 'hod' });
+      } else if (isAdmin) {
+        recipients.push({ user, role: 'admin' });
+      }
+    }
+
+    const titlePrefix = isCEO ? 'Executive Verdict:' : 'Investigation Outcome:';
+    const decisionText = isAccepted ? 'ACCEPTED' : 'DENIED';
+
+    const notifications = recipients.map(({ user, role }) => {
+      const title = `${titlePrefix} ${assetName} (${decisionText})`;
+      let message: string;
+
+      if (role === 'reporter') {
+        message = isAccepted
+          ? `Your report for "${assetName}" has been accepted. A replacement request has been automatically initiated.`
+          : `Your report for "${assetName}" has been denied. A penalty equivalent to the asset's current value has been applied to your account.`;
+      } else if (role === 'hod') {
+        message = `Final decision on incident involving "${assetName}" in your department: ${decisionText}. Remarks: "${remarks}"`;
+      } else {
+        message = `The investigation for "${assetName}" has been finalized with a verdict of ${decisionText} by ${isCEO ? 'the CEO' : 'Administration'}.`;
+      }
+
+      return this.notifRepo.create({
+        recipient: { id: user.id } as User,
+        title,
+        message,
+        type: isAccepted ? 'INFO' : 'ALERT',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
   async notifyFulfilment(params: {
     requestId: string;
     requestTitle: string;
@@ -216,6 +309,33 @@ export class NotificationsService {
     });
 
     await this.notifRepo.save(notifications);
+  }
+
+  async notifyPenaltyResolution(params: {
+    incidentId: string;
+    assetName: string;
+    recipientId: string;
+    amount: number;
+    isResolved: boolean;
+  }): Promise<void> {
+    const { assetName, recipientId, amount, isResolved } = params;
+
+    const title = isResolved
+      ? 'Penalty Settled Successfully'
+      : 'Penalty Status Updated';
+    const message = isResolved
+      ? `Your financial penalty of ${Number(amount).toLocaleString()} RWF for asset "${assetName}" has been officially settled. Your account is now clear regarding this incident.`
+      : `The settlement status for the incident involving "${assetName}" has been updated by Administration. Please check your portal for current status.`;
+
+    const notification = this.notifRepo.create({
+      recipient: { id: recipientId } as User,
+      title,
+      message,
+      type: 'INFO',
+      is_read: false,
+    });
+
+    await this.notifRepo.save(notification);
   }
 
   async getForUser(userId: string): Promise<Notification[]> {

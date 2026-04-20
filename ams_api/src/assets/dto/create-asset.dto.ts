@@ -10,17 +10,17 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAssetDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'System generated tag ID (e.g., HISP-RW-001)',
   })
-  @IsOptional()
-  @IsString()
-  tag_id?: string;
-
-  @ApiProperty({ example: 'PF329X4' })
   @IsString()
   @IsNotEmpty()
-  serial_number: string;
+  tag_id: string;
+
+  @ApiPropertyOptional({ example: 'PF329X4' })
+  @IsOptional()
+  @IsString()
+  serial_number?: string;
 
   @ApiProperty({ example: 'ThinkPad T14 Gen 3' })
   @IsString()
