@@ -19,9 +19,10 @@ import {
   History,
   Trash2,
 } from 'lucide-react';
-import { api } from '../lib/api';
 import { Asset } from '../types/assets';
+import { api } from '../lib/api';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 
 const getCategoryIcon = (categoryName?: string) => {
   const name = (categoryName || '').toLowerCase();
@@ -46,6 +47,8 @@ export const AssetTrail = () => {
   const [filterDept, setFilterDept] = useState<string>('ALL');
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -64,6 +67,17 @@ export const AssetTrail = () => {
 
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    filterCategory,
+    filterStatus,
+    filterDept,
+    startDate,
+    endDate,
+  ]);
 
   const { data: assets, isLoading } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -122,6 +136,13 @@ export const AssetTrail = () => {
         a.assigned_to?.full_name?.toLowerCase().includes(q),
     );
   }, [validAssets, searchQuery]);
+
+  const paginatedAssets = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAssets.slice(start, start + itemsPerPage);
+  }, [filteredAssets, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
 
   const categoryOptions = useMemo(() => {
     if (!assets) return [];
@@ -234,6 +255,36 @@ export const AssetTrail = () => {
         : new Date().toISOString().split('T')[0];
 
     link.setAttribute('download', `hisp_asset_logs_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'Tag ID',
+      'Asset Name',
+      'Category',
+      'Serial Number',
+      'Department',
+      'Personnel',
+      'Location',
+      'Status',
+      'Purchase Cost',
+      'Current Value',
+      'Purchase Date',
+    ];
+    const csvContent =
+      headers.join(',') +
+      '\n"TAG-001","MacBook Pro M2","LAPTOP","SN12345678","ICT","Personnel Name","HQ","ASSIGNED","2500000","2100000","2024-01-15"';
+
+    const blob = new Blob(['\ufeff' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'hisp_bulk_asset_template.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -480,7 +531,7 @@ export const AssetTrail = () => {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {!isLoading &&
-                filteredAssets.map((asset) => {
+                paginatedAssets.map((asset) => {
                   const Icon = getCategoryIcon(asset.category?.name);
                   return (
                     <tr
@@ -565,6 +616,13 @@ export const AssetTrail = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredAssets.length}
+        />
       </div>{' '}
       {showTemplateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
@@ -583,12 +641,16 @@ export const AssetTrail = () => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowTemplateModal(false)}
-                className="p-2 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadTemplate}
+                  className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  title="Download CSV Template"
+                >
+                  <FileSpreadsheet className="w-3 h-3" />
+                  Download csv Template
+                </button>
+              </div>
             </div>
 
             <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed">

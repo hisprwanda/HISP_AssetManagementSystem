@@ -102,6 +102,7 @@ export const EditAssetModal = ({
           : undefined,
         purchase_date: formData.purchase_date || undefined,
         warranty_expiry: formData.warranty_expiry || undefined,
+        serial_number: formData.serial_number.trim() || null,
         assigned_to_user_id: formData.assigned_to_user_id || null,
       };
       await api.patch(`/assets/${asset.id}`, payload);

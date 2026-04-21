@@ -69,4 +69,25 @@ export class AssetsController {
   recalculateAll() {
     return this.assetsService.recalculateAll();
   }
+
+  @Patch(':id/initiate-return')
+  @ApiOperation({ summary: 'Initiate the return process for an asset' })
+  initiateReturn(@Param('id') id: string, @Body('userId') userId: string) {
+    return this.assetsService.initiateReturn(id, userId);
+  }
+
+  @Patch(':id/acknowledge-return')
+  @ApiOperation({ summary: 'Admin acknowledges receipt of return request' })
+  acknowledgeReturn(@Param('id') id: string) {
+    return this.assetsService.acknowledgeReturn(id);
+  }
+
+  @Patch(':id/finalize-return')
+  @ApiOperation({ summary: 'Admin finalizes the return after inspection' })
+  finalizeReturn(
+    @Param('id') id: string,
+    @Body() params: { isDamaged: boolean; remarks?: string; location?: string },
+  ) {
+    return this.assetsService.finalizeReturn(id, params);
+  }
 }

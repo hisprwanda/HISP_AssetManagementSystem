@@ -89,6 +89,8 @@ export const CreateAssetModal = ({
         purchase_cost: formData.purchase_cost
           ? parseFloat(formData.purchase_cost)
           : undefined,
+        serial_number: formData.serial_number.trim() || null,
+        tag_id: formData.tag_id.trim() || undefined,
         purchase_date: formData.purchase_date || undefined,
         warranty_expiry: formData.warranty_expiry || undefined,
         department_id: formData.department_id || null,

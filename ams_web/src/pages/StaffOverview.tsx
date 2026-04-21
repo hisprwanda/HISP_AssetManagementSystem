@@ -13,6 +13,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Asset, AssetIncident, AssetAssignment } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { Pagination } from '../components/Pagination';
 
 export const StaffOverview = () => {
   const { user: currentUser } = useAuth();
@@ -20,6 +21,9 @@ export const StaffOverview = () => {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [signingAssignment, setSigningAssignment] =
     useState<AssetAssignment | null>(null);
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const [incidentsPage, setIncidentsPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -60,10 +64,28 @@ export const StaffOverview = () => {
                 new Date(b.reported_at).getTime() -
                 new Date(a.reported_at).getTime(),
             )
-            .slice(0, 3)
         : [],
     };
   }, [assets, incidents, currentUser]);
+
+  const paginatedAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (inventoryPage - 1) * itemsPerPage;
+    return stats.userAssets.slice(start, start + itemsPerPage);
+  }, [stats, inventoryPage, itemsPerPage]);
+
+  const paginatedIncidents = useMemo(() => {
+    if (!stats) return [];
+    const start = (incidentsPage - 1) * itemsPerPage;
+    return stats.recentOutcomes.slice(start, start + itemsPerPage);
+  }, [stats, incidentsPage, itemsPerPage]);
+
+  const inventoryTotalPages = Math.ceil(
+    (stats?.userAssets.length || 0) / itemsPerPage,
+  );
+  const incidentsTotalPages = Math.ceil(
+    (stats?.recentOutcomes.length || 0) / itemsPerPage,
+  );
 
   if (!stats) return null;
 
@@ -122,7 +144,7 @@ export const StaffOverview = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100/50">
-                    {stats.recentOutcomes.map((incident) => (
+                    {paginatedIncidents.map((incident) => (
                       <tr
                         key={incident.id}
                         className="group/row hover:bg-white/60"
@@ -218,6 +240,13 @@ export const StaffOverview = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={incidentsPage}
+                totalPages={incidentsTotalPages}
+                onPageChange={setIncidentsPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.recentOutcomes.length}
+              />
             </div>
           )}
 
@@ -251,7 +280,7 @@ export const StaffOverview = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100/50">
                   {stats.userAssets.length > 0 ? (
-                    stats.userAssets.map((asset) => (
+                    paginatedAssets.map((asset) => (
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
@@ -382,6 +411,13 @@ export const StaffOverview = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={inventoryPage}
+              totalPages={inventoryTotalPages}
+              onPageChange={setInventoryPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={stats.userAssets.length}
+            />
           </div>
 
           <div className="pt-8 mt-4 border-t border-slate-100 flex flex-col items-center text-center">

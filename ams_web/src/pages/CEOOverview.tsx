@@ -20,6 +20,7 @@ import {
   Printer,
   Box,
   Eye,
+  FileCheck,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -33,6 +34,7 @@ import {
 } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { Pagination } from '../components/Pagination';
 
 export const CEOOverview = () => {
   const navigate = useNavigate();
@@ -40,6 +42,10 @@ export const CEOOverview = () => {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [signingAssignment, setSigningAssignment] =
     useState<AssetAssignment | null>(null);
+  const [personalPage, setPersonalPage] = useState(1);
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [feedPage, setFeedPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -139,13 +145,11 @@ export const CEOOverview = () => {
         (a, b) => b[1].value - a[1].value,
       ),
       personalAssets,
-      ceoRequests: ceoPending
-        .sort(
-          (a, b) =>
-            new Date(b.created_at || 0).getTime() -
-            new Date(a.created_at || 0).getTime(),
-        )
-        .slice(0, 5),
+      ceoRequests: ceoPending.sort(
+        (a, b) =>
+          new Date(b.created_at || 0).getTime() -
+          new Date(a.created_at || 0).getTime(),
+      ),
       activityFeed: [
         ...(requests || []).map((r) => ({
           id: r.id,
@@ -165,14 +169,40 @@ export const CEOOverview = () => {
           status: i.investigation_status,
           user: i.reported_by?.full_name,
         })),
-      ]
-        .sort(
-          (a, b) =>
-            new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
-        )
-        .slice(0, 10),
+      ].sort(
+        (a, b) =>
+          new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
+      ),
     };
   }, [assets, requests, users, incidents, currentUser]);
+
+  const paginatedPersonalAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (personalPage - 1) * itemsPerPage;
+    return stats.personalAssets.slice(start, start + itemsPerPage);
+  }, [stats, personalPage, itemsPerPage]);
+
+  const paginatedRequests = useMemo(() => {
+    if (!stats) return [];
+    const start = (requestsPage - 1) * itemsPerPage;
+    return stats.ceoRequests.slice(start, start + itemsPerPage);
+  }, [stats, requestsPage, itemsPerPage]);
+
+  const paginatedFeed = useMemo(() => {
+    if (!stats) return [];
+    const start = (feedPage - 1) * itemsPerPage;
+    return stats.activityFeed.slice(start, start + itemsPerPage);
+  }, [stats, feedPage, itemsPerPage]);
+
+  const personalTotalPages = Math.ceil(
+    (stats?.personalAssets.length || 0) / itemsPerPage,
+  );
+  const requestsTotalPages = Math.ceil(
+    (stats?.ceoRequests.length || 0) / itemsPerPage,
+  );
+  const feedTotalPages = Math.ceil(
+    (stats?.activityFeed.length || 0) / itemsPerPage,
+  );
 
   const getAssetIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -321,7 +351,7 @@ export const CEOOverview = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {stats.personalAssets.map((asset) => (
+                  {paginatedPersonalAssets.map((asset) => (
                     <tr
                       key={asset.id}
                       className="group hover:bg-slate-50/50 transition-colors"
@@ -378,9 +408,9 @@ export const CEOOverview = () => {
                                     asset,
                                   } as unknown as AssetAssignment);
                               }}
-                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors"
+                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
                             >
-                              Sign Form
+                              <FileCheck className="w-3.5 h-3.5" /> Sign Form
                             </button>
                           )}
                         <button
@@ -404,6 +434,13 @@ export const CEOOverview = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={personalPage}
+              totalPages={personalTotalPages}
+              onPageChange={setPersonalPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={stats.personalAssets.length}
+            />
           </div>
         </div>
 
@@ -462,8 +499,8 @@ export const CEOOverview = () => {
               </div>
 
               <div className="space-y-4">
-                {stats.ceoRequests.length > 0 ? (
-                  stats.ceoRequests.map((req) => (
+                {paginatedRequests.length > 0 ? (
+                  paginatedRequests.map((req) => (
                     <div
                       key={req.id}
                       onClick={() => navigate('/requests')}
@@ -513,6 +550,13 @@ export const CEOOverview = () => {
                   </div>
                 )}
               </div>
+              <Pagination
+                currentPage={requestsPage}
+                totalPages={requestsTotalPages}
+                onPageChange={setRequestsPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.ceoRequests.length}
+              />
             </div>
 
             <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
@@ -528,7 +572,7 @@ export const CEOOverview = () => {
                 </div>
               </div>
               <div className="space-y-6">
-                {stats.activityFeed.map((item, idx) => (
+                {paginatedFeed.map((item, idx) => (
                   <div
                     key={idx}
                     className="flex gap-6 group cursor-pointer p-2 -mx-2 rounded-2xl hover:bg-slate-50 transition-all"
@@ -575,6 +619,13 @@ export const CEOOverview = () => {
                   </div>
                 ))}
               </div>
+              <Pagination
+                currentPage={feedPage}
+                totalPages={feedTotalPages}
+                onPageChange={setFeedPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.activityFeed.length}
+              />
             </div>
           </div>
 

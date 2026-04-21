@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { User } from '../users/entities/user.entity';
+import { Asset } from '../assets/entities/asset.entity';
 
 @Injectable()
 export class NotificationsService {
@@ -332,6 +333,83 @@ export class NotificationsService {
       title,
       message,
       type: 'INFO',
+      is_read: false,
+    });
+
+    await this.notifRepo.save(notification);
+  }
+
+  async notifyReturnInitiated(params: {
+    asset: Asset;
+    initiator: User;
+  }): Promise<void> {
+    const { asset, initiator } = params;
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const isAdminOrHOD = (u: User) => {
+      const roleUpper = u.role.toUpperCase();
+      const isAdmin =
+        roleUpper.includes('ADMIN') ||
+        roleUpper.includes('SYSTEM_ADMIN') ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+      const isHOD =
+        (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
+        u.department?.id === asset.department?.id;
+      return isAdmin || isHOD;
+    };
+
+    const recipients = allUsers.filter(isAdminOrHOD);
+
+    const notifications = recipients.map((recipient) => {
+      return this.notifRepo.create({
+        recipient: { id: recipient.id } as User,
+        title: `Asset Return Initiated: ${asset.name}`,
+        message: `${initiator.full_name} has initiated a return for the asset "${asset.name}" (${asset.tag_id || asset.serial_number}). Please review and acknowledge the request.`,
+        type: 'INFO',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
+  async notifyReturnAcknowledged(params: {
+    asset: Asset;
+    recipientId: string;
+  }): Promise<void> {
+    const { asset, recipientId } = params;
+
+    const notification = this.notifRepo.create({
+      recipient: { id: recipientId } as User,
+      title: 'Action Required: Asset Return Inspection',
+      message: `Your return request for "${asset.name}" has been acknowledged. Please bring the asset to the Office of Administration for inspection.`,
+      type: 'INFO',
+      is_read: false,
+    });
+
+    await this.notifRepo.save(notification);
+  }
+
+  async notifyReturnFinalized(params: {
+    asset: Asset;
+    recipientId: string;
+    isDamaged: boolean;
+    remarks?: string;
+  }): Promise<void> {
+    const { asset, recipientId, isDamaged, remarks } = params;
+
+    const title = isDamaged
+      ? 'Asset Return: Damage Reported'
+      : 'Asset Return: Completed';
+    const message = isDamaged
+      ? `Your return for "${asset.name}" has been processed. Inspection found issues: "${remarks || 'Damage reported'}". An incident report has been automatically created for further investigation.`
+      : `Your return for "${asset.name}" has been successfully completed. The asset has been inspected and returned to stock. Thank you.`;
+
+    const notification = this.notifRepo.create({
+      recipient: { id: recipientId } as User,
+      title,
+      message,
+      type: isDamaged ? 'ALERT' : 'INFO',
       is_read: false,
     });
 

@@ -14,6 +14,8 @@ import { Department } from 'src/departments/entities/department.entity';
 import { User } from 'src/users/entities/user.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
 import { DisposeAssetDto } from './dto/dispose-asset.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { AssetIncident } from 'src/asset-incidents/entities/asset-incident.entity';
 
 interface BulkAssetData {
   serial_number?: string;
@@ -34,12 +36,19 @@ export class AssetsService {
   constructor(
     @InjectRepository(Asset)
     private readonly assetRepo: Repository<Asset>,
+    @InjectRepository(AssetIncident)
+    private readonly incidentRepo: Repository<AssetIncident>,
     private readonly dataSource: DataSource,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(createAssetDto: CreateAssetDto): Promise<Asset> {
     const { category_id, department_id, assigned_to_user_id, ...assetData } =
       createAssetDto;
+
+    if (assetData.serial_number === '') {
+      assetData.serial_number = null;
+    }
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -173,6 +182,7 @@ export class AssetsService {
 
           const asset = queryRunner.manager.create(Asset, {
             ...entityFields,
+            serial_number: entityFields.serial_number || null,
             purchase_cost: Number(rawCost || 0),
             category,
             department,
@@ -491,6 +501,134 @@ export class AssetsService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('Disposal Transaction Failed:', error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async initiateReturn(id: string, userId: string): Promise<Asset> {
+    const asset = await this.findOne(id);
+    const initiator = await this.dataSource.manager.findOne(User, {
+      where: { id: userId },
+    });
+
+    if (!initiator)
+      throw new NotFoundException('Initiator of return not found');
+    if (asset.status !== 'ASSIGNED') {
+      throw new BadRequestException(
+        'Only currently assigned assets can be returned.',
+      );
+    }
+
+    asset.status = 'RETURN_PENDING';
+    const saved = await this.assetRepo.save(asset);
+
+    try {
+      await this.notificationsService.notifyReturnInitiated({
+        asset: saved,
+        initiator,
+      });
+    } catch (e) {
+      console.error('Return initiation notification failed:', e);
+    }
+
+    return saved;
+  }
+
+  async acknowledgeReturn(id: string): Promise<Asset> {
+    const asset = await this.findOne(id);
+
+    if (asset.status !== 'RETURN_PENDING') {
+      throw new BadRequestException('Asset is not in pending return state.');
+    }
+
+    if (asset.assigned_to) {
+      try {
+        await this.notificationsService.notifyReturnAcknowledged({
+          asset,
+          recipientId: asset.assigned_to.id,
+        });
+      } catch (e) {
+        console.error('Acknowledgment notification failed:', e);
+      }
+    }
+
+    return asset;
+  }
+
+  async finalizeReturn(
+    id: string,
+    params: { isDamaged: boolean; remarks?: string; location?: string },
+  ): Promise<Asset> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const asset = await queryRunner.manager.findOne(Asset, {
+        where: { id },
+        relations: [
+          'assigned_to',
+          'department',
+          'category',
+          'assignment_history',
+        ],
+      });
+
+      if (!asset) throw new NotFoundException('Asset not found');
+      const previousAssigneeId = asset.assigned_to?.id;
+
+      if (params.isDamaged) {
+        asset.status = 'BROKEN';
+        // Create an incident
+        const incident = queryRunner.manager.create(AssetIncident, {
+          asset: { id: asset.id },
+          reported_by: { id: previousAssigneeId },
+          incident_type: 'BROKEN',
+          location:
+            params.location || asset.location || 'Administration Office',
+          explanation: `[AUTO-GENERATED ON RETURN] Asset returned in bad condition. Remarks: ${params.remarks || 'No details provided.'}`,
+          investigation_status: 'INVESTIGATING',
+        });
+        await queryRunner.manager.save(incident);
+      } else {
+        asset.status = 'IN_STOCK';
+      }
+
+      // Close the active assignment
+      const activeAssignment = asset.assignment_history?.find(
+        (a) => a.returned_at === null,
+      );
+      if (activeAssignment) {
+        activeAssignment.returned_at = new Date();
+        activeAssignment.condition_on_assign = `${activeAssignment.condition_on_assign || ''} [RETURNED: ${params.isDamaged ? 'DAMAGED' : 'GOOD'}]`;
+        await queryRunner.manager.save(activeAssignment);
+      }
+
+      // Clear the assignee
+      asset.assigned_to = null;
+      asset.assigned_to_user_id = null;
+
+      const savedAsset = await queryRunner.manager.save(asset);
+      await queryRunner.commitTransaction();
+
+      if (previousAssigneeId) {
+        try {
+          await this.notificationsService.notifyReturnFinalized({
+            asset: savedAsset,
+            recipientId: previousAssigneeId,
+            isDamaged: params.isDamaged,
+            remarks: params.remarks,
+          });
+        } catch (e) {
+          console.error('Finalization notification failed:', e);
+        }
+      }
+
+      return savedAsset;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();

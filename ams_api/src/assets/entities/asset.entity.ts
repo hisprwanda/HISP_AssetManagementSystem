@@ -18,21 +18,28 @@ export class Asset {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ type: 'varchar', unique: true, nullable: false })
   tag_id: string;
 
-  @Column({ unique: true, nullable: true })
-  serial_number: string;
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  serial_number: string | null;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
   @Column('text', { nullable: true })
-  description: string;
+  description: string | null;
 
   @Column({
     type: 'enum',
-    enum: ['IN_STOCK', 'ASSIGNED', 'BROKEN', 'MISSING', 'DISPOSED'],
+    enum: [
+      'IN_STOCK',
+      'ASSIGNED',
+      'BROKEN',
+      'MISSING',
+      'DISPOSED',
+      'RETURN_PENDING',
+    ],
     default: 'IN_STOCK',
   })
   status: string;
@@ -43,8 +50,8 @@ export class Asset {
   @Column('numeric', { precision: 12, scale: 2, nullable: true })
   purchase_cost: number;
 
-  @Column({ nullable: true })
-  location: string;
+  @Column({ type: 'varchar', nullable: true })
+  location: string | null;
 
   @Column({ type: 'date', nullable: true })
   warranty_expiry: Date;
@@ -63,14 +70,14 @@ export class Asset {
   @Column('numeric', { precision: 12, scale: 2, default: 0 })
   accumulated_depreciation: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   category_id: string | null;
 
   @ManyToOne(() => Category, (category) => category.assets, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   department_id: string | null;
 
   @ManyToOne(() => Department, (department) => department.assets, {
@@ -79,7 +86,7 @@ export class Asset {
   @JoinColumn({ name: 'department_id' })
   department: Department | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   assigned_to_user_id: string | null;
 
   @ManyToOne(() => User, { nullable: true })

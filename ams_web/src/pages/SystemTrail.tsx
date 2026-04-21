@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 
 declare global {
   interface Window {
@@ -64,6 +65,8 @@ export const SystemTrail = () => {
   const [filterDept, setFilterDept] = useState<string>('ALL');
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -80,6 +83,10 @@ export const SystemTrail = () => {
     }
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterRole, filterDept, startDate, endDate]);
 
   useEffect(() => {
     if (uploadResult) {
@@ -154,6 +161,13 @@ export const SystemTrail = () => {
     );
   }, [validUsers, searchQuery]);
 
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredUsers.slice(start, start + itemsPerPage);
+  }, [filteredUsers, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
   const bulkCreateMutation = useMutation({
     mutationFn: async (userData: Record<string, unknown>[]) => {
       const chunkSize = 10;
@@ -192,6 +206,30 @@ export const SystemTrail = () => {
       );
     },
   });
+
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'Full Name',
+      'Email',
+      'Phone Number',
+      'Role',
+      'Department',
+    ];
+    const csvContent =
+      headers.join(',') +
+      '\n"Jane Doe","jane.doe@example.com","0780000000","STAFF","ICT"';
+
+    const blob = new Blob(['\ufeff' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'hisp_bulk_user_template.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleExportLogs = () => {
     if (!validUsers.length) return;
@@ -484,7 +522,7 @@ export const SystemTrail = () => {
                 </tr>
               )}
               {!isLoading &&
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <tr
                     key={user.id}
                     className="hover:bg-slate-50/50 transition-colors group"
@@ -541,6 +579,13 @@ export const SystemTrail = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredUsers.length}
+        />
       </div>
 
       {uploadResult && (
@@ -603,12 +648,16 @@ export const SystemTrail = () => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowTemplateModal(false)}
-                className="p-2 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadTemplate}
+                  className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  title="Download CSV Template"
+                >
+                  <FileSpreadsheet className="w-3 h-3" />
+                  Download csv Template
+                </button>
+              </div>
             </div>
 
             <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed">

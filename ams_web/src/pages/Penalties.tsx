@@ -16,6 +16,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { AssetIncident } from '../types/assets';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 
 export const Penalties = () => {
   const { isFinanceAdmin, isAdmin } = useAuth();
@@ -34,6 +35,8 @@ export const Penalties = () => {
   const [endDate, setEndDate] = useState<string>('');
   const [incidentToSettle, setIncidentToSettle] =
     useState<AssetIncident | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const queryClient = useQueryClient();
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
@@ -87,6 +90,17 @@ export const Penalties = () => {
     return result;
   }, [incidents, searchQuery, startDate, endDate]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, startDate, endDate]);
+
+  const paginatedPenalties = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredPenalties.slice(start, start + itemsPerPage);
+  }, [filteredPenalties, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredPenalties.length / itemsPerPage);
+
   const getDepartmentName = (inc: AssetIncident) => {
     if (typeof inc.asset?.department === 'string') return inc.asset.department;
     if (inc.asset?.department?.name) return inc.asset.department.name;
@@ -113,7 +127,7 @@ export const Penalties = () => {
       'Amount Owed (RWF)',
     ];
 
-    const escapeCSV = (val: string | number | undefined) => {
+    const escapeCSV = (val: string | number | undefined | null) => {
       if (val === null || val === undefined) return '""';
       return `"${String(val).replace(/"/g, '""')}"`;
     };
@@ -260,7 +274,7 @@ export const Penalties = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredPenalties.map((inc) => (
+              {paginatedPenalties.map((inc) => (
                 <tr
                   key={inc.id}
                   className="hover:bg-slate-50/80 transition-colors group"
@@ -351,6 +365,13 @@ export const Penalties = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredPenalties.length}
+        />
       </div>
 
       <ConfirmActionModal

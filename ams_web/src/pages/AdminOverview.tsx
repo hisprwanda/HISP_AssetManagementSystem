@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
@@ -13,15 +13,23 @@ import {
   Clock,
   FileText,
   Plus,
+  RotateCcw,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { Asset, AssetRequest, User } from '../types/assets';
+import { Pagination } from '../components/Pagination';
+import { toast } from 'react-hot-toast';
 
 export const AdminOverview = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const itemsPerPage = 10;
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -112,10 +120,20 @@ export const AdminOverview = () => {
           (a, b) =>
             new Date(b.created_at || 0).getTime() -
             new Date(a.created_at || 0).getTime(),
-        )
-        .slice(0, 5),
+        ),
+      pendingReturns: assets.filter((a) => a.status === 'RETURN_PENDING'),
     };
   }, [assets, requests, users]);
+
+  const paginatedRequests = useMemo(() => {
+    if (!stats) return [];
+    const start = (requestsPage - 1) * itemsPerPage;
+    return stats.recentRequests.slice(start, start + itemsPerPage);
+  }, [stats, requestsPage, itemsPerPage]);
+
+  const requestsTotalPages = Math.ceil(
+    (stats?.recentRequests.length || 0) / itemsPerPage,
+  );
 
   if (!stats) return null;
 
@@ -250,6 +268,169 @@ export const AdminOverview = () => {
             </div>
           )}
 
+          {stats.pendingReturns.length > 0 && (
+            <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-black text-slate-900 flex items-center gap-2.5">
+                    <RotateCcw className="w-5 h-5 text-[#ff8000]" /> Inbound
+                    Return Queue
+                  </h3>
+                  <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-widest opacity-60">
+                    Assets awaiting inspection & receipt
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {stats.pendingReturns.map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="p-4 bg-orange-50/30 border border-orange-100 rounded-xl space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-white border border-orange-100 flex items-center justify-center text-[#ff8000] shadow-sm">
+                          <Monitor className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-slate-800">
+                            {asset.name}
+                          </p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                            {asset.tag_id || asset.serial_number}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-black text-slate-400 uppercase">
+                          Return By
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-700">
+                          {asset.assigned_to?.full_name || 'Assigned User'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          setIsProcessing(asset.id);
+                          try {
+                            await api.patch(
+                              `/assets/${asset.id}/acknowledge-return`,
+                            );
+                            toast.success(
+                              'Return acknowledged. Instruction sent to user.',
+                            );
+                          } catch (error: unknown) {
+                            const message =
+                              error instanceof Error
+                                ? (
+                                    error as {
+                                      response?: {
+                                        data?: { message?: string };
+                                      };
+                                    }
+                                  ).response?.data?.message || error.message
+                                : 'Failed to acknowledge.';
+                            toast.error(message);
+                          } finally {
+                            setIsProcessing(null);
+                          }
+                        }}
+                        disabled={!!isProcessing}
+                        className="flex-1 py-2 bg-white border border-orange-200 text-[#ff8000] rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <FileText className="w-3 h-3" /> Acknowledge
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              'Accept this asset in GOOD condition? It will be returned to stock inventory.',
+                            )
+                          )
+                            return;
+                          setIsProcessing(asset.id);
+                          try {
+                            await api.patch(
+                              `/assets/${asset.id}/finalize-return`,
+                              { isDamaged: false },
+                            );
+                            toast.success(
+                              'Asset returned to stock in good condition.',
+                            );
+                          } catch (error: unknown) {
+                            const message =
+                              error instanceof Error
+                                ? (
+                                    error as {
+                                      response?: {
+                                        data?: { message?: string };
+                                      };
+                                    }
+                                  ).response?.data?.message || error.message
+                                : 'Failed to finalize.';
+                            toast.error(message);
+                          } finally {
+                            setIsProcessing(null);
+                          }
+                        }}
+                        disabled={!!isProcessing}
+                        className="flex-1 py-2 bg-[#ff8000] text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> Accept (Good)
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const remarks = window.prompt(
+                            'Please describe the damage for the incident report:',
+                          );
+                          if (remarks === null) return;
+
+                          setIsProcessing(asset.id);
+                          try {
+                            await api.patch(
+                              `/assets/${asset.id}/finalize-return`,
+                              {
+                                isDamaged: true,
+                                remarks:
+                                  remarks ||
+                                  'Returned in bad condition during offboarding.',
+                              },
+                            );
+                            toast.success(
+                              'Asset marked as DAMAGED. Incident report generated.',
+                            );
+                          } catch (error: unknown) {
+                            const message =
+                              error instanceof Error
+                                ? (
+                                    error as {
+                                      response?: {
+                                        data?: { message?: string };
+                                      };
+                                    }
+                                  ).response?.data?.message || error.message
+                                : 'Failed to report damage.';
+                            toast.error(message);
+                          } finally {
+                            setIsProcessing(null);
+                          }
+                        }}
+                        disabled={!!isProcessing}
+                        className="flex-1 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-50 transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <AlertTriangle className="w-3 h-3" /> Report Damage
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm min-h-[500px]">
             <div className="flex items-center justify-between mb-8 px-1">
               <div className="flex flex-col">
@@ -265,13 +446,13 @@ export const AdminOverview = () => {
                 to="/requests"
                 className="px-4 py-2 bg-slate-50 border border-slate-200 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest hover:border-[#ff8000] hover:text-[#ff8000] transition-all flex items-center gap-2"
               >
-                Audit Log <ArrowRight className="w-3 h-3" />
+                More <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
             <div className="space-y-4">
-              {stats.recentRequests.length > 0 ? (
-                stats.recentRequests.map((req) => (
+              {paginatedRequests.length > 0 ? (
+                paginatedRequests.map((req) => (
                   <div
                     key={req.id}
                     onClick={() => navigate('/requests')}
@@ -348,6 +529,13 @@ export const AdminOverview = () => {
                 </div>
               )}
             </div>
+            <Pagination
+              currentPage={requestsPage}
+              totalPages={requestsTotalPages}
+              onPageChange={setRequestsPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={stats.recentRequests.length}
+            />
           </div>
         </div>
         <div className="lg:col-span-4 space-y-6">

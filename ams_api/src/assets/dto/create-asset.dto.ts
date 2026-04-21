@@ -17,10 +17,10 @@ export class CreateAssetDto {
   @IsNotEmpty()
   tag_id: string;
 
-  @ApiPropertyOptional({ example: 'PF329X4' })
+  @ApiPropertyOptional({ example: 'PF329X4', nullable: true })
   @IsOptional()
   @IsString()
-  serial_number?: string;
+  serial_number?: string | null;
 
   @ApiProperty({ example: 'ThinkPad T14 Gen 3' })
   @IsString()
@@ -33,10 +33,24 @@ export class CreateAssetDto {
   description?: string;
 
   @ApiProperty({
-    enum: ['IN_STOCK', 'ASSIGNED', 'BROKEN', 'MISSING', 'DISPOSED'],
+    enum: [
+      'IN_STOCK',
+      'ASSIGNED',
+      'BROKEN',
+      'MISSING',
+      'DISPOSED',
+      'RETURN_PENDING',
+    ],
   })
   @IsString()
-  @IsIn(['IN_STOCK', 'ASSIGNED', 'BROKEN', 'MISSING', 'DISPOSED'])
+  @IsIn([
+    'IN_STOCK',
+    'ASSIGNED',
+    'BROKEN',
+    'MISSING',
+    'DISPOSED',
+    'RETURN_PENDING',
+  ])
   status: string;
 
   @ApiPropertyOptional({ type: 'string', format: 'date' })

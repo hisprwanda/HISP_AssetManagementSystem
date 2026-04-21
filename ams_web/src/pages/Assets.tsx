@@ -38,6 +38,7 @@ import { ViewCategoryModal } from '../components/ViewCategoryModal';
 import { DisposeAssetModal } from '../components/DisposeAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 import { UploadScannedFormModal } from '../components/UploadScannedFormModal';
+import { Pagination } from '../components/Pagination';
 
 import {
   Category,
@@ -116,6 +117,8 @@ export const Assets = () => {
   const [newItemName, setNewItemName] = useState('');
   const [isRequestableSidebarOpen, setIsRequestableSidebarOpen] =
     useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: categories, isLoading: loadingCats } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -176,6 +179,15 @@ export const Assets = () => {
     }
   }, [categories, categoryIdParam]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+    setAssetSearch('');
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [assetSearch, searchQuery]);
+
   const { data: assets, isLoading: loadingAssets } = useQuery<Asset[]>({
     queryKey: ['assets'],
     queryFn: async () => {
@@ -225,6 +237,13 @@ export const Assets = () => {
     isHOD,
     currentUser,
   ]);
+
+  const paginatedAssets = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAssets.slice(start, start + itemsPerPage);
+  }, [filteredAssets, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
 
   const { counts: categoryAssetsCount, uncategorizedCount } = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -290,6 +309,8 @@ export const Assets = () => {
       case 'BROKEN':
       case 'MISSING':
         return 'bg-white text-orange-500 border-orange-100 italic';
+      case 'RETURN_PENDING':
+        return 'bg-orange-100 text-orange-950 border-orange-300 font-bold';
       default:
         return 'bg-slate-50 text-slate-400 border-slate-100';
     }
@@ -571,9 +592,9 @@ export const Assets = () => {
       </div>
 
       <div className="flex gap-4 flex-1 min-h-0 relative">
-        <div className="flex-1 min-w-0 flex flex-col focus-within:z-10">
-          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex-1 flex flex-col relative">
-            <div className="overflow-x-auto flex-1">
+        <div className="flex-1 min-w-0 flex flex-col focus-within:z-10 bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+          <div className="flex-1 min-w-0 flex flex-col relative focus-within:z-10 overflow-hidden">
+            <div className="overflow-auto flex-1">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100/50">
@@ -623,7 +644,7 @@ export const Assets = () => {
                   )}
 
                   {!loadingAssets &&
-                    filteredAssets.map((asset) => {
+                    paginatedAssets.map((asset) => {
                       const RowIcon = getCategoryIcon(asset.category?.name);
 
                       return (
@@ -856,13 +877,13 @@ export const Assets = () => {
                 </tbody>
               </table>
             </div>
-            <div className="px-6 py-4 border-t border-slate-100/50 bg-white/40 flex items-center justify-between text-xs font-bold text-slate-400">
-              <span>
-                Showing {filteredAssets.length} of{' '}
-                {assets?.filter((a) => a.status !== 'DISPOSED').length || 0}{' '}
-                items
-              </span>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredAssets.length}
+            />
           </div>
         </div>
 

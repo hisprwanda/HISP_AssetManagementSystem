@@ -11,12 +11,14 @@ import {
   ShieldAlert,
   AlertCircle,
   Eye,
+  FileCheck,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { Asset, AssetIncident, AssetAssignment } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { Pagination } from '../components/Pagination';
 
 export const HODOverview = () => {
   const { user: currentUser } = useAuth();
@@ -24,6 +26,11 @@ export const HODOverview = () => {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [signingAssignment, setSigningAssignment] =
     useState<AssetAssignment | null>(null);
+  const [personalPage, setPersonalPage] = useState(1);
+  const [sharedPage, setSharedPage] = useState(1);
+  const [staffPage, setStaffPage] = useState(1);
+  const [incidentsPage, setIncidentsPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -76,10 +83,46 @@ export const HODOverview = () => {
                 new Date(b.reported_at).getTime() -
                 new Date(a.reported_at).getTime(),
             )
-            .slice(0, 3)
         : [],
     };
   }, [assets, incidents, currentUser]);
+
+  const paginatedPersonalAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (personalPage - 1) * itemsPerPage;
+    return stats.personalAssets.slice(start, start + itemsPerPage);
+  }, [stats, personalPage, itemsPerPage]);
+
+  const paginatedSharedAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (sharedPage - 1) * itemsPerPage;
+    return stats.sharedAssets.slice(start, start + itemsPerPage);
+  }, [stats, sharedPage, itemsPerPage]);
+
+  const paginatedStaffAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (staffPage - 1) * itemsPerPage;
+    return stats.staffAssets.slice(start, start + itemsPerPage);
+  }, [stats, staffPage, itemsPerPage]);
+
+  const paginatedIncidents = useMemo(() => {
+    if (!stats) return [];
+    const start = (incidentsPage - 1) * itemsPerPage;
+    return stats.recentOutcomes.slice(start, start + itemsPerPage);
+  }, [stats, incidentsPage, itemsPerPage]);
+
+  const personalTotalPages = Math.ceil(
+    (stats?.personalAssets.length || 0) / itemsPerPage,
+  );
+  const sharedTotalPages = Math.ceil(
+    (stats?.sharedAssets.length || 0) / itemsPerPage,
+  );
+  const staffTotalPages = Math.ceil(
+    (stats?.staffAssets.length || 0) / itemsPerPage,
+  );
+  const incidentsTotalPages = Math.ceil(
+    (stats?.recentOutcomes.length || 0) / itemsPerPage,
+  );
 
   const getAssetIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -225,7 +268,7 @@ export const HODOverview = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {stats.personalAssets.map((asset) => (
+                    {paginatedPersonalAssets.map((asset) => (
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -258,6 +301,30 @@ export const HODOverview = () => {
                           >
                             {asset.status.replace('_', ' ')}
                           </span>
+                          {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            ) && (
+                              <button
+                                onClick={() => {
+                                  const pending =
+                                    asset.assignment_history?.find(
+                                      (a) =>
+                                        a.form_status ===
+                                        'PENDING_USER_SIGNATURE',
+                                    );
+                                  if (pending)
+                                    setSigningAssignment({
+                                      ...pending,
+                                      asset,
+                                    } as unknown as AssetAssignment);
+                                }}
+                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
+                                title="Sign Receipt Form"
+                              >
+                                <FileCheck className="w-3.5 h-3.5" /> Sign Form
+                              </button>
+                            )}
                           <button
                             onClick={() => setSelectedAsset(asset)}
                             className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
@@ -282,6 +349,13 @@ export const HODOverview = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={personalPage}
+                totalPages={personalTotalPages}
+                onPageChange={setPersonalPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.personalAssets.length}
+              />
             </div>
           </div>
 
@@ -316,7 +390,7 @@ export const HODOverview = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {stats.sharedAssets.map((asset) => (
+                    {paginatedSharedAssets.map((asset) => (
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -367,6 +441,13 @@ export const HODOverview = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={sharedPage}
+                totalPages={sharedTotalPages}
+                onPageChange={setSharedPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.sharedAssets.length}
+              />
             </div>
           </div>
 
@@ -401,7 +482,7 @@ export const HODOverview = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {stats.staffAssets.map((asset) => (
+                    {paginatedStaffAssets.map((asset) => (
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -452,6 +533,13 @@ export const HODOverview = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={staffPage}
+                totalPages={staffTotalPages}
+                onPageChange={setStaffPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.staffAssets.length}
+              />
             </div>
           </div>
         </div>
@@ -485,7 +573,7 @@ export const HODOverview = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100/50">
-                    {stats.recentOutcomes.map((incident) => (
+                    {paginatedIncidents.map((incident) => (
                       <tr
                         key={incident.id}
                         className="group/row hover:bg-white/60"
@@ -581,6 +669,13 @@ export const HODOverview = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={incidentsPage}
+                totalPages={incidentsTotalPages}
+                onPageChange={setIncidentsPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={stats.recentOutcomes.length}
+              />
             </div>
           </div>
         )}

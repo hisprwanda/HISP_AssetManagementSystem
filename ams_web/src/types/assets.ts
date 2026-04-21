@@ -65,11 +65,17 @@ export interface POData {
 export interface Asset {
   id: string;
   name: string;
-  tag_id: string;
-  serial_number: string;
-  description?: string;
-  status: 'IN_STOCK' | 'ASSIGNED' | 'BROKEN' | 'MISSING' | 'DISPOSED';
-  location: string;
+  tag_id: string | null;
+  serial_number: string | null;
+  description: string | null;
+  status:
+    | 'IN_STOCK'
+    | 'ASSIGNED'
+    | 'BROKEN'
+    | 'MISSING'
+    | 'DISPOSED'
+    | 'RETURN_PENDING';
+  location: string | null;
   category?: { id: string; name: string };
   department?: { id: string; name: string };
   assigned_to?: { id: string; full_name: string };

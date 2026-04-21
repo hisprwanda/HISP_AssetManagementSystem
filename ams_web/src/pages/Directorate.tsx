@@ -22,6 +22,7 @@ import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
 import { ViewUserModal } from '../components/ViewUserModal';
 import { ViewDepartmentModal } from '../components/ViewDepartmentModal';
+import { Pagination } from '../components/Pagination';
 
 interface Department {
   id: string;
@@ -63,6 +64,8 @@ export const Directorate = () => {
   const [userToView, setUserToView] = useState<User | null>(null);
   const [deptToView, setDeptToView] = useState<Department | null>(null);
   const [staffSearch, setStaffSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: departments, isLoading: loadingDepts } = useQuery<Department[]>(
     {
@@ -87,14 +90,23 @@ export const Directorate = () => {
 
   const filteredStaff = useMemo(() => {
     if (!staff) return [];
-    const q = staffSearch.toLowerCase().trim();
-    if (!q) return staff;
     return staff.filter(
-      (u) =>
-        u.full_name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q),
+      (s) =>
+        s.full_name?.toLowerCase().includes(staffSearch.toLowerCase()) ||
+        s.email?.toLowerCase().includes(staffSearch.toLowerCase()),
     );
   }, [staff, staffSearch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [staffSearch]);
+
+  const paginatedStaff = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredStaff.slice(start, start + itemsPerPage);
+  }, [filteredStaff, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
 
   const deleteMutation = useMutation({
     mutationFn: async (deptId: string) => {
@@ -415,7 +427,7 @@ export const Directorate = () => {
                 </tr>
               )}
 
-              {filteredStaff.map((user) => (
+              {paginatedStaff.map((user) => (
                 <tr
                   key={user.id}
                   className="hover:bg-white/60 transition-colors group"
@@ -503,6 +515,13 @@ export const Directorate = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredStaff.length}
+        />
       </div>
 
       <CreateUserModal

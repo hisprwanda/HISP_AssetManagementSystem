@@ -12,6 +12,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Asset } from '@/types/assets';
+import { api } from '../lib/api';
+import { toast } from 'react-hot-toast';
+import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 
 interface ViewAssetModalProps {
   isOpen: boolean;
@@ -22,9 +26,16 @@ interface ViewAssetModalProps {
 export const ViewAssetModal = ({
   isOpen,
   onClose,
-  asset,
+  asset: initialAsset,
 }: ViewAssetModalProps) => {
-  const { isAdmin, isCEO } = useAuth();
+  const { user, isAdmin, isCEO } = useAuth();
+  const [asset, setAsset] = useState<Asset | null>(initialAsset);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync state when initialAsset changes
+  if (initialAsset?.id !== asset?.id) {
+    setAsset(initialAsset);
+  }
   if (!isOpen || !asset) return null;
 
   const calculateMonths = () => {
@@ -253,6 +264,54 @@ export const ViewAssetModal = ({
               </p>
             </div>
           )}
+
+          {asset.status === 'ASSIGNED' &&
+            user &&
+            (user.id === asset.assigned_to?.id ||
+              user.role.toUpperCase().includes('HOD') ||
+              user.role.toUpperCase().includes('ADMIN')) && (
+              <div className="pt-6 border-t border-slate-100">
+                <button
+                  onClick={async () => {
+                    if (
+                      !window.confirm(
+                        'Are you sure you want to initiate the return process for this asset? Administration and your HOD will be notified.',
+                      )
+                    )
+                      return;
+
+                    setIsSubmitting(true);
+                    try {
+                      const response = await api.patch(
+                        `/assets/${asset.id}/initiate-return`,
+                        { userId: user.id },
+                      );
+                      setAsset(response.data);
+                      toast.success('Return process initiated successfully.');
+                    } catch (error: unknown) {
+                      const message =
+                        error instanceof Error
+                          ? (
+                              error as {
+                                response?: { data?: { message?: string } };
+                              }
+                            ).response?.data?.message || error.message
+                          : 'Failed to initiate return.';
+                      toast.error(message);
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-orange-100 text-[#ff8000] rounded-xl text-sm font-black uppercase tracking-widest hover:bg-orange-50 hover:border-orange-200 transition-all disabled:opacity-50"
+                >
+                  <RotateCcw
+                    className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`}
+                  />
+                  {isSubmitting ? 'Processing...' : 'Submit for Return'}
+                </button>
+              </div>
+            )}
         </div>
       </div>
     </>

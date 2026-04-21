@@ -740,16 +740,19 @@ export const AssetReceiptFormModal = ({
           </div>
         )}
         {(assignment.form_status === 'APPROVED' ||
+          !isAdmin ||
           (isAdmin &&
             (assignment.form_status === 'PENDING_USER_SIGNATURE' ||
               assignment.form_status === 'PENDING_ADMIN_REVIEW'))) && (
           <div className="p-8 border-t border-slate-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] flex gap-4 print:hidden">
-            <button
-              onClick={handlePrint}
-              className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
-            >
-              <Printer className="w-5 h-5 text-slate-400" /> Print Document
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handlePrint}
+                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+              >
+                <Printer className="w-5 h-5 text-slate-400" /> Print Document
+              </button>
+            )}
             <button
               onClick={onClose}
               className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 font-bold rounded-2xl"

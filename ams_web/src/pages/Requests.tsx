@@ -28,6 +28,7 @@ import { ViewRequestModal } from '../components/ViewRequestModal';
 import { CEODecisionModal } from '../components/CEODecisionModal';
 import { FormalizeRequestModal } from '../components/FormalizeRequestModal';
 import { PurchaseOrderModal } from '../components/PurchaseOrderModal';
+import { Pagination } from '../components/Pagination';
 
 export const Requests = () => {
   const { user: currentUser, isAdmin, isHOD, isStaff, isCEO } = useAuth();
@@ -69,6 +70,8 @@ export const Requests = () => {
   );
   const [isPOModalOpen, setIsPOModalOpen] = useState(false);
   const [requestForPO, setRequestForPO] = useState<AssetRequest | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: requests, isLoading } = useQuery<AssetRequest[]>({
     queryKey: ['assets-requests'],
@@ -77,6 +80,10 @@ export const Requests = () => {
       return response.data;
     },
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, startDate, endDate]);
   const updateStatusMutation = useMutation({
     mutationFn: async ({
       id,
@@ -171,6 +178,17 @@ export const Requests = () => {
     isAdmin,
     isCEO,
   ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, searchQuery, startDate, endDate]);
+
+  const paginatedRequests = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredRequests.slice(start, start + itemsPerPage);
+  }, [filteredRequests, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
   const pendingCount =
     requests?.filter((r) => r.status === 'PENDING').length || 0;
@@ -457,7 +475,7 @@ export const Requests = () => {
               )}
 
               {!isLoading &&
-                filteredRequests.map((req) => (
+                paginatedRequests.map((req) => (
                   <tr
                     key={req.id}
                     className="hover:bg-white/60 transition-colors group"
@@ -668,9 +686,13 @@ export const Requests = () => {
             </tbody>
           </table>
         </div>
-        <div className="px-4 py-3 border-t border-slate-100/50 bg-white/40 flex items-center justify-between text-[11px] font-bold text-slate-400">
-          <span>Showing {filteredRequests.length} requests</span>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredRequests.length}
+        />
       </div>
       <CreateRequestModal
         isOpen={isCreateModalOpen}

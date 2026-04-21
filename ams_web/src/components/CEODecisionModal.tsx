@@ -64,7 +64,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
           <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
             {isApprove
               ? 'Executive Remarks (Optional)'
-              : 'Reason for Rejection (Optional)'}
+              : 'Reason for Rejection (Required)'}
           </label>
           <textarea
             value={remarks}
@@ -72,7 +72,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
             placeholder={
               isApprove
                 ? 'e.g. Approved for urgent acquisition...'
-                : 'e.g. Budget constraints / Refine specifications...'
+                : 'Please provide a reason for declining this request...'
             }
             className="w-full h-32 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm focus:bg-white focus:ring-4 focus:ring-slate-100 focus:border-slate-200 outline-none transition-all placeholder:text-slate-300 font-medium resize-none shadow-inner"
           />
@@ -86,11 +86,11 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
             </button>
             <button
               onClick={() => onConfirm(remarks)}
-              disabled={isPending}
+              disabled={isPending || (!isApprove && !remarks.trim())}
               className={`flex-[2] flex items-center justify-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-widest text-white rounded-xl shadow-lg transition-all transform active:scale-[0.98] ${
                 isApprove
                   ? 'bg-[#ff8000] hover:bg-orange-700 shadow-orange-200'
-                  : 'bg-orange-950 hover:bg-black shadow-slate-200'
+                  : 'bg-orange-950 hover:bg-black shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed'
               }`}
             >
               {isPending ? (

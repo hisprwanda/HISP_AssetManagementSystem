@@ -1,6 +1,6 @@
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  FileText,
   Printer,
   Building2,
   Calendar,
@@ -13,9 +13,9 @@ import {
 import { api } from '../lib/api';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { AssetRequest } from '../types/assets';
-import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 
 export const ProcurementTrail = () => {
   const navigate = useNavigate();
@@ -24,6 +24,8 @@ export const ProcurementTrail = () => {
   const [endDate, setEndDate] = useState('');
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
@@ -32,6 +34,10 @@ export const ProcurementTrail = () => {
     setHeaderTitle('Procurement Archive');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, startDate, endDate]);
 
   const { data: requests, isLoading } = useQuery<AssetRequest[]>({
     queryKey: ['assets-requests'],
@@ -77,6 +83,13 @@ export const ProcurementTrail = () => {
         new Date(a.created_at || 0).getTime(),
     );
   }, [requests, searchQuery, startDate, endDate]);
+
+  const paginatedRequests = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return poRequests.slice(start, start + itemsPerPage);
+  }, [poRequests, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(poRequests.length / itemsPerPage);
 
   const handlePrintPO = (request: AssetRequest) => {
     const po = request.purchase_order;
@@ -254,7 +267,7 @@ export const ProcurementTrail = () => {
       'Date Ordered',
     ];
 
-    const escapeCSV = (val: string | number | undefined) => {
+    const escapeCSV = (val: string | number | undefined | null) => {
       if (val === null || val === undefined) return '""';
       return `"${String(val).replace(/"/g, '""')}"`;
     };
@@ -407,7 +420,7 @@ export const ProcurementTrail = () => {
                   </td>
                 </tr>
               ) : (
-                poRequests.map((req) => (
+                paginatedRequests.map((req) => (
                   <tr
                     key={req.id}
                     className="hover:bg-slate-50/40 transition-colors group"
@@ -475,16 +488,13 @@ export const ProcurementTrail = () => {
             </tbody>
           </table>
         </div>
-        <div className="mt-auto px-8 py-4 bg-slate-50/50 border-t border-slate-100/50 flex items-center justify-between">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-            TOTAL ARCHIVED INSTRUMENTS: {poRequests.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-              <FileText className="w-3 h-3" /> Digital Trace Verified
-            </p>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={poRequests.length}
+        />
       </div>
 
       <ConfirmActionModal

@@ -1,3 +1,4 @@
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search,
@@ -16,9 +17,9 @@ import {
 import { api } from '../lib/api';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { AssetRequest } from '../types/assets';
-import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 
 export const RequestTrail = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ export const RequestTrail = () => {
   const [endDate, setEndDate] = useState('');
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
@@ -36,6 +39,10 @@ export const RequestTrail = () => {
     setHeaderTitle('Request Trail');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, startDate, endDate]);
 
   const { data: requests, isLoading } = useQuery<AssetRequest[]>({
     queryKey: ['assets-requests'],
@@ -85,6 +92,13 @@ export const RequestTrail = () => {
         new Date(a.created_at || 0).getTime(),
     );
   }, [requests, filterStatus, searchQuery, startDate, endDate]);
+
+  const paginatedRequests = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredRequests.slice(start, start + itemsPerPage);
+  }, [filteredRequests, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
   const handleExportLogs = () => {
     if (!startDate && !endDate) {
@@ -442,7 +456,7 @@ export const RequestTrail = () => {
                   </td>
                 </tr>
               ) : (
-                filteredRequests.map((req) => (
+                paginatedRequests.map((req) => (
                   <tr
                     key={req.id}
                     className="hover:bg-slate-50/40 transition-colors group"
@@ -527,6 +541,13 @@ export const RequestTrail = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredRequests.length}
+        />
       </div>
       <ConfirmActionModal
         isOpen={showExportConfirm}

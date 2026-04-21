@@ -17,6 +17,7 @@ import { AssetIncident } from '../types/assets';
 import { ViewIncidentModal } from '../components/ViewIncidentModal';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { useAuth } from '../hooks/useAuth';
+import { Pagination } from '../components/Pagination';
 
 export const IncidentTrail = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ export const IncidentTrail = () => {
   );
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -39,6 +42,10 @@ export const IncidentTrail = () => {
     setHeaderTitle('Incident Trail');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType, filterStatus, startDate, endDate]);
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
     queryKey: ['asset-incidents'],
@@ -158,6 +165,13 @@ export const IncidentTrail = () => {
         new Date(b.reported_at).getTime() - new Date(a.reported_at).getTime(),
     );
   }, [incidents, filterType, filterStatus, searchQuery, startDate, endDate]);
+
+  const paginatedIncidents = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredIncidents.slice(start, start + itemsPerPage);
+  }, [filteredIncidents, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage);
 
   const handlePrintIncident = (inc: AssetIncident) => {
     const printWindow = window.open('', '_blank');
@@ -458,7 +472,7 @@ export const IncidentTrail = () => {
                 </tr>
               )}
               {!isLoading &&
-                filteredIncidents.map((inc) => (
+                paginatedIncidents.map((inc) => (
                   <tr
                     key={inc.id}
                     className="hover:bg-slate-50/50 transition-colors group"
@@ -596,6 +610,13 @@ export const IncidentTrail = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredIncidents.length}
+        />
       </div>
 
       <ViewIncidentModal

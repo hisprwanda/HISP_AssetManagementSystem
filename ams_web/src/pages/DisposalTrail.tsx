@@ -26,6 +26,7 @@ import {
 import { api } from '../lib/api';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
+import { Pagination } from '../components/Pagination';
 import { Asset, Category } from '@/types/assets';
 
 const getCategoryIcon = (categoryName?: string) => {
@@ -82,6 +83,8 @@ export const DisposalTrail = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [assetToView, setAssetToView] = useState<Asset | null>(null);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
@@ -96,6 +99,10 @@ export const DisposalTrail = () => {
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, startDate, endDate, selectedCategory]);
 
   const { data: assets, isLoading } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -313,6 +320,13 @@ export const DisposalTrail = () => {
     );
   }, [disposedAssets, searchQuery]);
 
+  const paginatedAssets = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAssets.slice(start, start + itemsPerPage);
+  }, [filteredAssets, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
+
   return (
     <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
@@ -517,7 +531,7 @@ export const DisposalTrail = () => {
                       </td>
                     </tr>
                   )}
-                  {filteredAssets.map((asset) => {
+                  {paginatedAssets.map((asset) => {
                     const RowIcon = getCategoryIcon(asset.category?.name);
                     const lifecycleYears =
                       asset.purchase_date && asset.disposal_date
@@ -632,6 +646,13 @@ export const DisposalTrail = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredAssets.length}
+            />
           </div>
         </>
       )}
