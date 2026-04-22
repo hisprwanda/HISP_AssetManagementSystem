@@ -42,6 +42,7 @@ export const CreateUserModal = ({
     mutationFn: async (newUser: {
       full_name: string;
       email: string;
+      phone_number: string;
       password_hash: string;
       role: string;
       department_id: string;
