@@ -38,11 +38,11 @@ export const ConfirmActionModal = ({
         };
       case 'success':
         return {
-          bg: 'bg-emerald-50',
-          iconBg: 'bg-emerald-100',
-          icon: 'text-emerald-600',
+          bg: 'bg-emerald-50/30',
+          iconBg: 'bg-emerald-50',
+          icon: 'text-emerald-500',
           button:
-            'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100',
+            'bg-[#ff8000] hover:bg-[#e49f37] text-white shadow-lg shadow-orange-100',
           Icon: CheckCircle2,
         };
       case 'info':
@@ -74,11 +74,11 @@ export const ConfirmActionModal = ({
             <Icon className={`w-7 h-7 ${styles.icon}`} />
           </div>
 
-          <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase mb-2 px-4">
+          <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase mb-2 px-4">
             {title}
           </h3>
 
-          <p className="text-[11px] font-bold text-slate-500 leading-relaxed max-w-[280px] px-2">
+          <p className="text-[11px] font-semibold text-slate-500 leading-relaxed max-w-[280px] px-2">
             {message}
           </p>
         </div>
@@ -87,7 +87,7 @@ export const ConfirmActionModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+            className="flex-1 px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
           >
             {cancelText}
           </button>
@@ -98,7 +98,7 @@ export const ConfirmActionModal = ({
               onClose();
             }}
             disabled={isLoading}
-            className={`flex-[1.5] px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all transform active:scale-95 disabled:opacity-50 ${styles.button}`}
+            className={`flex-[1.5] px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all transform active:scale-95 disabled:opacity-50 ${styles.button}`}
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">

@@ -27,7 +27,7 @@ export class AssetIncident {
   @Column({ type: 'enum', enum: ['BROKEN', 'MISSING'] })
   incident_type: string;
 
-  @Column({ type: 'enum', enum: ['WORK', 'HOME', 'OTHER'], nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   location: string;
 
   @Column('text')

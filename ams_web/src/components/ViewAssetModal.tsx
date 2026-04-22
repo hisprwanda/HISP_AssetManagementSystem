@@ -16,6 +16,7 @@ import { api } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import { RotateCcw } from 'lucide-react';
+import { ConfirmActionModal } from './ConfirmActionModal';
 
 interface ViewAssetModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const ViewAssetModal = ({
   const { user, isAdmin, isCEO } = useAuth();
   const [asset, setAsset] = useState<Asset | null>(initialAsset);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReturnConfirmOpen, setIsReturnConfirmOpen] = useState(false);
 
   // Sync state when initialAsset changes
   if (initialAsset?.id !== asset?.id) {
@@ -272,38 +274,9 @@ export const ViewAssetModal = ({
               user.role.toUpperCase().includes('ADMIN')) && (
               <div className="pt-6 border-t border-slate-100">
                 <button
-                  onClick={async () => {
-                    if (
-                      !window.confirm(
-                        'Are you sure you want to initiate the return process for this asset? Administration and your HOD will be notified.',
-                      )
-                    )
-                      return;
-
-                    setIsSubmitting(true);
-                    try {
-                      const response = await api.patch(
-                        `/assets/${asset.id}/initiate-return`,
-                        { userId: user.id },
-                      );
-                      setAsset(response.data);
-                      toast.success('Return process initiated successfully.');
-                    } catch (error: unknown) {
-                      const message =
-                        error instanceof Error
-                          ? (
-                              error as {
-                                response?: { data?: { message?: string } };
-                              }
-                            ).response?.data?.message || error.message
-                          : 'Failed to initiate return.';
-                      toast.error(message);
-                    } finally {
-                      setIsSubmitting(false);
-                    }
-                  }}
+                  onClick={() => setIsReturnConfirmOpen(true)}
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-orange-100 text-[#ff8000] rounded-xl text-sm font-black uppercase tracking-widest hover:bg-orange-50 hover:border-orange-200 transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-orange-100 text-[#ff8000] rounded-xl text-sm font-black uppercase tracking-widest hover:bg-orange-50 hover:border-orange-200 transition-all disabled:opacity-50 shadow-sm"
                 >
                   <RotateCcw
                     className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`}
@@ -314,6 +287,36 @@ export const ViewAssetModal = ({
             )}
         </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isReturnConfirmOpen}
+        onClose={() => setIsReturnConfirmOpen(false)}
+        onConfirm={async () => {
+          setIsSubmitting(true);
+          try {
+            const response = await api.patch(
+              `/assets/${asset.id}/initiate-return`,
+              { userId: user?.id },
+            );
+            setAsset(response.data);
+            toast.success('Return process initiated successfully.');
+          } catch (error: unknown) {
+            const message =
+              error instanceof Error
+                ? (error as { response?: { data?: { message?: string } } })
+                    .response?.data?.message || error.message
+                : 'Failed to initiate return.';
+            toast.error(message);
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
+        title="Initiate Asset Return"
+        message={`Hello ${user?.full_name?.split(' ')[0] || 'User'}, are you sure you want to initiate the return process for this asset? Administration and your HOD will be notified immediately.`}
+        confirmText="Initiate Return"
+        variant="warning"
+        isLoading={isSubmitting}
+      />
     </>
   );
 };
