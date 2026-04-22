@@ -301,10 +301,10 @@ export const Requests = () => {
             <Clock className="w-5 h-5 text-amber-500" />
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
               Pending Review
             </p>
-            <p className="text-xl font-black text-slate-800 leading-none">
+            <p className="text-xl font-semibold text-slate-800 leading-none">
               {pendingCount}{' '}
               <span className="text-xs font-bold text-slate-400">requests</span>
             </p>
@@ -317,10 +317,10 @@ export const Requests = () => {
               <Banknote className="w-5 h-5 text-[#ff8000]" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Est. Pending Budget
               </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
+              <p className="text-xl font-semibold text-slate-800 leading-none">
                 {pendingValue.toLocaleString()}{' '}
                 <span className="text-xs font-bold text-slate-400">RWF</span>
               </p>
@@ -333,10 +333,10 @@ export const Requests = () => {
             <CheckCircle2 className="w-5 h-5 text-slate-400" />
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
               Successfully Fulfilled
             </p>
-            <p className="text-xl font-black text-slate-800 leading-none">
+            <p className="text-xl font-semibold text-slate-800 leading-none">
               {fulfilledCount}{' '}
               <span className="text-xs font-bold text-slate-400">
                 assets deployed
@@ -348,7 +348,7 @@ export const Requests = () => {
 
       <div className="flex justify-end mt-3 mb-6">
         <div className="bg-white/40 backdrop-blur-md border border-white p-2 rounded-xl shadow-sm flex items-center gap-2 max-w-sm">
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap pl-1">
+          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap pl-1">
             Date Range:
           </span>
           <div className="flex items-center gap-1.5 flex-1 justify-end">
@@ -398,7 +398,7 @@ export const Requests = () => {
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
           <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
             <Filter className="w-4 h-4 text-[#ff8000]" />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
               Filters:
             </span>
           </div>
@@ -430,24 +430,24 @@ export const Requests = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Request Item
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Requested By
                 </th>
                 {!isRequesterOnly && (
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Total Est. Cost
                   </th>
                 )}
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Urgency
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Status
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -530,7 +530,7 @@ export const Requests = () => {
                     )}
                     <td className="px-4 py-2.5">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border border-transparent ${getUrgencyStyle(req.urgency)}`}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider border border-transparent ${getUrgencyStyle(req.urgency)}`}
                       >
                         {req.urgency === 'CRITICAL' && (
                           <AlertTriangle className="w-3 h-3" />
@@ -541,7 +541,7 @@ export const Requests = () => {
 
                     <td className="px-4 py-2.5">
                       <div
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${getStatusStyle(req.status)}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider border ${getStatusStyle(req.status)}`}
                       >
                         {req.status}
                       </div>

@@ -34,16 +34,16 @@ export const Pagination: React.FC<PaginationProps> = ({
           </button>
 
           <div className="flex items-center gap-2 px-2">
-            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
+            <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.2em]">
               Page
             </span>
-            <span className="text-[11px] font-black text-slate-900 tabular-nums">
+            <span className="text-[11px] font-semibold text-slate-900 tabular-nums">
               {currentPage}
             </span>
-            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
+            <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.2em]">
               of
             </span>
-            <span className="text-[11px] font-black text-slate-500 tabular-nums">
+            <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
               {totalPages}
             </span>
           </div>
@@ -59,10 +59,10 @@ export const Pagination: React.FC<PaginationProps> = ({
       </div>
 
       <div className="flex items-center gap-3 order-1 sm:order-2">
-        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
+        <span className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest">
           Displaying
         </span>
-        <div className="flex items-center gap-1 text-[11px] font-black text-slate-700 bg-slate-50/50 px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-50/50 px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
           <span className="text-[#ff8000] tabular-nums">
             {startItem}-{endItem}
           </span>

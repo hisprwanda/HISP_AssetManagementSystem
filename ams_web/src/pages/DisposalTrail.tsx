@@ -332,7 +332,7 @@ export const DisposalTrail = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <button
           onClick={handleBackToOverview}
-          className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform w-fit"
+          className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform w-fit"
         >
           <ArrowLeft className="w-3 h-3" />{' '}
           {selectedCategory ? 'Back to Registry' : 'Back to Audit Hub'}
@@ -341,7 +341,7 @@ export const DisposalTrail = () => {
         {selectedCategory && (
           <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Audit Period:
               </span>
               <input
@@ -373,7 +373,7 @@ export const DisposalTrail = () => {
             <button
               onClick={handleExportLogs}
               disabled={filteredAssets.length === 0}
-              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="flex items-center gap-2 text-[9px] font-semibold text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Download CSV Export"
             >
               <History className="w-3.5 h-3.5 text-[#ff8000]" /> Disposal log
@@ -385,10 +385,10 @@ export const DisposalTrail = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
               Total Retired
             </p>
-            <h3 className="text-lg font-black text-slate-800 leading-none">
+            <h3 className="text-lg font-semibold text-slate-800 leading-none">
               {disposedAssets.length}{' '}
               <span className="text-[9px] font-bold text-slate-400">UNITS</span>
             </h3>
@@ -397,10 +397,10 @@ export const DisposalTrail = () => {
         </div>
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
               Recovery Value
             </p>
-            <h3 className="text-lg font-black text-[#ff8000] leading-none">
+            <h3 className="text-lg font-semibold text-[#ff8000] leading-none">
               {metrics.totalRecovery.toLocaleString()}{' '}
               <span className="text-[9px] font-bold text-orange-200">RWF</span>
             </h3>
@@ -409,10 +409,10 @@ export const DisposalTrail = () => {
         </div>
         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
               Avg. Service Life
             </p>
-            <h3 className="text-lg font-black text-slate-800 leading-none">
+            <h3 className="text-lg font-semibold text-slate-800 leading-none">
               {metrics.avgLifecycle}{' '}
               <span className="text-[9px] font-bold text-slate-400">YEARS</span>
             </h3>
@@ -438,31 +438,31 @@ export const DisposalTrail = () => {
                     <CatIcon className="w-6 h-6 text-[#ff8000]" />
                   </div>
 
-                  <h3 className="text-lg font-black text-slate-800 mb-1 group-hover:text-[#ff8000] transition-colors">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-1 group-hover:text-[#ff8000] transition-colors">
                     {cat.name}
                   </h3>
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Retired
                       </span>
-                      <span className="text-sm font-black text-slate-700">
+                      <span className="text-sm font-semibold text-slate-700">
                         {cat.count} Units
                       </span>
                     </div>
                     <div className="w-px h-6 bg-slate-100" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Recovered
                       </span>
-                      <span className="text-sm font-black text-slate-800">
+                      <span className="text-sm font-semibold text-slate-800">
                         {cat.recovery.toLocaleString()} RWF
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                    <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
                       View Logs &rarr;
                     </span>
                   </div>
@@ -491,19 +491,19 @@ export const DisposalTrail = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Asset & Identifiers
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Lifecycle Details
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Financials
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Previous Custodian
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                       Actions
                     </th>
                   </tr>
@@ -557,7 +557,7 @@ export const DisposalTrail = () => {
                                 {asset.name}
                               </span>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[9px] font-black text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded leading-none">
+                                <span className="text-[9px] font-semibold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded leading-none">
                                   {asset.tag_id || 'NO TAG'}
                                 </span>
                                 <span className="text-[9px] font-bold text-slate-400 truncate max-w-[120px]">
@@ -592,7 +592,7 @@ export const DisposalTrail = () => {
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1.5">
                               <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
-                              <span className="text-xs font-black text-slate-700">
+                              <span className="text-xs font-semibold text-slate-700">
                                 {Number(
                                   asset.disposal_value || 0,
                                 ).toLocaleString()}{' '}
@@ -618,7 +618,7 @@ export const DisposalTrail = () => {
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex flex-col min-w-[140px]">
-                            <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">
+                            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight">
                               {getResolvedCustodian(asset) ||
                                 asset.department?.name ||
                                 'General Inventory'}

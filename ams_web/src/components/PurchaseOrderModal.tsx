@@ -227,7 +227,7 @@ export const PurchaseOrderModal = ({
     label: string;
     icon?: LucideIcon;
   }) => (
-    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-2 group-focus-within:text-[#ff8000] transition-colors">
+    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-2 group-focus-within:text-[#ff8000] transition-colors">
       {Icon && <Icon className="w-3.5 h-3.5" />}
       {label}
     </label>
@@ -242,13 +242,13 @@ export const PurchaseOrderModal = ({
       <div className="fixed inset-y-0 right-0 w-full max-w-5xl bg-white shadow-2xl z-[70] animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/80 shrink-0">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-800 tracking-tight flex items-center gap-2">
               <ShoppingCart className="w-5 h-5 text-[#ff8000]" />
               Official Purchase Order Form
             </h2>
             <div className="flex items-center gap-2 mt-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
+              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest leading-none">
                 Drafting Final Procurement Instrument
               </span>
             </div>
@@ -299,7 +299,7 @@ export const PurchaseOrderModal = ({
                     required
                     value={orderDate}
                     onChange={(e) => setOrderDate(e.target.value)}
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-black text-slate-700 shadow-sm transition-all"
+                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-semibold text-slate-700 shadow-sm transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -309,7 +309,7 @@ export const PurchaseOrderModal = ({
                     required
                     value={poNumber}
                     onChange={(e) => setPoNumber(e.target.value)}
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-black text-slate-700 shadow-sm transition-all"
+                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-semibold text-slate-700 shadow-sm transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -328,7 +328,7 @@ export const PurchaseOrderModal = ({
               <div className="space-y-2">
                 <RequisitionLabel label="Bill To" icon={FileText} />
                 <div className="bg-white/60 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-xs font-black text-slate-800 tracking-tight">
+                  <p className="text-xs font-semibold text-slate-800 tracking-tight">
                     HISP Rwanda Ltd
                   </p>
                   <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">
@@ -339,7 +339,7 @@ export const PurchaseOrderModal = ({
               <div className="space-y-2">
                 <RequisitionLabel label="Ship To / Deliver To" icon={Truck} />
                 <div className="bg-white/60 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-xs font-black text-slate-800 tracking-tight">
+                  <p className="text-xs font-semibold text-slate-800 tracking-tight">
                     HISP Rwanda LTD
                   </p>
                   <p className="text-[10px] font-medium text-slate-500 mt-1 leading-snug">
@@ -353,7 +353,7 @@ export const PurchaseOrderModal = ({
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-[#ff8000]" />
                 Final Procured Goods/Services
               </h3>
@@ -362,7 +362,7 @@ export const PurchaseOrderModal = ({
             <div className="border border-slate-200 rounded-[2rem] overflow-hidden bg-slate-50/50">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-100/80 border-b border-slate-200">
-                  <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <tr className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                     <th className="px-8 py-5 w-24 text-center">Qty</th>
                     <th className="px-8 py-5">Item Name / Service</th>
                     <th className="px-8 py-5 text-right w-48">
@@ -379,7 +379,7 @@ export const PurchaseOrderModal = ({
                       key={idx}
                       className="bg-white hover:bg-slate-50/50 transition-colors group"
                     >
-                      <td className="px-8 py-5 text-sm font-black text-slate-600 text-center">
+                      <td className="px-8 py-5 text-sm font-semibold text-slate-600 text-center">
                         {item.quantity}
                       </td>
                       <td className="px-8 py-5">
@@ -397,7 +397,7 @@ export const PurchaseOrderModal = ({
                       <td className="px-8 py-5 text-right text-xs font-bold text-slate-500">
                         {item.unit_price.toLocaleString()}
                       </td>
-                      <td className="px-8 py-5 text-right text-sm font-black text-slate-900 pr-12">
+                      <td className="px-8 py-5 text-right text-sm font-semibold text-slate-900 pr-12">
                         {(item.quantity * item.unit_price).toLocaleString()}
                       </td>
                     </tr>
@@ -405,10 +405,10 @@ export const PurchaseOrderModal = ({
                 </tbody>
               </table>
               <div className="bg-slate-100/50 px-12 py-5 flex justify-end items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Total Approved Value For Items:
                 </span>
-                <span className="text-lg font-black text-slate-800">
+                <span className="text-lg font-semibold text-slate-800">
                   {subtotal.toLocaleString()} RWF
                 </span>
               </div>
@@ -444,14 +444,14 @@ export const PurchaseOrderModal = ({
               />
               <div className="bg-orange-50 p-8 rounded-[2.5rem] border border-orange-100 shadow-sm relative overflow-hidden group">
                 <div className="space-y-6 relative z-10">
-                  <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest text-[#ff8000]">
+                  <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-widest text-[#ff8000]">
                     <span>Financial Integrity Check</span>
                     <ShieldAlert className="w-4 h-4" />
                   </div>
                   <div className="space-y-4 divide-y divide-orange-100">
                     <div className="flex justify-between items-center text-slate-400 text-[11px] font-bold pb-2">
                       <span>Items Subtotal</span>
-                      <span className="text-slate-600 font-black">
+                      <span className="text-slate-600 font-semibold">
                         {subtotal.toLocaleString()} RWF
                       </span>
                     </div>
@@ -465,7 +465,7 @@ export const PurchaseOrderModal = ({
                         onChange={(e) =>
                           setShippingCost(Number(e.target.value))
                         }
-                        className="w-24 bg-white border border-orange-50 rounded-lg px-2 py-1 text-right text-xs font-black text-orange-600 focus:ring-4 focus:ring-orange-500/10 outline-none"
+                        className="w-24 bg-white border border-orange-50 rounded-lg px-2 py-1 text-right text-xs font-semibold text-orange-600 focus:ring-4 focus:ring-orange-500/10 outline-none"
                       />
                     </div>
                     <div className="flex justify-between items-center pt-2">
@@ -476,15 +476,15 @@ export const PurchaseOrderModal = ({
                         type="number"
                         value={otherCost}
                         onChange={(e) => setOtherCost(Number(e.target.value))}
-                        className="w-24 bg-white border border-orange-50 rounded-lg px-2 py-1 text-right text-xs font-black text-orange-600 focus:ring-4 focus:ring-orange-500/10 outline-none"
+                        className="w-24 bg-white border border-orange-50 rounded-lg px-2 py-1 text-right text-xs font-semibold text-orange-600 focus:ring-4 focus:ring-orange-500/10 outline-none"
                       />
                     </div>
                   </div>
                   <div className="pt-4 flex justify-between items-end">
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400 mb-1">
                       TOTAL PO VALUE
                     </span>
-                    <span className="text-3xl font-black text-[#ff8000] tracking-tighter">
+                    <span className="text-3xl font-semibold text-[#ff8000] tracking-tighter">
                       {grandTotal.toLocaleString()}{' '}
                       <span className="text-xs text-orange-300">RWF</span>
                     </span>
@@ -501,7 +501,7 @@ export const PurchaseOrderModal = ({
               />
               <div className="bg-orange-50/30 p-8 rounded-[2.5rem] border border-orange-100 space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest pl-1">
+                  <label className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest pl-1">
                     Name & Title *
                   </label>
                   <input
@@ -510,12 +510,12 @@ export const PurchaseOrderModal = ({
                     value={hispSignName}
                     onChange={(e) => setHispSignName(e.target.value)}
                     placeholder="Name and Title of authorized HISP signatory..."
-                    className="w-full px-5 py-3 bg-white border border-orange-100 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-xs font-black text-slate-800 shadow-sm transition-all"
+                    className="w-full px-5 py-3 bg-white border border-orange-100 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-xs font-semibold text-slate-800 shadow-sm transition-all"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                    <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Signature
                     </label>
                     <div className="h-10 border-b border-orange-200 flex items-center justify-center text-[10px] italic text-orange-300 font-medium">
@@ -523,14 +523,14 @@ export const PurchaseOrderModal = ({
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest pl-1">
+                    <label className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest pl-1">
                       Sign Date
                     </label>
                     <input
                       type="date"
                       value={hispSignDate}
                       onChange={(e) => setHispSignDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-black text-slate-700 outline-none"
+                      className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-semibold text-slate-700 outline-none"
                     />
                   </div>
                 </div>
@@ -541,7 +541,7 @@ export const PurchaseOrderModal = ({
               <RequisitionLabel label="Vendor Acceptance" icon={PenTool} />
               <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                  <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                     Name & Title
                   </label>
                   <input
@@ -549,25 +549,25 @@ export const PurchaseOrderModal = ({
                     value={vendorSignName}
                     onChange={(e) => setVendorSignName(e.target.value)}
                     placeholder="Vendor signatory name..."
-                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 text-xs font-black text-slate-800 shadow-sm transition-all"
+                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 text-xs font-semibold text-slate-800 shadow-sm transition-all"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                    <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Stamp/Signature
                     </label>
                     <div className="h-10 border-b border-slate-200"></div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                    <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Sign Date
                     </label>
                     <input
                       type="date"
                       value={vendorSignDate}
                       onChange={(e) => setVendorSignDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none"
                     />
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export const PurchaseOrderModal = ({
             <div className="flex items-start gap-4 p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100">
               <ShieldAlert className="w-6 h-6 text-[#ff8000] shrink-0" />
               <div className="space-y-3">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none">
                   Authorization & Compliance Notice
                 </p>
                 <p className="text-xs font-medium text-slate-500 italic leading-relaxed">
@@ -591,7 +591,7 @@ export const PurchaseOrderModal = ({
                     HISP ANTI-MOTIVATION POLICY: Staff members are strictly
                     prohibited from receiving motivation in any form from
                     vendors. Report violations to{' '}
-                    <span className="font-black underline px-1">
+                    <span className="font-semibold underline px-1">
                       @hisprwanda.org
                     </span>
                   </p>
@@ -604,7 +604,9 @@ export const PurchaseOrderModal = ({
           <div className="flex-1 text-[10px] font-medium text-slate-400 leading-tight max-w-sm">
             Finalizing this document will generate a binding digital Purchase
             Order associated with Requisition:{' '}
-            <span className="font-black text-slate-600">"{request.title}"</span>
+            <span className="font-semibold text-slate-600">
+              "{request.title}"
+            </span>
             .
           </div>
           <div className="flex gap-4 shrink-0">

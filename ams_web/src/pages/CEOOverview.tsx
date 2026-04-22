@@ -220,11 +220,11 @@ export const CEOOverview = () => {
         (a) => a.form_status === 'PENDING_USER_SIGNATURE',
       )
     ) {
-      return 'bg-orange-600 text-white border-orange-500 font-black shadow-md';
+      return 'bg-orange-600 text-white border-orange-500 font-semibold shadow-md';
     }
     switch (asset.status) {
       case 'IN_STOCK':
-        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-semibold';
       case 'ASSIGNED':
         return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'BROKEN':
@@ -242,12 +242,12 @@ export const CEOOverview = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="px-2 py-0.5 bg-orange-50 rounded-md border border-orange-100 text-[8px] font-black uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
+            <div className="px-2 py-0.5 bg-orange-50 rounded-md border border-orange-100 text-[8px] font-semibold uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
               <ShieldCheck className="w-3 h-3 text-orange-400" /> Executive
               Strategic Dashboard
             </div>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none">
             Asset Intelligence Portal
           </h1>
           <p className="text-slate-500 font-medium mt-3 text-sm max-w-xl leading-relaxed">
@@ -307,11 +307,11 @@ export const CEOOverview = () => {
               </div>
               <ArrowRight className="w-4 h-4 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-1 transition-all" />
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
             </p>
             <div className="flex items-baseline gap-1.5 leading-none">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
+              <h3 className="text-xl font-semibold text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
                 {stat.value}
               </h3>
               <span className="text-[9px] font-bold text-slate-400 uppercase">
@@ -325,11 +325,11 @@ export const CEOOverview = () => {
       <div className="space-y-8">
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
               <div className="w-1.5 h-6 bg-[#ff8000] rounded-full shadow-[0_0_10px_rgba(255,128,0,0.3)]" />
               Your Personally Assigned Equipment
             </h3>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
               {stats.personalAssets.length} Executive Items
             </span>
           </div>
@@ -339,13 +339,13 @@ export const CEOOverview = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-orange-100/30 bg-orange-50/20">
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Asset Details
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Tag / Serial
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                       Status & Action
                     </th>
                   </tr>
@@ -362,7 +362,7 @@ export const CEOOverview = () => {
                             {getAssetIcon(asset.name)}
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-black text-slate-800 tracking-tight">
+                            <span className="text-sm font-semibold text-slate-800 tracking-tight">
                               {asset.name}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -383,7 +383,7 @@ export const CEOOverview = () => {
                       </td>
                       <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                         <span
-                          className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
+                          className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border ${getStatusStyle(asset)}`}
                         >
                           {asset.status === 'IN_STOCK' &&
                           asset.assignment_history?.some(
@@ -408,7 +408,7 @@ export const CEOOverview = () => {
                                     asset,
                                   } as unknown as AssetAssignment);
                               }}
-                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
+                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
                             >
                               <FileCheck className="w-3.5 h-3.5" /> Sign Form
                             </button>
@@ -425,7 +425,7 @@ export const CEOOverview = () => {
                   {stats.personalAssets.length === 0 && (
                     <tr>
                       <td colSpan={3} className="py-12 text-center opacity-40">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                           No personal equipment assigned to executive office
                         </p>
                       </td>
@@ -455,13 +455,13 @@ export const CEOOverview = () => {
                       <ShieldAlert className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-black text-white uppercase tracking-[0.1em]">
+                      <h3 className="text-xl font-semibold text-white uppercase tracking-[0.1em]">
                         Executive Authorization Pending
                       </h3>
                       <p className="text-white/80 text-xs font-medium leading-relaxed mt-2 max-w-md">
                         There are {stats.ceoPendingCount} verified procurement
                         requisitions totaling{' '}
-                        <span className="text-white font-black">
+                        <span className="text-white font-semibold">
                           {stats.ceoPendingValue.toLocaleString()} RWF
                         </span>{' '}
                         that require your immediate approval for organizational
@@ -471,7 +471,7 @@ export const CEOOverview = () => {
                   </div>
                   <Link
                     to="/requests"
-                    className="px-8 py-4 bg-white text-[#ff8000] rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap"
+                    className="px-8 py-4 bg-white text-[#ff8000] rounded-2xl text-[11px] font-semibold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap"
                   >
                     Review Queue
                   </Link>
@@ -482,7 +482,7 @@ export const CEOOverview = () => {
             <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
                     <Activity className="w-6 h-6 text-orange-500" /> Executive
                     Decision Queue
                   </h3>
@@ -492,7 +492,7 @@ export const CEOOverview = () => {
                 </div>
                 <Link
                   to="/requests"
-                  className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] hover:text-orange-600 flex items-center gap-2"
+                  className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000] hover:text-orange-600 flex items-center gap-2"
                 >
                   View All <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -512,7 +512,7 @@ export const CEOOverview = () => {
                           <FileText className="w-6 h-6" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-base font-black text-slate-800 group-hover:text-[#ff8000] transition-colors truncate mb-1">
+                          <p className="text-base font-semibold text-slate-800 group-hover:text-[#ff8000] transition-colors truncate mb-1">
                             {req.title}
                           </p>
                           <div className="flex items-center gap-4">
@@ -523,7 +523,7 @@ export const CEOOverview = () => {
                             <span className="w-1 h-1 rounded-full bg-slate-200" />
                             <p className="text-[11px] font-bold text-slate-500">
                               By{' '}
-                              <span className="text-slate-900 font-black">
+                              <span className="text-slate-900 font-semibold">
                                 {req.requested_by?.full_name}
                               </span>
                             </p>
@@ -531,11 +531,11 @@ export const CEOOverview = () => {
                         </div>
                       </div>
                       <div className="flex items-center justify-between md:flex-col md:items-end gap-3 shrink-0">
-                        <p className="text-xl font-black text-slate-900 tracking-tight">
+                        <p className="text-xl font-semibold text-slate-900 tracking-tight">
                           {(req.financials?.grand_total || 0).toLocaleString()}{' '}
                           <span className="text-sm text-slate-400">RWF</span>
                         </p>
-                        <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-black uppercase tracking-widest rounded-lg border border-orange-100">
+                        <span className="px-3 py-1 bg-orange-50 text-orange-600 text-[9px] font-semibold uppercase tracking-widest rounded-lg border border-orange-100">
                           {req.status}
                         </span>
                       </div>
@@ -544,7 +544,7 @@ export const CEOOverview = () => {
                 ) : (
                   <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30">
                     <Clock className="w-12 h-12 text-slate-200 mx-auto mb-4 opacity-40" />
-                    <p className="text-sm text-slate-400 font-black uppercase tracking-widest">
+                    <p className="text-sm text-slate-400 font-semibold uppercase tracking-widest">
                       Decision queue empty
                     </p>
                   </div>
@@ -562,7 +562,7 @@ export const CEOOverview = () => {
             <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
                     <AuditIcon className="w-6 h-6 text-orange-400" /> Unified
                     Activity Stream
                   </h3>
@@ -593,17 +593,17 @@ export const CEOOverview = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-black text-slate-800 truncate group-hover:text-orange-600 transition-colors uppercase tracking-tight">
+                        <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-orange-600 transition-colors uppercase tracking-tight">
                           {item.title}
                         </p>
                         <span
-                          className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${item.type === 'REQUEST' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'}`}
+                          className={`px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest ${item.type === 'REQUEST' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'}`}
                         >
                           {item.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                        <span className="text-slate-600 font-black">
+                        <span className="text-slate-600 font-semibold">
                           {item.user}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-slate-200" />
@@ -611,7 +611,7 @@ export const CEOOverview = () => {
                           {new Date(item.date || 0).toLocaleDateString()}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-slate-200" />
-                        <span className="text-slate-400 font-black">
+                        <span className="text-slate-400 font-semibold">
                           {item.status}
                         </span>
                       </div>
@@ -631,7 +631,7 @@ export const CEOOverview = () => {
 
           <div className="lg:col-span-4 space-y-8">
             <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
-              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
+              <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
                 <Users className="w-4 h-4 text-orange-500" /> Strategic
                 Workforce
               </h3>
@@ -643,7 +643,7 @@ export const CEOOverview = () => {
                     onClick={() => navigate('/directorate')}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-[10px] font-black text-[#ff8000] border border-orange-100 uppercase group-hover:bg-[#ff8000] group-hover:text-white transition-all">
+                      <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-[10px] font-semibold text-[#ff8000] border border-orange-100 uppercase group-hover:bg-[#ff8000] group-hover:text-white transition-all">
                         {user.full_name
                           ?.split(' ')
                           .map((n) => n[0])
@@ -651,7 +651,7 @@ export const CEOOverview = () => {
                           .substring(0, 2)}
                       </div>
                       <div>
-                        <p className="text-[11px] font-black text-slate-800 group-hover:text-orange-600 transition-colors">
+                        <p className="text-[11px] font-semibold text-slate-800 group-hover:text-orange-600 transition-colors">
                           {user.full_name}
                         </p>
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
@@ -665,7 +665,7 @@ export const CEOOverview = () => {
               </div>
               <Link
                 to="/directorate"
-                className="mt-8 block w-full py-4 bg-slate-50 hover:bg-[#ff8000] hover:text-white rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-slate-500 transition-all border border-slate-100 group shadow-inner"
+                className="mt-8 block w-full py-4 bg-slate-50 hover:bg-[#ff8000] hover:text-white rounded-2xl text-center text-[10px] font-semibold uppercase tracking-widest text-slate-500 transition-all border border-slate-100 group shadow-inner"
               >
                 Corporate Roster{' '}
                 <ArrowRight className="w-3.5 h-3.5 inline ml-1 group-hover:translate-x-1 transition-transform" />
@@ -673,14 +673,14 @@ export const CEOOverview = () => {
             </div>
 
             <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
-              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
+              <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
                 <PieChart className="w-4 h-4 text-orange-400" /> Capital
                 Allocation
               </h3>
               <div className="space-y-8">
                 {stats.categories.slice(0, 6).map(([name, data]) => (
                   <div key={name} className="group/item">
-                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-slate-500 mb-3 group-hover/item:text-orange-600 transition-colors">
+                    <div className="flex justify-between text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-3 group-hover/item:text-orange-600 transition-colors">
                       <span>{name}</span>
                       <span>
                         {((data.value / (stats.totalValue || 1)) * 100).toFixed(
@@ -706,10 +706,10 @@ export const CEOOverview = () => {
               </div>
 
               <div className="mt-10 pt-10 border-t border-slate-100 text-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
                   Cumulative Depreciation
                 </p>
-                <h4 className="text-2xl font-black text-slate-900 tracking-tight flex items-center justify-center gap-3">
+                <h4 className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center justify-center gap-3">
                   <TrendingDown className="w-6 h-6 text-slate-600" />{' '}
                   {stats.totalDepreciation.toLocaleString()}{' '}
                   <span className="text-xs text-slate-400 font-bold uppercase">

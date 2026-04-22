@@ -42,15 +42,15 @@ export const ViewUserModal = ({
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-white shadow-sm flex items-center justify-center text-slate-600 font-black text-xl mb-4">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-white shadow-sm flex items-center justify-center text-slate-600 font-semibold text-xl mb-4">
             {initials}
           </div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-tight">
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight leading-tight">
             {user.full_name}
           </h2>
           <div className="flex items-center gap-2 mt-2">
             <div
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
                 user.role === 'Admin and Finance'
                   ? 'bg-[#ff8000]/10 text-[#ff8000] border-[#ff8000]/20'
                   : 'bg-slate-100 text-slate-600 border-slate-200'
@@ -66,14 +66,14 @@ export const ViewUserModal = ({
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8">
           <div>
-            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Personnel Information
             </h3>
             <div className="space-y-5">
               <div className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Email Address
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -84,7 +84,7 @@ export const ViewUserModal = ({
               <div className="flex items-start gap-3">
                 <Building2 className="w-4 h-4 text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Directorate / Unit
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -95,7 +95,7 @@ export const ViewUserModal = ({
               <div className="flex items-start gap-3">
                 <Activity className="w-4 h-4 text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Account status
                   </p>
                   <span className="inline-flex items-center gap-1 text-sm font-bold text-orange-600">
@@ -108,14 +108,14 @@ export const ViewUserModal = ({
           </div>
 
           <div>
-            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Workplace Settings
             </h3>
             <div className="space-y-5">
               <div className="flex items-start gap-3">
                 <Briefcase className="w-4 h-4 text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Primary Station
                   </p>
                   <p className="text-sm font-bold text-slate-700">

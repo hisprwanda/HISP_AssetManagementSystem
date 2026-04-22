@@ -86,7 +86,7 @@ export const Login = () => {
                 className="w-9 h-9 rounded-full"
               />
             </div>
-            <h1 className="text-2xl font-black leading-tight mb-3">
+            <h1 className="text-2xl font-semibold leading-tight mb-3">
               Intelligence <br /> in Inventory.
             </h1>
             <p className="text-orange-50 font-medium opacity-90 max-w-xs">
@@ -109,7 +109,7 @@ export const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="group">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
                   Work Email
                 </label>
               </div>
@@ -128,7 +128,7 @@ export const Login = () => {
 
             <div className="group">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
                   Secure Password
                 </label>
               </div>

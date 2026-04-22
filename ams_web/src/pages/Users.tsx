@@ -122,19 +122,19 @@ export const Users = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Personnel
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Contact
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   System Role
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Department
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -206,7 +206,7 @@ export const Users = () => {
 
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
                           [
                             'Admin and Finance Director',
                             'Finance Officer',

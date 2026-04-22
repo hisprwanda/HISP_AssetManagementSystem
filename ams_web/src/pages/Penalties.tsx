@@ -167,7 +167,7 @@ export const Penalties = () => {
         <div className="w-20 h-20 bg-orange-50 rounded-[2rem] flex items-center justify-center mb-6 border border-orange-100">
           <ShieldX className="w-10 h-10 text-[#ff8000]" />
         </div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none mb-3">
           Access Restricted
         </h1>
         <p className="text-slate-500 font-medium max-w-sm">
@@ -190,7 +190,7 @@ export const Penalties = () => {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md p-1.5 px-4 rounded-xl border border-slate-200 shadow-sm">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
               Date Range:
             </span>
             <input
@@ -221,7 +221,7 @@ export const Penalties = () => {
           <button
             onClick={handleExportLogs}
             disabled={!filteredPenalties.length}
-            className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-slate-50 flex items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 transition-colors" />{' '}
             Export List
@@ -256,19 +256,19 @@ export const Penalties = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="p-4 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">
                   Case ID
                 </th>
-                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <th className="p-4 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">
                   Billed To
                 </th>
-                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hidden md:table-cell">
+                <th className="p-4 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] hidden md:table-cell">
                   Asset
                 </th>
-                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] max-w-[200px]">
+                <th className="p-4 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] max-w-[200px]">
                   Reason for Denial
                 </th>
-                <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">
+                <th className="p-4 text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] text-right">
                   Amount Owed
                 </th>
               </tr>
@@ -284,7 +284,7 @@ export const Penalties = () => {
                       <div className="w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center border border-orange-100 shrink-0">
                         <ShieldX className="w-3 h-3 text-[#ff8000]" />
                       </div>
-                      <span className="text-[10px] font-black text-slate-900 tracking-wider">
+                      <span className="text-[10px] font-semibold text-slate-900 tracking-wider">
                         #{inc.id.slice(0, 8).toUpperCase()}
                       </span>
                     </div>
@@ -298,7 +298,7 @@ export const Penalties = () => {
                         {inc.reported_by?.full_name}
                       </span>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-[#ff8000] ml-7">
+                    <p className="text-[9px] font-semibold uppercase tracking-widest text-[#ff8000] ml-7">
                       {getDepartmentName(inc)}
                     </p>
                   </td>
@@ -322,11 +322,11 @@ export const Penalties = () => {
                   </td>
                   <td className="p-4 align-top text-right">
                     <div className="inline-flex flex-col items-end gap-2">
-                      <span className="text-sm font-black text-[#ff8000] bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
+                      <span className="text-sm font-semibold text-[#ff8000] bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
                         {Number(inc.penalty_amount || 0).toLocaleString()} RWF
                       </span>
                       {inc.penalty_resolved_at ? (
-                        <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[8px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 italic">
+                        <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[8px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 italic">
                           <CheckCircle2 className="w-2.5 h-2.5" /> PAID ON{' '}
                           {new Date(
                             inc.penalty_resolved_at,
@@ -335,7 +335,7 @@ export const Penalties = () => {
                       ) : (
                         <button
                           onClick={() => setIncidentToSettle(inc)}
-                          className="flex items-center gap-1.5 text-orange-600 font-black text-[8px] uppercase tracking-widest bg-orange-50 px-2 py-1 rounded border border-orange-100 hover:bg-orange-100 transition-all shadow-sm active:scale-95 text-nowrap"
+                          className="flex items-center gap-1.5 text-orange-600 font-semibold text-[8px] uppercase tracking-widest bg-orange-50 px-2 py-1 rounded border border-orange-100 hover:bg-orange-100 transition-all shadow-sm active:scale-95 text-nowrap"
                         >
                           <Banknote className="w-3 h-3" /> SETTLE NOW
                         </button>

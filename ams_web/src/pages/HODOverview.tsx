@@ -140,11 +140,11 @@ export const HODOverview = () => {
         (a) => a.form_status === 'PENDING_USER_SIGNATURE',
       )
     ) {
-      return 'bg-orange-600 text-white border-orange-500 font-black shadow-md';
+      return 'bg-orange-600 text-white border-orange-500 font-semibold shadow-md';
     }
     switch (asset.status) {
       case 'IN_STOCK':
-        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-semibold';
       case 'ASSIGNED':
         return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'BROKEN':
@@ -163,7 +163,7 @@ export const HODOverview = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-orange-100 text-[9px] font-black uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
+              <div className="px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-orange-100 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
                 <Building2 className="w-3.5 h-3.5" /> Department Portal
               </div>
               <div className="h-1.5 w-1.5 rounded-full bg-slate-200" />
@@ -171,7 +171,7 @@ export const HODOverview = () => {
                 {currentUser?.department?.name || 'Unknown'} Directorate
               </div>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-2">
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight leading-none mb-2">
               HOD Overview Dashboard
             </h1>
             <p className="text-slate-500 font-medium text-xs max-w-xl leading-relaxed">
@@ -187,10 +187,10 @@ export const HODOverview = () => {
               <Box className="w-5 h-5 text-[#ff8000]" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Total Dept Assets
               </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
+              <p className="text-xl font-semibold text-slate-800 leading-none">
                 {stats.total}
               </p>
             </div>
@@ -201,10 +201,10 @@ export const HODOverview = () => {
               <Users className="w-5 h-5 text-slate-500" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Shared Assets
               </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
+              <p className="text-xl font-semibold text-slate-800 leading-none">
                 {stats.sharedAssets.length}
               </p>
             </div>
@@ -215,10 +215,10 @@ export const HODOverview = () => {
               <Laptop className="w-5 h-5 text-[#ff8000]" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Your Assets
               </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
+              <p className="text-xl font-semibold text-slate-800 leading-none">
                 {stats.personalAssets.length}
               </p>
             </div>
@@ -229,10 +229,10 @@ export const HODOverview = () => {
               <Users className="w-5 h-5 text-[#ff8000]" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Staff Assets
               </p>
-              <p className="text-xl font-black text-slate-800 leading-none">
+              <p className="text-xl font-semibold text-slate-800 leading-none">
                 {stats.staffAssets.length}
               </p>
             </div>
@@ -242,11 +242,11 @@ export const HODOverview = () => {
         <div className="space-y-12">
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-[#ff8000] rounded-full shadow-[0_0_10px_rgba(255,128,0,0.3)]" />
                 Your Personally Assigned Equipment
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
                 {stats.personalAssets.length} Personal Items
               </span>
             </div>
@@ -256,13 +256,13 @@ export const HODOverview = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-orange-100/30 bg-orange-50/20">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Asset Details
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Tag / Serial
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                         Status & Action
                       </th>
                     </tr>
@@ -276,7 +276,7 @@ export const HODOverview = () => {
                               {getAssetIcon(asset.name)}
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-sm font-black text-slate-800 tracking-tight">
+                              <span className="text-sm font-semibold text-slate-800 tracking-tight">
                                 {asset.name}
                               </span>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -297,7 +297,7 @@ export const HODOverview = () => {
                         </td>
                         <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                           <span
-                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border ${getStatusStyle(asset)}`}
                           >
                             {asset.status.replace('_', ' ')}
                           </span>
@@ -319,7 +319,7 @@ export const HODOverview = () => {
                                       asset,
                                     } as unknown as AssetAssignment);
                                 }}
-                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
+                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
                                 title="Sign Receipt Form"
                               >
                                 <FileCheck className="w-3.5 h-3.5" /> Sign Form
@@ -340,7 +340,7 @@ export const HODOverview = () => {
                           colSpan={3}
                           className="py-12 text-center opacity-40"
                         >
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                             No personal equipment assigned
                           </p>
                         </td>
@@ -361,11 +361,11 @@ export const HODOverview = () => {
 
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-slate-400 rounded-full" />
                 Shared Departmental Resources
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                 {stats.sharedAssets.length} Resources
               </span>
             </div>
@@ -375,16 +375,16 @@ export const HODOverview = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Resource
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Currently Held By
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Location
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                         Status
                       </th>
                     </tr>
@@ -397,7 +397,7 @@ export const HODOverview = () => {
                             <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
                               {getAssetIcon(asset.name)}
                             </div>
-                            <span className="text-sm font-black text-slate-800 leading-tight">
+                            <span className="text-sm font-semibold text-slate-800 leading-tight">
                               {asset.name}
                             </span>
                           </div>
@@ -405,10 +405,10 @@ export const HODOverview = () => {
                         <td className="px-6 py-4">
                           {asset.assigned_to ? (
                             <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-600">
+                              <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] font-semibold text-slate-600">
                                 {asset.assigned_to.full_name.charAt(0)}
                               </div>
-                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">
+                              <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-tight">
                                 {asset.assigned_to.full_name}
                               </span>
                             </div>
@@ -425,7 +425,7 @@ export const HODOverview = () => {
                         </td>
                         <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                           <span
-                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border ${getStatusStyle(asset)}`}
                           >
                             {asset.status.replace('_', ' ')}
                           </span>
@@ -453,11 +453,11 @@ export const HODOverview = () => {
 
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-slate-200 rounded-full shadow-inner" />
                 Directorate Staff Equipment
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                 {stats.staffAssets.length} Staff-Held Items
               </span>
             </div>
@@ -467,16 +467,16 @@ export const HODOverview = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Staff Member
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Assigned Asset
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Category
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                         Incident Status
                       </th>
                     </tr>
@@ -486,10 +486,10 @@ export const HODOverview = () => {
                       <tr key={asset.id} className="group hover:bg-white/60">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black text-white shadow-lg">
+                            <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-semibold text-white shadow-lg">
                               {asset.assigned_to?.full_name?.charAt(0) || '?'}
                             </div>
-                            <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">
+                            <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight">
                               {asset.assigned_to?.full_name ||
                                 'Pooled / In Stock'}
                             </span>
@@ -500,19 +500,19 @@ export const HODOverview = () => {
                             <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-[#ff8000]">
                               {getAssetIcon(asset.name)}
                             </div>
-                            <span className="text-sm font-black text-slate-800 tracking-tight leading-none">
+                            <span className="text-sm font-semibold text-slate-800 tracking-tight leading-none">
                               {asset.name}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
                             {asset.category?.name || 'Hardware'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                           <div
-                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(asset)}`}
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border ${getStatusStyle(asset)}`}
                           >
                             {asset.status === 'IN_STOCK' &&
                             asset.assignment_history?.some(
@@ -547,7 +547,7 @@ export const HODOverview = () => {
         {stats.recentOutcomes.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-orange-200 rounded-full shadow-[0_0_10px_rgba(255,128,0,0.2)]" />{' '}
                 Critical Path Outcomes
               </h3>
@@ -558,16 +558,16 @@ export const HODOverview = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100/50 bg-slate-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Verdict
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Asset
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Resolution summary
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                         Date
                       </th>
                     </tr>
@@ -580,7 +580,7 @@ export const HODOverview = () => {
                       >
                         <td className="px-6 py-4">
                           <div
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent ${
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-transparent ${
                               incident.investigation_status === 'ACCEPTED'
                                 ? 'bg-orange-50 text-orange-950 border-orange-200'
                                 : 'bg-orange-50 text-orange-600 border-orange-100'
@@ -620,7 +620,7 @@ export const HODOverview = () => {
                               {incident.investigation_status === 'DENIED' && (
                                 <div className="mt-1.5 flex items-center gap-3">
                                   {incident.penalty_resolved_at ? (
-                                    <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm">
+                                    <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm">
                                       <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                                       CLEARED:{' '}
                                       {Number(
@@ -629,7 +629,7 @@ export const HODOverview = () => {
                                       RWF
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
+                                    <div className="flex items-center gap-1.5 text-orange-600 font-semibold text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
                                       <AlertCircle className="w-3 h-3" />{' '}
                                       Penalty:{' '}
                                       {Number(
@@ -657,7 +657,7 @@ export const HODOverview = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/50 px-2 py-1 rounded-lg">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-100/50 px-2 py-1 rounded-lg">
                             {new Date(incident.reported_at).toLocaleDateString(
                               'en-GB',
                               { day: '2-digit', month: 'short' },
@@ -681,7 +681,7 @@ export const HODOverview = () => {
         )}
 
         <div className="pt-8 mt-4 border-t border-slate-100 flex flex-col items-center text-center">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
             <ShieldAlert className="w-3 h-3 text-orange-400" /> System Protocol
             Notice
           </p>
@@ -703,7 +703,7 @@ export const HODOverview = () => {
             <div className="absolute top-0 right-0 p-4">
               <button
                 onClick={() => setResolutionNotice(null)}
-                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-black"
+                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-semibold"
               >
                 ✕
               </button>
@@ -711,7 +711,7 @@ export const HODOverview = () => {
             <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
               <ShieldAlert className="w-8 h-8 text-[#ff8000]" />
             </div>
-            <h4 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+            <h4 className="text-xl font-semibold text-slate-900 tracking-tight mb-3">
               Penalty Resolution
             </h4>
             <p className="text-sm font-semibold text-slate-500 leading-relaxed mb-8 italic">
@@ -719,7 +719,7 @@ export const HODOverview = () => {
             </p>
             <button
               onClick={() => setResolutionNotice(null)}
-              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 shadow-xl"
+              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-orange-700 shadow-xl"
             >
               Acknowledged
             </button>

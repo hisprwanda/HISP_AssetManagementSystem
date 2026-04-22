@@ -94,7 +94,7 @@ export const UploadScannedFormModal = ({
           <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-emerald-500" />
           </div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-2">
             Upload Complete!
           </h2>
           <p className="text-slate-500 font-medium text-sm">
@@ -118,7 +118,7 @@ export const UploadScannedFormModal = ({
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">
+              <h3 className="text-lg font-semibold text-slate-800 tracking-tight">
                 Upload Scanned Form
               </h3>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -170,7 +170,7 @@ export const UploadScannedFormModal = ({
           <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 space-y-2">
             <div className="flex items-center gap-2 text-blue-700">
               <FileText className="w-4 h-4" />
-              <span className="text-xs font-black uppercase tracking-widest">
+              <span className="text-xs font-semibold uppercase tracking-widest">
                 Asset Target
               </span>
             </div>
@@ -194,7 +194,7 @@ export const UploadScannedFormModal = ({
           <button
             type="submit"
             disabled={!file || uploadMutation.isPending}
-            className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-3 transition-all active:scale-95"
+            className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-3 transition-all active:scale-95"
           >
             {uploadMutation.isPending ? (
               <>

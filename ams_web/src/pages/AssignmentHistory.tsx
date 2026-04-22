@@ -145,14 +145,14 @@ export const AssignmentHistory = () => {
         <div>
           <button
             onClick={() => navigate('/audit-trail')}
-            className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
+            className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
           >
             <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
           </button>
         </div>
         <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
               Audit Period:
             </span>
             <input
@@ -186,7 +186,7 @@ export const AssignmentHistory = () => {
           <button
             onClick={handleExportLogs}
             disabled={validAssignments.length === 0}
-            className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="flex items-center gap-2 text-[9px] font-semibold text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             title="Download CSV Export"
           >
             <History className="w-3.5 h-3.5 text-[#ff8000]" /> Assignment logs
@@ -212,19 +212,19 @@ export const AssignmentHistory = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Form Details
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Asset Informaiton
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Recipient
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Status
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -284,7 +284,7 @@ export const AssignmentHistory = () => {
                           {assignment.asset?.name || 'Unknown Asset'}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-black text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded leading-none">
+                          <span className="text-[9px] font-semibold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded leading-none">
                             {assignment.asset?.tag_id || 'NO TAG'}
                           </span>
                           <span className="text-[9px] font-bold text-slate-400 truncate">
@@ -295,7 +295,7 @@ export const AssignmentHistory = () => {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex flex-col min-w-[140px]">
-                        <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight flex items-center gap-1.5">
+                        <span className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight flex items-center gap-1.5">
                           <UserIcon className="w-3 h-3 text-slate-400" />
                           {assignment.user?.full_name || 'N/A'}
                         </span>
@@ -308,7 +308,7 @@ export const AssignmentHistory = () => {
                     </td>
                     <td className="px-6 py-5">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-semibold uppercase tracking-widest border shadow-sm
                             ${
                               isApproved
                                 ? 'bg-slate-900 border-slate-900 text-white'

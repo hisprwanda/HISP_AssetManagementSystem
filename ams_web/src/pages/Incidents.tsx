@@ -182,7 +182,7 @@ export const Incidents = () => {
   const getStatusStyle = (status: AssetIncident['investigation_status']) => {
     switch (status) {
       case 'ACCEPTED':
-        return 'bg-slate-50 text-slate-950 border-slate-200 font-black';
+        return 'bg-slate-50 text-slate-950 border-slate-200 font-semibold';
       case 'DENIED':
         return 'bg-orange-50 text-orange-600 border-orange-100 italic';
       case 'CEO_REVIEW':
@@ -218,7 +218,7 @@ export const Incidents = () => {
         <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mb-6 border border-red-100">
           <ShieldX className="w-10 h-10 text-red-500" />
         </div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-3">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none mb-3">
           Access Restricted
         </h1>
         <p className="text-slate-500 font-medium max-w-sm">
@@ -238,7 +238,7 @@ export const Incidents = () => {
             {(isHOD || isAdmin || isCEO) && (
               <button
                 onClick={openIncident}
-                className="px-4 py-2 bg-orange-600 border border-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
+                className="px-4 py-2 bg-orange-600 border border-orange-600 text-white rounded-xl font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
               >
                 <ShieldAlert className="w-3.5 h-3.5 text-orange-200" /> Report
                 Incident
@@ -254,10 +254,10 @@ export const Incidents = () => {
                 <Clock className="w-4 h-4 text-[#ff8000]" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
                   Investigating
                 </p>
-                <h3 className="text-lg font-black text-slate-800 leading-none">
+                <h3 className="text-lg font-semibold text-slate-800 leading-none">
                   {stats.investigating}{' '}
                   <span className="text-[9px] font-bold text-slate-400">
                     ADM
@@ -272,10 +272,10 @@ export const Incidents = () => {
                 <ShieldAlert className="w-4 h-4 text-amber-500" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
                   CEO Review
                 </p>
-                <h3 className="text-lg font-black text-slate-800 leading-none animate-pulse">
+                <h3 className="text-lg font-semibold text-slate-800 leading-none animate-pulse">
                   {stats.ceo_review}{' '}
                   <span className="text-[9px] font-bold text-amber-300">
                     EXEC
@@ -290,10 +290,10 @@ export const Incidents = () => {
                 <ShieldCheck className="w-4 h-4 text-slate-400" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
                   Accepted
                 </p>
-                <h3 className="text-lg font-black text-slate-800 leading-none">
+                <h3 className="text-lg font-semibold text-slate-800 leading-none">
                   {stats.accepted}{' '}
                   <span className="text-[9px] font-bold text-slate-300">
                     RESOLVED
@@ -319,10 +319,10 @@ export const Incidents = () => {
                 <ShieldX className="w-4 h-4 text-[#ff8000]" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5 group-hover:text-[#ff8000] transition-colors">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 group-hover:text-[#ff8000] transition-colors">
                   Denied
                 </p>
-                <h3 className="text-lg font-black text-slate-800 leading-none">
+                <h3 className="text-lg font-semibold text-slate-800 leading-none">
                   {stats.denied_pending}{' '}
                   <span className="text-[9px] font-bold text-orange-200">
                     PENDING
@@ -337,10 +337,10 @@ export const Incidents = () => {
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
                   Settled
                 </p>
-                <h3 className="text-lg font-black text-slate-800 leading-none text-emerald-600">
+                <h3 className="text-lg font-semibold text-slate-800 leading-none text-emerald-600">
                   {stats.resolved_penalties}{' '}
                   <span className="text-[9px] font-bold text-emerald-300">
                     PAID
@@ -364,7 +364,7 @@ export const Incidents = () => {
           </div>
           <div className="flex flex-col md:flex-row gap-2 items-center">
             <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 DATE RANGE:
               </span>
               <input
@@ -397,7 +397,7 @@ export const Incidents = () => {
                 <button
                   key={type}
                   onClick={() => setFilterType(type)}
-                  className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${filterType === type ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`px-4 py-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest transition-all ${filterType === type ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   {type}
                 </button>
@@ -408,7 +408,7 @@ export const Incidents = () => {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-1 focus:ring-[#ff8000]/20"
+              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-1 focus:ring-[#ff8000]/20"
             >
               <option value="ALL">All Status</option>
               <option value="INVESTIGATING">INVESTIGATING</option>
@@ -423,19 +423,19 @@ export const Incidents = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100/50">
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Incident Details
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Affected Asset
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Reporter & Department
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Status & Outcome
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                     Actions
                   </th>
                 </tr>
@@ -445,7 +445,7 @@ export const Incidents = () => {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-8 py-20 text-center text-xs font-black text-slate-300 uppercase tracking-widest"
+                      className="px-8 py-20 text-center text-xs font-semibold text-slate-300 uppercase tracking-widest"
                     >
                       Compiling Investigation Data...
                     </td>
@@ -470,7 +470,7 @@ export const Incidents = () => {
                             <ShieldAlert className="w-5 h-5" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs font-black text-slate-900 truncate">
+                            <p className="text-xs font-semibold text-slate-900 truncate">
                               #{inc.id.slice(0, 8).toUpperCase()} -{' '}
                               {inc.incident_type}
                             </p>
@@ -483,11 +483,11 @@ export const Incidents = () => {
 
                       <td className="px-8 py-5">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-black text-slate-700 flex items-center gap-2">
+                          <span className="text-[10px] font-semibold text-slate-700 flex items-center gap-2">
                             <Laptop className="w-3.5 h-3.5 text-slate-400" />{' '}
                             {inc.asset?.name || 'Legacy Asset'}
                           </span>
-                          <span className="text-[8px] font-black text-[#ff8000] uppercase tracking-widest">
+                          <span className="text-[8px] font-semibold text-[#ff8000] uppercase tracking-widest">
                             {inc.asset?.tag_id || 'NO TAG'}
                           </span>
                         </div>
@@ -495,14 +495,14 @@ export const Incidents = () => {
 
                       <td className="px-8 py-5">
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-black text-slate-700 flex items-center gap-2">
+                          <span className="text-[10px] font-semibold text-slate-700 flex items-center gap-2">
                             <UserIcon className="w-3.5 h-3.5 text-slate-400" />{' '}
                             {inc.reported_by?.full_name}
                           </span>
-                          <span className="text-[8px] font-black text-[#ff8000] uppercase tracking-widest">
+                          <span className="text-[8px] font-semibold text-[#ff8000] uppercase tracking-widest">
                             {getDepartmentName(inc)}
                           </span>
-                          <span className="text-[8px] font-black text-slate-300 uppercase mt-0.5 flex items-center gap-1.5">
+                          <span className="text-[8px] font-semibold text-slate-300 uppercase mt-0.5 flex items-center gap-1.5">
                             <Calendar className="w-3 h-3" />{' '}
                             {new Date(inc.reported_at).toLocaleDateString()}
                           </span>
@@ -512,7 +512,7 @@ export const Incidents = () => {
                       <td className="px-8 py-5">
                         <div className="flex flex-col gap-2">
                           <div
-                            className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${getStatusStyle(inc.investigation_status)} shadow-sm`}
+                            className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${getStatusStyle(inc.investigation_status)} shadow-sm`}
                           >
                             {inc.investigation_status}
                           </div>
@@ -591,7 +591,7 @@ export const Incidents = () => {
                       >
                         <div className="flex flex-col items-center">
                           <CheckCircle2 className="w-12 h-12 text-emerald-100 mb-4" />
-                          <p className="text-sm font-black uppercase tracking-[0.2em] opacity-40">
+                          <p className="text-sm font-semibold uppercase tracking-[0.2em] opacity-40">
                             No investigation logs found
                           </p>
                         </div>

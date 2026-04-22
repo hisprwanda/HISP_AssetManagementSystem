@@ -160,7 +160,7 @@ export const FormalizeRequestModal = ({
             <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-orange-100 group-hover:scale-110 transition-transform">
               <CheckCircle2 className="w-8 h-8 text-[#ff8000]" />
             </div>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight mb-2">
               Requisition Formalized!
             </h2>
             <p className="text-slate-500 font-medium px-8">
@@ -176,16 +176,16 @@ export const FormalizeRequestModal = ({
                   <FileText className="w-6 h-6 text-[#ff8000]" />
                 </div>
                 <div>
-                  <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
+                  <DialogTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
                     Formalize Requisition
                   </DialogTitle>
                   <DialogDescription className="text-slate-500 font-medium">
                     Staff:{' '}
-                    <span className="text-slate-900 font-black">
+                    <span className="text-slate-900 font-semibold">
                       {request.requested_by?.full_name}
                     </span>{' '}
                     • Dept:{' '}
-                    <span className="text-[#ff8000] font-black">
+                    <span className="text-[#ff8000] font-semibold">
                       {request.department?.name}
                     </span>
                   </DialogDescription>
@@ -207,7 +207,7 @@ export const FormalizeRequestModal = ({
               <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
                 <div className="flex items-center gap-2 mb-3">
                   <Info className="w-4 h-4 text-[#ff8000]" />
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-[#ff8000]">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000]">
                     Staff Description
                   </h4>
                 </div>
@@ -220,13 +220,13 @@ export const FormalizeRequestModal = ({
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                     Official Line Items
                   </h4>
                   <button
                     type="button"
                     onClick={addItem}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff8000] text-white rounded-xl text-[10px] font-black uppercase tracking-tighter hover:bg-[#e49f37] transition-all shadow-md shadow-orange-100"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff8000] text-white rounded-xl text-[10px] font-semibold uppercase tracking-tighter hover:bg-[#e49f37] transition-all shadow-md shadow-orange-100"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Product
                   </button>
@@ -248,7 +248,7 @@ export const FormalizeRequestModal = ({
                       >
                         <div className="grid grid-cols-12 gap-4">
                           <div className="col-span-12 md:col-span-5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+                            <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-1 block">
                               Item Name
                             </label>
                             <input
@@ -262,7 +262,7 @@ export const FormalizeRequestModal = ({
                             />
                           </div>
                           <div className="col-span-6 md:col-span-3">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+                            <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-1 block">
                               Qty
                             </label>
                             <input
@@ -276,7 +276,7 @@ export const FormalizeRequestModal = ({
                             />
                           </div>
                           <div className="col-span-12 md:col-span-4">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+                            <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-1 block">
                               Unit Price (RWF)
                             </label>
                             <input
@@ -308,10 +308,10 @@ export const FormalizeRequestModal = ({
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 justify-between items-center">
                   <div className="space-y-4 w-full md:w-auto">
                     <div className="flex items-center justify-between md:justify-start gap-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Subtotal
                       </span>
-                      <span className="text-xl font-black">
+                      <span className="text-xl font-semibold">
                         {itemsSubtotal.toLocaleString()}{' '}
                         <span className="text-[10px] text-slate-400 font-bold">
                           RWF
@@ -319,7 +319,7 @@ export const FormalizeRequestModal = ({
                       </span>
                     </div>
                     <div className="flex items-center justify-between md:justify-start gap-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Logistics
                       </span>
                       <input
@@ -334,10 +334,10 @@ export const FormalizeRequestModal = ({
                   </div>
                   <div className="h-px md:h-12 w-full md:w-px bg-slate-200" />
                   <div className="text-center md:text-right">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[#ff8000] mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000] mb-1">
                       Total Estimated Investment
                     </p>
-                    <p className="text-4xl font-black tracking-tight">
+                    <p className="text-4xl font-semibold tracking-tight">
                       {grandTotal.toLocaleString()}{' '}
                       <span className="text-sm text-slate-400 font-bold">
                         RWF
@@ -360,7 +360,7 @@ export const FormalizeRequestModal = ({
                 type="submit"
                 onClick={handleSubmit}
                 disabled={mutation.isPending}
-                className="flex-[2] bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                className="flex-[2] bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-xl shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
               >
                 {mutation.isPending ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

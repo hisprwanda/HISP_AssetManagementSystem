@@ -380,13 +380,13 @@ export const SystemTrail = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <button
           onClick={() => navigate('/audit-trail')}
-          className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
+          className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
         >
           <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
         </button>
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
-            <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+            <div className="flex items-center gap-2 text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
               Audit Period:
               <div className="flex items-center gap-2 ml-2">
                 <input
@@ -422,7 +422,7 @@ export const SystemTrail = () => {
 
             <button
               onClick={handleExportLogs}
-              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="flex items-center gap-2 text-[9px] font-semibold text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Download provisioning history"
             >
               <History className="w-3.5 h-3.5 text-[#ff8000]" /> Export logs
@@ -433,7 +433,7 @@ export const SystemTrail = () => {
             <button
               onClick={() => setShowTemplateModal(true)}
               disabled={isUploading}
-              className="px-4 py-2 bg-[#ff8000] text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-lg hover:shadow-orange-200 flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-[#ff8000] text-white rounded-xl font-semibold text-[9px] uppercase tracking-widest transition-all shadow-lg hover:shadow-orange-200 flex items-center gap-2 disabled:opacity-50"
             >
               <Upload className="w-3.5 h-3.5" />
               {isUploading ? 'Processing...' : 'Bulk Provision'}
@@ -464,7 +464,7 @@ export const SystemTrail = () => {
           <select
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
+            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
           >
             <option value="ALL">All Organisational Units</option>
             {deptOptions.map((dept) => (
@@ -476,7 +476,7 @@ export const SystemTrail = () => {
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
+            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
           >
             <option value="ALL">All System Roles</option>
             {roleOptions.map((role) => (
@@ -493,19 +493,19 @@ export const SystemTrail = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Personnel
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Phone Number
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Directorate
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   System Role
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Status
                 </th>
               </tr>
@@ -515,7 +515,7 @@ export const SystemTrail = () => {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-8 py-32 text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.25em]"
+                    className="px-8 py-32 text-center text-[10px] font-semibold text-slate-300 uppercase tracking-[0.25em]"
                   >
                     Synchronizing User Records...
                   </td>
@@ -533,7 +533,7 @@ export const SystemTrail = () => {
                           <Users className="w-5 h-5 text-[#ff8000]/40 group-hover:text-[#ff8000] transition-colors" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-black text-slate-800 text-sm">
+                          <span className="font-semibold text-slate-800 text-sm">
                             {user.full_name}
                           </span>
                           <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-0.5">
@@ -556,7 +556,7 @@ export const SystemTrail = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-slate-300" />
-                        <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">
+                        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-tight">
                           {user.department?.name || 'Unassigned'}
                         </span>
                       </div>
@@ -564,13 +564,13 @@ export const SystemTrail = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
                         <Shield className="w-4 h-4 text-orange-400/50" />
-                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                        <span className="text-[10px] font-semibold text-slate-700 uppercase tracking-widest">
                           {user.role}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
+                      <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
                         ACTIVE
                       </span>
                     </td>
@@ -601,7 +601,7 @@ export const SystemTrail = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
+              <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">
                 Provisioning Task
               </h3>
               <p className="text-[11px] font-bold text-slate-700 leading-tight">
@@ -615,7 +615,7 @@ export const SystemTrail = () => {
                   {uploadResult.success} staff members registered.
                 </span>
                 {uploadResult.failed > 0 && (
-                  <span className="block text-[9px] text-slate-400 mt-1 uppercase font-black tracking-widest">
+                  <span className="block text-[9px] text-slate-400 mt-1 uppercase font-semibold tracking-widest">
                     {uploadResult.failed} validation errors
                   </span>
                 )}
@@ -640,10 +640,10 @@ export const SystemTrail = () => {
                   <FileSpreadsheet className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-800 tracking-tight">
+                  <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
                     Registration Template
                   </h3>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                  <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
                     Directory Schema Requirements
                   </p>
                 </div>
@@ -651,7 +651,7 @@ export const SystemTrail = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleDownloadTemplate}
-                  className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-black text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-semibold text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
                   title="Download CSV Template"
                 >
                   <FileSpreadsheet className="w-3 h-3" />
@@ -667,7 +667,7 @@ export const SystemTrail = () => {
 
             <div className="space-y-6">
               <div className="p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-[#ff8000] rounded-full" />{' '}
                   MANDATORY
                 </p>
@@ -689,7 +689,7 @@ export const SystemTrail = () => {
                 </div>
               </div>
               <div className="p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-slate-300 rounded-full" />{' '}
                   OPTIONAL
                 </p>
@@ -704,7 +704,7 @@ export const SystemTrail = () => {
             <div className="mt-10 flex gap-4">
               <button
                 onClick={() => setShowTemplateModal(false)}
-                className="flex-1 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
+                className="flex-1 py-4 rounded-xl font-semibold text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
@@ -713,7 +713,7 @@ export const SystemTrail = () => {
                   setShowTemplateModal(false);
                   fileInputRef.current?.click();
                 }}
-                className="flex-1 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-white bg-[#ff8000] hover:bg-orange-600 shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transition-all active:scale-95"
+                className="flex-1 py-4 rounded-xl font-semibold text-[10px] uppercase tracking-widest text-white bg-[#ff8000] hover:bg-orange-600 shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] transition-all active:scale-95"
               >
                 Confirm & Provision
               </button>

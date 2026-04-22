@@ -349,14 +349,14 @@ export const IncidentTrail = () => {
         <div>
           <button
             onClick={() => navigate('/audit-trail')}
-            className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
+            className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
           >
             <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
           </button>
         </div>
         <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
               Audit Period:
             </span>
             <input
@@ -389,7 +389,7 @@ export const IncidentTrail = () => {
             <button
               onClick={handleExportLogs}
               disabled={filteredIncidents.length === 0}
-              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="flex items-center gap-2 text-[9px] font-semibold text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Download CSV Export"
             >
               <History className="w-3.5 h-3.5 text-[#ff8000]" /> Incident logs
@@ -413,7 +413,7 @@ export const IncidentTrail = () => {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
+            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
           >
             <option value="ALL">All Types</option>
             <option value="BROKEN">Broken</option>
@@ -422,7 +422,7 @@ export const IncidentTrail = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
+            className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
           >
             <option value="ALL">All Status</option>
             <option value="INVESTIGATING">Investigating</option>
@@ -437,25 +437,25 @@ export const IncidentTrail = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Date Reported
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Reporter
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Asset
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Incident Details
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Outcome
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Penalty Outcome
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Certificate
                 </th>
               </tr>
@@ -465,7 +465,7 @@ export const IncidentTrail = () => {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-8 py-32 text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]"
+                    className="px-8 py-32 text-center text-[10px] font-semibold text-slate-300 uppercase tracking-[0.2em]"
                   >
                     Compiling Incident Records...
                   </td>
@@ -479,7 +479,7 @@ export const IncidentTrail = () => {
                   >
                     <td className="px-8 py-6">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-slate-700">
+                        <span className="text-xs font-semibold text-slate-700">
                           {new Date(inc.reported_at).toLocaleDateString()}
                         </span>
                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
@@ -496,10 +496,10 @@ export const IncidentTrail = () => {
                           <UserIcon className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-black text-slate-800">
+                          <span className="text-xs font-semibold text-slate-800">
                             {inc.reported_by?.full_name}
                           </span>
-                          <span className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest mt-0.5">
+                          <span className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest mt-0.5">
                             {inc.reported_by?.department?.name || 'CENTRAL'}
                           </span>
                         </div>
@@ -511,7 +511,7 @@ export const IncidentTrail = () => {
                           <Laptop className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-black text-slate-800">
+                          <span className="text-xs font-semibold text-slate-800">
                             {inc.asset?.name}
                           </span>
                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
@@ -523,7 +523,7 @@ export const IncidentTrail = () => {
                     <td className="px-8 py-6 max-w-xs">
                       <div className="flex flex-col gap-1.5">
                         <span
-                          className={`inline-flex self-start px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${
+                          className={`inline-flex self-start px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest border ${
                             inc.incident_type === 'BROKEN'
                               ? 'bg-orange-50 text-orange-600 border-orange-100'
                               : 'bg-slate-50 text-slate-500 border-slate-100'
@@ -539,7 +539,7 @@ export const IncidentTrail = () => {
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-2">
                         <span
-                          className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                          className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
                             inc.investigation_status === 'ACCEPTED'
                               ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                               : inc.investigation_status === 'DENIED'
@@ -551,7 +551,7 @@ export const IncidentTrail = () => {
                         </span>
                         {inc.investigation_remarks && (
                           <p
-                            className="text-[9px] font-black text-slate-400 uppercase truncate max-w-[120px]"
+                            className="text-[9px] font-semibold text-slate-400 uppercase truncate max-w-[120px]"
                             title={inc.investigation_remarks}
                           >
                             Outcome: {inc.investigation_remarks}
@@ -563,7 +563,7 @@ export const IncidentTrail = () => {
                       {inc.investigation_status === 'DENIED' &&
                       (inc.penalty_amount || 0) > 0 ? (
                         <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                          className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
                             inc.penalty_resolved_at
                               ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                               : 'bg-rose-50 text-rose-600 border-rose-100'
@@ -600,7 +600,7 @@ export const IncidentTrail = () => {
                   <td colSpan={6} className="px-8 py-32 text-center">
                     <div className="flex flex-col items-center">
                       <ShieldAlert className="w-12 h-12 text-slate-100 mb-4" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-300">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-300">
                         No Historical Incidents Found
                       </p>
                     </div>

@@ -43,7 +43,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
             )}
           </div>
           <div className="flex-1">
-            <h3 className="text-base font-black text-slate-900 tracking-tight">
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
               {isApprove ? 'Final Executive Approval' : 'Decline Asset Request'}
             </h3>
             <p
@@ -61,7 +61,7 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
         </div>
 
         <div className="p-6">
-          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2 px-1">
             {isApprove
               ? 'Executive Remarks (Optional)'
               : 'Reason for Rejection (Required)'}
@@ -80,14 +80,14 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
           <div className="mt-6 flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all"
+              className="flex-1 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-all"
             >
               Cancel
             </button>
             <button
               onClick={() => onConfirm(remarks)}
               disabled={isPending || (!isApprove && !remarks.trim())}
-              className={`flex-[2] flex items-center justify-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-widest text-white rounded-xl shadow-lg transition-all transform active:scale-[0.98] ${
+              className={`flex-[2] flex items-center justify-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white rounded-xl shadow-lg transition-all transform active:scale-[0.98] ${
                 isApprove
                   ? 'bg-[#ff8000] hover:bg-orange-700 shadow-orange-200'
                   : 'bg-orange-950 hover:bg-black shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed'

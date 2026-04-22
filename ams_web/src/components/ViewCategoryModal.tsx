@@ -31,7 +31,7 @@ export const ViewCategoryModal = ({
               <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
             </div>
           </div>
-          <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
+          <DialogTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
             Category Details
           </DialogTitle>
           <DialogDescription className="text-slate-500 font-medium">
@@ -42,10 +42,10 @@ export const ViewCategoryModal = ({
         <div className="space-y-6 py-4">
           <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff8000]/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-[#ff8000]/10 transition-colors" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8000] mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#ff8000] mb-1">
               Official Classification
             </p>
-            <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+            <h3 className="text-2xl font-semibold text-slate-800 tracking-tight">
               {category.name}
             </h3>
             <p className="text-xs font-bold text-slate-400 mt-0.5">
@@ -58,10 +58,10 @@ export const ViewCategoryModal = ({
               <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center mb-3 group-hover:bg-[#ff8000] transition-colors">
                 <Percent className="w-4 h-4 text-[#ff8000] group-hover:text-white transition-colors" />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">
                 Depreciation
               </p>
-              <p className="text-sm font-black text-slate-700">
+              <p className="text-sm font-semibold text-slate-700">
                 {category.depreciation_rate ?? 0}%{' '}
                 <span className="text-[10px] text-slate-400 font-bold tracking-normal italic ml-0.5">
                   per year
@@ -73,10 +73,10 @@ export const ViewCategoryModal = ({
               <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center mb-3 group-hover:bg-[#ff8000] transition-colors text-[#ff8000] group-hover:text-white">
                 <ArrowDownToLine className="w-4 h-4" />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">
                 Disposal Rate
               </p>
-              <p className="text-sm font-black text-slate-700">
+              <p className="text-sm font-semibold text-slate-700">
                 {category.disposal_rate ?? 0}%{' '}
                 <span className="text-[10px] text-slate-400 font-bold tracking-normal italic ml-0.5">
                   per year

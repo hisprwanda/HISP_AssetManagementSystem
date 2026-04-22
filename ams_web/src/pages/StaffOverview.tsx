@@ -98,7 +98,7 @@ export const StaffOverview = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200/60">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-orange-100 text-[9px] font-black uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
+              <div className="px-3 py-1 bg-white/80 backdrop-blur-md rounded-full border border-orange-100 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#ff8000] flex items-center gap-1.5 shadow-sm">
                 <LifeBuoy className="w-3.5 h-3.5" /> Personnel Portal
               </div>
               <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
@@ -106,7 +106,7 @@ export const StaffOverview = () => {
                 {currentUser?.department?.name || 'Operations'} Directorate
               </div>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-2">
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight leading-none mb-2">
               My Asset Overview
             </h1>
             <p className="text-slate-500 font-medium text-xs max-w-xl leading-relaxed">
@@ -120,7 +120,7 @@ export const StaffOverview = () => {
           {stats.recentOutcomes.length > 0 && (
             <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50 group">
               <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40">
-                <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                <h3 className="text-[11px] font-semibold text-slate-900 uppercase tracking-widest flex items-center gap-3">
                   <div className="w-1.5 h-4 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(255,128,0,0.4)]" />
                   Critical Path Outcomes
                 </h3>
@@ -129,16 +129,16 @@ export const StaffOverview = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100/50 bg-slate-50/50">
-                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Verdict
                       </th>
-                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Asset
                       </th>
-                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Resolution summary
                       </th>
-                      <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                      <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                         Date
                       </th>
                     </tr>
@@ -151,7 +151,7 @@ export const StaffOverview = () => {
                       >
                         <td className="px-4 py-3">
                           <div
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent ${
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-transparent ${
                               incident.investigation_status === 'ACCEPTED'
                                 ? 'bg-orange-50 text-orange-950 border-orange-200'
                                 : 'bg-orange-50 text-orange-600 border-orange-100'
@@ -191,7 +191,7 @@ export const StaffOverview = () => {
                               {incident.investigation_status === 'DENIED' && (
                                 <div className="mt-1.5 flex items-center gap-3">
                                   {incident.penalty_resolved_at ? (
-                                    <div className="flex items-center gap-1.5 text-emerald-600 font-black text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm animate-in zoom-in duration-300">
+                                    <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm animate-in zoom-in duration-300">
                                       <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                                       CLEARED:{' '}
                                       {Number(
@@ -200,7 +200,7 @@ export const StaffOverview = () => {
                                       RWF
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-1.5 text-orange-600 font-black text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
+                                    <div className="flex items-center gap-1.5 text-orange-600 font-semibold text-[9px] uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">
                                       <AlertCircle className="w-3 h-3" />{' '}
                                       Penalty:{' '}
                                       {Number(
@@ -228,7 +228,7 @@ export const StaffOverview = () => {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/50 px-2 py-1 rounded-lg">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-100/50 px-2 py-1 rounded-lg">
                             {new Date(incident.reported_at).toLocaleDateString(
                               'en-GB',
                               { day: '2-digit', month: 'short' },
@@ -252,7 +252,7 @@ export const StaffOverview = () => {
 
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50">
             <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40">
-              <h3 className="text-[11px] font-black text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
+              <h3 className="text-[11px] font-semibold text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
                 <div className="w-1.5 h-4 bg-[#ff8000] rounded-full shadow-[0_0_12px_rgba(255,128,0,0.3)]" />
                 My Asset Inventory
               </h3>
@@ -261,19 +261,19 @@ export const StaffOverview = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100/50 bg-slate-50/50">
-                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Asset
                     </th>
-                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Category
                     </th>
-                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Assignment Date
                     </th>
-                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                       Action
                     </th>
                   </tr>
@@ -291,20 +291,20 @@ export const StaffOverview = () => {
                               <p className="text-xs font-bold text-slate-800 tracking-tight leading-none mb-1 group-hover:text-[#ff8000]">
                                 {asset.name}
                               </p>
-                              <code className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                              <code className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
                                 {asset.tag_id || 'NON-TAGGED'}
                               </code>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
                             {asset.category?.name || 'General'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-transparent shadow-sm ${
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-transparent shadow-sm ${
                               asset.status === 'IN_STOCK' &&
                               asset.assignment_history?.some(
                                 (a) =>
@@ -350,7 +350,7 @@ export const StaffOverview = () => {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 text-slate-500">
                             <Calendar className="w-3.5 h-3.5 opacity-40 text-slate-400" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                               {asset.purchase_date
                                 ? new Date(
                                     asset.purchase_date,
@@ -382,7 +382,7 @@ export const StaffOverview = () => {
                                       asset,
                                     } as unknown as AssetAssignment);
                                 }}
-                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transition-colors"
+                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors"
                                 title="Sign Receipt Form"
                               >
                                 Sign Form
@@ -402,7 +402,7 @@ export const StaffOverview = () => {
                     <tr>
                       <td
                         colSpan={5}
-                        className="py-12 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-20"
+                        className="py-12 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-widest opacity-20"
                       >
                         No Unit Assignments Found
                       </td>
@@ -421,7 +421,7 @@ export const StaffOverview = () => {
           </div>
 
           <div className="pt-8 mt-4 border-t border-slate-100 flex flex-col items-center text-center">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
               <ShieldAlert className="w-3 h-3 text-orange-400" /> System
               Protocol Notice
             </p>
@@ -444,7 +444,7 @@ export const StaffOverview = () => {
             <div className="absolute top-0 right-0 p-4">
               <button
                 onClick={() => setResolutionNotice(null)}
-                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-black"
+                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-semibold"
               >
                 ✕
               </button>
@@ -452,7 +452,7 @@ export const StaffOverview = () => {
             <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
               <ShieldAlert className="w-8 h-8 text-[#ff8000]" />
             </div>
-            <h4 className="text-xl font-black text-slate-900 tracking-tight mb-3">
+            <h4 className="text-xl font-semibold text-slate-900 tracking-tight mb-3">
               Penalty Resolution
             </h4>
             <p className="text-sm font-semibold text-slate-500 leading-relaxed mb-8 italic">
@@ -460,7 +460,7 @@ export const StaffOverview = () => {
             </p>
             <button
               onClick={() => setResolutionNotice(null)}
-              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-700 shadow-xl"
+              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-orange-700 shadow-xl"
             >
               Acknowledged
             </button>

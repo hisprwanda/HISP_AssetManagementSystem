@@ -4,7 +4,7 @@ import {
   IsNotEmpty,
   IsUUID,
   IsIn,
-  MinLength,
+  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,10 +18,18 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', minLength: 6 })
+  @ApiProperty({
+    example: 'pass12',
+    description: 'Must be exactly 6 characters long',
+  })
   @IsString()
-  @MinLength(6)
-  password_hash: string;
+  @Length(6, 6)
+  password: string;
+
+  @ApiProperty({ example: '+250788123456' })
+  @IsString()
+  @IsNotEmpty()
+  phone_number: string;
 
   @ApiProperty({
     enum: [

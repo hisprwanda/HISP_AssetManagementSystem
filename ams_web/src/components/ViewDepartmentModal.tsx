@@ -40,15 +40,15 @@ export const ViewDepartmentModal = ({
           <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4 shadow-sm">
             <Building2 className="w-8 h-8 text-[#ff8000]" />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-tight">
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight leading-tight">
             {department.name}
           </h2>
           <div className="flex items-center gap-2 mt-2">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
               <Layout className="w-3 h-3" /> {department.type}
             </div>
             <div
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
                 department.status === 'Inactive'
                   ? 'bg-slate-100 text-slate-400 border-slate-200'
                   : 'bg-orange-50 text-orange-950 border-orange-200'
@@ -61,7 +61,7 @@ export const ViewDepartmentModal = ({
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8">
           <div>
-            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Organizational Profile
             </h3>
             <div className="space-y-5">
@@ -70,7 +70,7 @@ export const ViewDepartmentModal = ({
                   <Briefcase className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Primary Workplace
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -83,7 +83,7 @@ export const ViewDepartmentModal = ({
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Assignment Policy
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -95,7 +95,7 @@ export const ViewDepartmentModal = ({
           </div>
 
           <div>
-            <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Operational Settings
             </h3>
             <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
@@ -103,7 +103,7 @@ export const ViewDepartmentModal = ({
                 <span className="text-xs font-bold text-slate-500">
                   Asset Management
                 </span>
-                <span className="text-xs font-black text-slate-800 uppercase">
+                <span className="text-xs font-semibold text-slate-800 uppercase">
                   Enabled
                 </span>
               </div>
@@ -111,7 +111,7 @@ export const ViewDepartmentModal = ({
                 <span className="text-xs font-bold text-slate-500">
                   Procurement Rights
                 </span>
-                <span className="text-xs font-black text-slate-400 uppercase">
+                <span className="text-xs font-semibold text-slate-400 uppercase">
                   Restricted
                 </span>
               </div>

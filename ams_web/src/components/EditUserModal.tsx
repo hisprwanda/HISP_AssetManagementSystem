@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserCog, Mail, User, Shield, Save, AlertCircle } from 'lucide-react';
+import {
+  UserCog,
+  Mail,
+  User,
+  Shield,
+  Save,
+  AlertCircle,
+  Phone,
+} from 'lucide-react';
 import { api } from '../lib/api';
 import {
   Dialog,
@@ -16,6 +24,7 @@ interface StaffUser {
   full_name: string;
   email: string;
   role: string;
+  phone_number?: string;
 }
 
 interface EditUserModalProps {
@@ -34,6 +43,7 @@ export const EditUserModal = ({
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [role, setRole] = useState('Staff');
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +51,7 @@ export const EditUserModal = ({
     if (user) {
       setFullName(user.full_name);
       setEmail(user.email);
+      setPhoneNumber(user.phone_number || '');
       setRole(user.role);
       setError(null);
     }
@@ -50,6 +61,7 @@ export const EditUserModal = ({
     mutationFn: async (updatedUser: {
       full_name: string;
       email: string;
+      phone_number: string;
       role: string;
     }) => {
       const response = await api.patch(`/users/${user!.id}`, updatedUser);
@@ -77,11 +89,16 @@ export const EditUserModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!fullName || !email || !role) {
+    if (!fullName || !email || !phoneNumber || !role) {
       setError('Please fill in all required fields.');
       return;
     }
-    mutation.mutate({ full_name: fullName, email, role });
+    mutation.mutate({
+      full_name: fullName,
+      email,
+      phone_number: phoneNumber,
+      role,
+    });
   };
 
   const isFinanceDept =
@@ -100,7 +117,7 @@ export const EditUserModal = ({
           <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
             <UserCog className="w-6 h-6 text-[#ff8000]" />
           </div>
-          <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
+          <DialogTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
             Edit Staff Member
           </DialogTitle>
           <DialogDescription className="text-slate-500 font-medium">
@@ -117,7 +134,7 @@ export const EditUserModal = ({
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">
               Full Name *
             </label>
             <div className="relative">
@@ -134,7 +151,7 @@ export const EditUserModal = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">
               Email Address *
             </label>
             <div className="relative">
@@ -151,7 +168,24 @@ export const EditUserModal = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">
+              Phone Number *
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="e.g. +250788123456"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all placeholder:text-slate-400"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">
               System Role *
             </label>
             <div className="relative">

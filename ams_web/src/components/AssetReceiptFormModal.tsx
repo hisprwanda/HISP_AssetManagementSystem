@@ -176,7 +176,7 @@ export const AssetReceiptFormModal = ({
           <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
             <CheckCircle2 className="w-12 h-12 text-[#ff8000]" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">
+          <h2 className="text-3xl font-semibold text-slate-900 mb-4 tracking-tight">
             Form Signed!
           </h2>
           <p className="text-slate-500 font-medium">
@@ -201,15 +201,15 @@ export const AssetReceiptFormModal = ({
               <FileCheck className="w-6 h-6 text-[#ff8000]" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-1">
+              <h2 className="text-xl font-semibold text-slate-800 tracking-tight leading-none mb-1">
                 Asset Receipt Form
               </h2>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
                   {assignment.form_number || 'STAGED-FORM'}
                 </span>
                 <span
-                  className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border ${
+                  className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-md border ${
                     assignment.form_status === 'APPROVED'
                       ? 'bg-slate-900 text-white border-slate-900'
                       : assignment.form_status === 'REJECTED'
@@ -245,11 +245,11 @@ export const AssetReceiptFormModal = ({
                   {step.completed ? (
                     <CheckCircle2 className="w-5 h-5" />
                   ) : (
-                    <span className="text-sm font-black">{idx + 1}</span>
+                    <span className="text-sm font-semibold">{idx + 1}</span>
                   )}
                 </div>
                 <span
-                  className={`text-[9px] font-black uppercase tracking-widest ${
+                  className={`text-[9px] font-semibold uppercase tracking-widest ${
                     step.active || step.completed
                       ? 'text-slate-700'
                       : 'text-slate-300'
@@ -270,7 +270,7 @@ export const AssetReceiptFormModal = ({
           <div className="bg-white p-8 rounded-[1rem] border border-slate-200 shadow-xl max-w-2xl mx-auto space-y-6 relative overflow-hidden print:shadow-none print:border-none print:p-0 print:rounded-none print-content">
             {assignment.form_status !== 'APPROVED' && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] rotate-[-35deg] select-none print:hidden">
-                <span className="text-[120px] font-black tracking-tighter uppercase">
+                <span className="text-[120px] font-semibold tracking-tighter uppercase">
                   VOID FORM
                 </span>
               </div>
@@ -283,7 +283,7 @@ export const AssetReceiptFormModal = ({
                   className="w-16 h-16 object-contain"
                 />
                 <div className="space-y-0.5">
-                  <h1 className="text-xl font-black text-slate-900 tracking-tighter">
+                  <h1 className="text-xl font-semibold text-slate-900 tracking-tighter">
                     HISP RWANDA
                   </h1>
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
@@ -292,7 +292,7 @@ export const AssetReceiptFormModal = ({
                 </div>
               </div>
               <div className="text-right">
-                <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase">
+                <h3 className="text-lg font-semibold text-slate-900 tracking-tight uppercase">
                   Asset Receipt Form
                 </h3>
                 <p className="text-[10px] font-bold text-slate-400 mt-0.5 italic">
@@ -302,14 +302,14 @@ export const AssetReceiptFormModal = ({
             </div>
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
+                <h4 className="text-xs font-semibold uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
                   Part A: Handed Over By
                 </h4>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <UserIcon className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col flex-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Full Names
                       </span>
                       {canEdit ? (
@@ -330,7 +330,7 @@ export const AssetReceiptFormModal = ({
                   <div className="flex items-center gap-4">
                     <Calendar className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Handover Date
                       </span>
                       <span className="text-sm font-bold text-slate-800">
@@ -343,7 +343,7 @@ export const AssetReceiptFormModal = ({
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Contact Email
                       </span>
                       <span className="text-sm font-bold text-slate-800">
@@ -355,14 +355,14 @@ export const AssetReceiptFormModal = ({
               </div>
 
               <div className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
+                <h4 className="text-xs font-semibold uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
                   Part B: Received By (Custody)
                 </h4>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <UserIcon className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Staff Names
                       </span>
                       <span className="text-sm font-bold text-slate-800">
@@ -373,7 +373,7 @@ export const AssetReceiptFormModal = ({
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Email Address
                       </span>
                       <span className="text-sm font-bold text-slate-800">
@@ -384,7 +384,7 @@ export const AssetReceiptFormModal = ({
                   <div className="flex items-center gap-4">
                     <Phone className="w-5 h-5 text-slate-300" />
                     <div className="flex flex-col flex-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                         Telephone / Extension
                       </span>
                       {canEdit ? (
@@ -407,23 +407,23 @@ export const AssetReceiptFormModal = ({
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-xs font-black uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-[#ff8000] border-b border-orange-100 pb-2">
                 Part C: Asset Specifications
               </h4>
               <div className="border-2 border-slate-900 overflow-hidden">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-slate-900 text-white">
-                      <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/20">
+                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/20">
                         Item #
                       </th>
-                      <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/20">
+                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/20">
                         Component / Asset Type
                       </th>
-                      <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/20">
+                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/20">
                         Serial Number
                       </th>
-                      <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest">
+                      <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest">
                         Inventory Tag ID
                       </th>
                     </tr>
@@ -465,7 +465,7 @@ export const AssetReceiptFormModal = ({
                 </table>
               </div>
               <div className="bg-slate-50 p-4 border border-slate-200 rounded-xl">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">
                   Condition on Handover
                 </p>
                 {canEdit ? (
@@ -490,7 +490,7 @@ export const AssetReceiptFormModal = ({
               <div className="absolute top-0 right-0 p-4 opacity-10">
                 <CheckCircle2 className="w-24 h-24" />
               </div>
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-orange-400 underline decoration-2 underline-offset-4">
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400 underline decoration-2 underline-offset-4">
                 Declaration of Responsibility
               </h4>
               <p className="text-xs font-medium leading-[1.8] text-slate-300 text-justify">
@@ -518,13 +518,13 @@ export const AssetReceiptFormModal = ({
                       </span>
                     </div>
                   ) : (
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 italic">
                       Awaiting Recipient Signature
                     </span>
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-black text-slate-900 uppercase tracking-widest">
+                  <p className="text-xs font-semibold text-slate-900 uppercase tracking-widest">
                     Signer: {assignment.user?.full_name}
                   </p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">
@@ -543,13 +543,13 @@ export const AssetReceiptFormModal = ({
                       </span>
                     </div>
                   ) : (
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 italic">
                       Awaiting Admin Verification
                     </span>
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-black text-slate-900 uppercase tracking-widest">
+                  <p className="text-xs font-semibold text-slate-900 uppercase tracking-widest">
                     Administrator: HISP RWANDA
                   </p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">
@@ -564,7 +564,7 @@ export const AssetReceiptFormModal = ({
               <div className="bg-rose-50 border border-rose-100 p-6 rounded-2xl flex items-start gap-4">
                 <AlertCircle className="w-6 h-6 text-rose-500 shrink-0" />
                 <div className="space-y-1">
-                  <h4 className="text-sm font-black text-rose-700 uppercase tracking-widest">
+                  <h4 className="text-sm font-semibold text-rose-700 uppercase tracking-widest">
                     Rejection Notice
                   </h4>
                   <p className="text-xs font-medium text-rose-600 leading-relaxed italic">
@@ -583,7 +583,7 @@ export const AssetReceiptFormModal = ({
             assignment.form_status === 'REJECTED') && (
             <div className="p-8 border-t border-slate-100 bg-white flex flex-col gap-6 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-20">
               <div className="space-y-3">
-                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Signature className="w-4 h-4 text-orange-500" /> Confirm Full
                   Name for Digital Signature
                 </label>
@@ -600,7 +600,7 @@ export const AssetReceiptFormModal = ({
                 {error && (
                   <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
                     <AlertCircle className="w-5 h-5 text-rose-500" />
-                    <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest leading-none">
+                    <p className="text-[11px] font-semibold text-rose-600 uppercase tracking-widest leading-none">
                       {error}
                     </p>
                   </div>
@@ -613,7 +613,7 @@ export const AssetReceiptFormModal = ({
               <button
                 onClick={() => signMutation.mutate()}
                 disabled={!signatureName || signMutation.isPending}
-                className="w-full py-5 bg-[#ff8000] hover:bg-orange-600 disabled:opacity-50 text-white font-black text-xs uppercase tracking-[0.3em] rounded-[2rem] shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                className="w-full py-5 bg-[#ff8000] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.3em] rounded-[2rem] shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3"
               >
                 {signMutation.isPending ? (
                   <>
@@ -635,14 +635,14 @@ export const AssetReceiptFormModal = ({
               <button
                 onClick={() => prepareMutation.mutate(false)}
                 disabled={prepareMutation.isPending}
-                className="flex-1 py-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95"
+                className="flex-1 py-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95"
               >
                 Save Draft
               </button>
               <button
                 onClick={() => prepareMutation.mutate(true)}
                 disabled={prepareMutation.isPending}
-                className="flex-[2] py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95"
+                className="flex-[2] py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95"
               >
                 {prepareMutation.isPending ? (
                   <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
@@ -666,7 +666,7 @@ export const AssetReceiptFormModal = ({
             {showRejectionForm ? (
               <div className="space-y-4 animate-in slide-in-from-bottom-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">
+                  <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest">
                     Reason for Rejection
                   </h3>
                   <button
@@ -685,7 +685,7 @@ export const AssetReceiptFormModal = ({
                 <button
                   onClick={() => verifyMutation.mutate(false)}
                   disabled={!rejectionRemarks || verifyMutation.isPending}
-                  className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg"
+                  className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg"
                 >
                   Confirm Rejection
                 </button>
@@ -693,7 +693,7 @@ export const AssetReceiptFormModal = ({
             ) : (
               <>
                 <div className="space-y-3">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                     <Signature className="w-4 h-4 text-orange-500" /> Admin
                     Approval Signature
                   </label>
@@ -708,7 +708,7 @@ export const AssetReceiptFormModal = ({
                     className={`w-full px-6 py-4 bg-slate-50 border ${error ? 'border-rose-300 focus:border-rose-500' : 'border-slate-200 focus:border-orange-500'} rounded-2xl outline-none focus:ring-4 text-lg font-['Dancing_Script',_cursive] transition-all placeholder:font-sans placeholder:text-sm`}
                   />
                   {error && (
-                    <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                    <p className="text-[10px] font-semibold text-rose-500 uppercase tracking-widest">
                       {error}
                     </p>
                   )}
@@ -717,14 +717,14 @@ export const AssetReceiptFormModal = ({
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setShowRejectionForm(true)}
-                    className="py-5 bg-white border-2 border-slate-200 hover:border-rose-400 hover:text-rose-600 text-slate-600 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95"
+                    className="py-5 bg-white border-2 border-slate-200 hover:border-rose-400 hover:text-rose-600 text-slate-600 font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95"
                   >
                     Reject Form <XCircle className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => verifyMutation.mutate(true)}
                     disabled={verifyMutation.isPending || !adminSignatureName}
-                    className="py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                    className="py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                   >
                     {verifyMutation.isPending ? (
                       <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />

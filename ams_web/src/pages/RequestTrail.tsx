@@ -279,14 +279,14 @@ export const RequestTrail = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
         <button
           onClick={() => navigate('/audit-trail')}
-          className="flex items-center gap-2 text-[10px] font-black text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform w-fit"
+          className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform w-fit"
         >
           <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
         </button>
 
         <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
               Audit Period:
             </span>
             <input
@@ -321,7 +321,7 @@ export const RequestTrail = () => {
             <button
               onClick={handleExportLogs}
               disabled={!filteredRequests.length}
-              className="flex items-center gap-2 text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="flex items-center gap-2 text-[9px] font-semibold text-slate-600 uppercase tracking-widest hover:text-[#ff8000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Download CSV Export"
             >
               <History className="w-3.5 h-3.5 text-[#ff8000]" /> Request log
@@ -336,10 +336,10 @@ export const RequestTrail = () => {
             <Clock className="w-5 h-5 text-orange-500" />
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
               Total Logs
             </p>
-            <p className="text-lg font-black text-slate-800 leading-none">
+            <p className="text-lg font-semibold text-slate-800 leading-none">
               {filteredRequests.length}
             </p>
           </div>
@@ -349,10 +349,10 @@ export const RequestTrail = () => {
             <CheckCircle2 className="w-5 h-5 text-green-500" />
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
               Fulfilled
             </p>
-            <p className="text-lg font-black text-slate-800 leading-none">
+            <p className="text-lg font-semibold text-slate-800 leading-none">
               {filteredRequests.filter((r) => r.status === 'FULFILLED').length}
             </p>
           </div>
@@ -363,10 +363,10 @@ export const RequestTrail = () => {
               <X className="w-5 h-5 text-rose-500" />
             </div>
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
                 Rejected
               </p>
-              <p className="text-lg font-black text-slate-800 leading-none">
+              <p className="text-lg font-semibold text-slate-800 leading-none">
                 {filteredRequests.filter((r) => r.status === 'REJECTED').length}
               </p>
             </div>
@@ -391,7 +391,7 @@ export const RequestTrail = () => {
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar sm:pr-2">
           <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
             <Filter className="w-4 h-4 text-[#ff8000]" />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
               Status:
             </span>
           </div>
@@ -416,22 +416,22 @@ export const RequestTrail = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Request Item
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Requested By
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Total Est. Cost
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Urgency
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Status
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -463,7 +463,7 @@ export const RequestTrail = () => {
                   >
                     <td className="px-8 py-5">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-slate-800">
+                        <span className="text-sm font-semibold text-slate-800">
                           {req.title}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1">
@@ -478,7 +478,7 @@ export const RequestTrail = () => {
                           <User className="w-3.5 h-3.5 text-orange-500" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-black text-slate-700">
+                          <span className="text-xs font-semibold text-slate-700">
                             {req.requested_by?.full_name}
                           </span>
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -490,7 +490,7 @@ export const RequestTrail = () => {
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-1.5">
                         <Banknote className="w-4 h-4 text-emerald-500" />
-                        <span className="text-sm font-black text-slate-800">
+                        <span className="text-sm font-semibold text-slate-800">
                           {(
                             req.financials?.grand_total ||
                             req.estimated_unit_cost ||
@@ -502,7 +502,7 @@ export const RequestTrail = () => {
                     </td>
                     <td className="px-8 py-5">
                       <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${
+                        className={`px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-widest border ${
                           req.urgency === 'CRITICAL'
                             ? 'bg-rose-50 text-rose-600 border-rose-100'
                             : req.urgency === 'HIGH'
@@ -515,7 +515,7 @@ export const RequestTrail = () => {
                     </td>
                     <td className="px-8 py-5">
                       <span
-                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        className={`px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-widest border ${
                           req.status === 'FULFILLED'
                             ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                             : req.status === 'REJECTED'

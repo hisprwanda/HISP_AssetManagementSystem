@@ -160,7 +160,7 @@ export const SimpleRequestModal = ({
             <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
               <CheckCircle2 className="w-10 h-10 text-orange-500" />
             </div>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight mb-2">
               Request Submitted!
             </h2>
             <p className="text-slate-500 font-medium px-8">
@@ -175,7 +175,7 @@ export const SimpleRequestModal = ({
               <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
                 <ShoppingCart className="w-6 h-6 text-[#ff8000]" />
               </div>
-              <DialogTitle className="text-2xl font-black text-slate-800 tracking-tight">
+              <DialogTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
                 Request New Asset
               </DialogTitle>
               <DialogDescription className="text-slate-500 font-medium">
@@ -193,7 +193,7 @@ export const SimpleRequestModal = ({
               )}
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Asset Category *
                 </label>
                 <div className="relative">
@@ -219,7 +219,7 @@ export const SimpleRequestModal = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   What item do you need? *
                 </label>
                 <div>
@@ -297,7 +297,7 @@ export const SimpleRequestModal = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Why is this item needed? (Description) *
                 </label>
                 <textarea
@@ -313,7 +313,7 @@ export const SimpleRequestModal = ({
                 <button
                   type="submit"
                   disabled={mutation.isPending}
-                  className="w-full bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  className="w-full bg-[#ff8000] hover:bg-[#e49f37] text-white px-8 py-3.5 rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-lg shadow-orange-100 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
                   {mutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

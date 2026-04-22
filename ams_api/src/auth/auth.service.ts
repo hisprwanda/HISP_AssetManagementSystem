@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { UserStatus } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,14 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (user.status === UserStatus.INACTIVE) {
+      console.log(
+        `[AuthService] First-time login for ${user.email}. Activating account...`,
+      );
+      await this.usersService.updateStatus(user.id, UserStatus.ACTIVE);
+      user.status = UserStatus.ACTIVE;
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };

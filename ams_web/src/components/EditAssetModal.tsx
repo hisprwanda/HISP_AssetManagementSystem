@@ -128,7 +128,7 @@ export const EditAssetModal = ({
       <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
               Update Asset
             </h2>
             <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mt-1">
@@ -147,13 +147,13 @@ export const EditAssetModal = ({
             </div>
           )}
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Laptop className="w-4 h-4 text-orange-500" /> Hardware
               Specifications
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Asset Name / Model *
                 </label>
                 <input
@@ -167,7 +167,7 @@ export const EditAssetModal = ({
                 />
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Category *
                 </label>
                 <select
@@ -189,7 +189,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Status
                 </label>
                 <select
@@ -226,12 +226,12 @@ export const EditAssetModal = ({
 
           <hr className="border-slate-100" />
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Hash className="w-4 h-4 text-orange-500" /> Identification
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Serial Number
                 </label>
                 <input
@@ -244,7 +244,7 @@ export const EditAssetModal = ({
                 />
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Internal Tag ID *
                 </label>
                 <input
@@ -262,12 +262,12 @@ export const EditAssetModal = ({
 
           <hr className="border-slate-100" />
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-orange-500" /> Deployment
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Directorate *
                 </label>
                 <select
@@ -293,7 +293,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Assigned To
                 </label>
                 <select
@@ -319,7 +319,7 @@ export const EditAssetModal = ({
                 </select>
               </div>
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Location
                 </label>
                 <input
@@ -332,7 +332,7 @@ export const EditAssetModal = ({
                 />
               </div>
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-orange-500">
                   Purchase Cost (RWF)
                 </label>
                 <input
@@ -347,7 +347,7 @@ export const EditAssetModal = ({
               </div>
 
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Current Book Value (RWF)
                 </label>
                 <div className="w-full px-4 py-2.5 bg-orange-50/50 border border-orange-100 rounded-xl text-sm font-bold text-slate-700 flex items-center justify-between">
@@ -362,12 +362,12 @@ export const EditAssetModal = ({
 
               {formData.status === 'DISPOSED' && (
                 <div className="bg-red-50/30 rounded-2xl p-5 border border-red-100 space-y-4 col-span-2">
-                  <h3 className="text-xs font-black text-red-600 uppercase tracking-widest flex items-center gap-2 border-b border-red-100 pb-2">
+                  <h3 className="text-xs font-semibold text-red-600 uppercase tracking-widest flex items-center gap-2 border-b border-red-100 pb-2">
                     <Trash2 className="w-4 h-4" /> Disposal Settlement
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Recovery Value
                       </label>
                       <p className="text-sm font-bold text-slate-700">
@@ -375,7 +375,7 @@ export const EditAssetModal = ({
                       </p>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Disposal Date
                       </label>
                       <p className="text-sm font-bold text-slate-700">
@@ -385,7 +385,7 @@ export const EditAssetModal = ({
                       </p>
                     </div>
                     <div className="space-y-1 col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         Disposal Reason
                       </label>
                       <p className="text-sm font-medium text-slate-600 italic leading-relaxed">
@@ -411,7 +411,7 @@ export const EditAssetModal = ({
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-[2] py-3 bg-[#ff8000] hover:bg-[#e67300] text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
+            className="flex-[2] py-3 bg-[#ff8000] hover:bg-[#e67300] text-white font-semibold text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

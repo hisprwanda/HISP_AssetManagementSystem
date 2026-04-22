@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
+import { User, UserStatus } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Department } from 'src/departments/entities/department.entity';
 
 @Injectable()
-export class UsersService implements OnModuleInit {
+export class UsersService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
@@ -17,102 +21,91 @@ export class UsersService implements OnModuleInit {
     console.log('[UsersService] Service Instantiated');
   }
 
-  async onModuleInit() {
-    console.log('[UsersService] onModuleInit triggered');
-    await this.seedUsers();
+  async onApplicationBootstrap() {
+    console.log('[UsersService] onApplicationBootstrap triggered');
+    await this.bootstrapSystemAdmin();
   }
 
-  async seedUsers() {
+  private async bootstrapSystemAdmin() {
     try {
-      console.log('[UsersService] [SEED] Starting synchronization...');
+      const count = await this.userRepo.count();
+      if (count > 0) return;
+
+      console.log('[UsersService] [BOOTSTRAP] Initializing System Admin...');
 
       const deptRepo = this.dataSource.getRepository(Department);
-      const userRepo = this.dataSource.getRepository(User);
-
-      const defaultDeptName = 'Operations';
-      let defaultDept = await deptRepo.findOne({
+      const defaultDeptName = 'Admin and Finance';
+      let dept = await deptRepo.findOne({
         where: { name: defaultDeptName },
       });
 
-      if (!defaultDept) {
-        console.log(
-          `[UsersService] [SEED] Creating Department: ${defaultDeptName}`,
-        );
-        defaultDept = deptRepo.create({
+      if (!dept) {
+        dept = deptRepo.create({
           name: defaultDeptName,
           type: 'Directorate',
           status: 'Active',
         });
-        await deptRepo.save(defaultDept);
+        await deptRepo.save(dept);
       }
 
-      const usersToSeed = [
-        {
-          email: 'admin@hisprwanda.org',
-          full_name: 'Test Admin',
-          password: 'Admin123!',
-          role: 'Admin and Finance Director',
-        },
-        {
-          email: 'staff@hisprwanda.org',
-          full_name: 'Test Staff',
-          password: 'Staff123!',
-          role: 'Staff',
-        },
-        {
-          email: 'hod@hisprwanda.org',
-          full_name: 'Test HOD',
-          password: 'Hod123!',
-          role: 'Head of Operations',
-        },
-        {
-          email: 'ceo@hisprwanda.org',
-          full_name: 'Test CEO',
-          password: 'Ceo123!',
-          role: 'Office of the CEO',
-        },
-      ];
+      const tempPassword = this.generateTempPassword();
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-      for (const seed of usersToSeed) {
-        const hashedPassword = await bcrypt.hash(seed.password, 10);
-        let user = await userRepo.findOne({ where: { email: seed.email } });
+      const admin = this.userRepo.create({
+        full_name: 'System Admin',
+        email: 'admin@hisp.tech',
+        password_hash: hashedPassword,
+        role: 'Admin and Finance Director',
+        department: dept,
+        status: UserStatus.ACTIVE,
+      });
 
-        if (!user) {
-          console.log(`[UsersService] [SEED] Creating User: ${seed.email}`);
-          user = userRepo.create({
-            full_name: seed.full_name,
-            email: seed.email,
-            password_hash: hashedPassword,
-            role: seed.role,
-            department: defaultDept,
-          });
-        } else {
-          console.log(`[UsersService] [SEED] Updating User: ${seed.email}`);
-          user.password_hash = hashedPassword;
-          user.role = seed.role;
-          user.department = defaultDept;
-          user.full_name = seed.full_name;
-        }
-        await userRepo.save(user);
-      }
-      console.log('[UsersService] [SEED] ALL USERS SYNCHRONIZED');
+      await this.userRepo.save(admin);
+      console.log(
+        `[UsersService] [BOOTSTRAP] System Admin created successfully.`,
+      );
+      console.log(`[UsersService] [BOOTSTRAP] Email: admin@hisp.tech`);
+      console.log(`[UsersService] [BOOTSTRAP] Temp Password: ${tempPassword}`);
     } catch (error) {
-      console.error('[UsersService] [SEED] ERROR:', error);
+      console.error('[UsersService] [BOOTSTRAP] ERROR:', error);
     }
   }
 
+  private generateTempPassword(): string {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { department_id, password_hash, ...userData } = createUserDto;
+    const { department_id, password, ...userData } = createUserDto;
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password_hash, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = this.userRepo.create({
       ...userData,
       password_hash: hashedPassword,
       department: { id: department_id } as Department,
+      status: UserStatus.INACTIVE,
     });
-    return await this.userRepo.save(user);
+    const savedUser = await this.userRepo.save(user);
+
+    console.log(`\n--- WELCOME EMAIL MOCK ---`);
+    console.log(`To: ${savedUser.email}`);
+    console.log(`Subject: Welcome to HISP Asset Management System`);
+    console.log(
+      `Your account has been created. Please log in using the temporary password below:`,
+    );
+    console.log(`Temporary Password: ${password}`);
+    console.log(`Login Link: http://localhost:5173/login`);
+    console.log(`--------------------------\n`);
+
+    return savedUser;
   }
 
   async bulkCreate(
@@ -127,21 +120,14 @@ export class UsersService implements OnModuleInit {
 
     for (const data of usersData) {
       try {
-        const {
-          full_name,
-          email,
-          role,
-          department_name,
-          password,
-          phone_number,
-        } = data as {
-          full_name: string;
-          email: string;
-          role: string;
-          department_name: string;
-          password?: string;
-          phone_number: string;
-        };
+        const { full_name, email, role, department_name, phone_number } =
+          data as {
+            full_name: string;
+            email: string;
+            role: string;
+            department_name: string;
+            phone_number: string;
+          };
         if (
           !full_name ||
           !email ||
@@ -174,7 +160,7 @@ export class UsersService implements OnModuleInit {
             );
           }
         }
-        const rawPassword = password || 'Welcome@123';
+        const rawPassword = this.generateTempPassword();
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
         const newUser = this.userRepo.create({
@@ -184,9 +170,21 @@ export class UsersService implements OnModuleInit {
           phone_number,
           password_hash: hashedPassword,
           department: department,
+          status: UserStatus.INACTIVE,
         });
 
         await this.userRepo.save(newUser);
+
+        console.log(`\n--- BULK WELCOME EMAIL MOCK ---`);
+        console.log(`To: ${email}`);
+        console.log(`Subject: Welcome to HISP Asset Management System`);
+        console.log(
+          `Your account has been created via bulk upload. Please log in using the temporary password below:`,
+        );
+        console.log(`Temporary Password: ${rawPassword}`);
+        console.log(`Login Link: http://localhost:5173/login`);
+        console.log(`-------------------------------\n`);
+
         results.success++;
       } catch (err: unknown) {
         const errorMessage =
@@ -234,25 +232,12 @@ export class UsersService implements OnModuleInit {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    let user = await this.userRepo
+    const user = await this.userRepo
       .createQueryBuilder('user')
       .addSelect('user.password_hash')
       .leftJoinAndSelect('user.department', 'department')
       .where('user.email = :email', { email })
       .getOne();
-
-    if (!user && email === 'ceo@hisprwanda.org') {
-      console.log(
-        `[UsersService] findByEmail: CEO not found. Triggering emergency re-seed...`,
-      );
-      await this.seedUsers();
-      user = await this.userRepo
-        .createQueryBuilder('user')
-        .addSelect('user.password_hash')
-        .leftJoinAndSelect('user.department', 'department')
-        .where('user.email = :email', { email })
-        .getOne();
-    }
 
     if (user) {
       console.log(
@@ -274,6 +259,12 @@ export class UsersService implements OnModuleInit {
     }
 
     Object.assign(user, userData);
+    return await this.userRepo.save(user);
+  }
+
+  async updateStatus(id: string, status: UserStatus): Promise<User> {
+    const user = await this.findOne(id);
+    user.status = status;
     return await this.userRepo.save(user);
   }
 

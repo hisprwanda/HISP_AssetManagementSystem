@@ -220,7 +220,7 @@ export const Directorate = () => {
                 </div>
 
                 <h3
-                  className="text-lg font-black text-slate-800 mb-0.5 truncate"
+                  className="text-lg font-semibold text-slate-800 mb-0.5 truncate"
                   title={dept.name}
                 >
                   {dept.name}
@@ -231,7 +231,7 @@ export const Directorate = () => {
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                    <span className="text-[10px] uppercase font-semibold tracking-widest text-slate-400">
                       Status
                     </span>
                     <span
@@ -244,7 +244,7 @@ export const Directorate = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
-                    <span className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest">
+                    <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest">
                       Personnel &rarr;
                     </span>
                   </div>
@@ -284,7 +284,7 @@ export const Directorate = () => {
               <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
                 <AlertTriangle className="w-7 h-7 text-red-500" />
               </div>
-              <h2 className="text-xl font-black text-slate-800 text-center mb-2">
+              <h2 className="text-xl font-semibold text-slate-800 text-center mb-2">
                 Delete Organisation Unit?
               </h2>
               <p className="text-slate-500 text-sm font-medium text-center mb-6">
@@ -337,7 +337,7 @@ export const Directorate = () => {
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <Building2 className="w-5 h-5 text-[#e49f37]" />
-              <h1 className="text-xl font-black text-slate-800 tracking-tight">
+              <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
                 {selectedDept.name}
               </h1>
             </div>
@@ -385,16 +385,16 @@ export const Directorate = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Personnel
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Contact
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   System Role
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -460,7 +460,7 @@ export const Directorate = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
                         [
                           'Admin and Finance Director',
                           'Finance Officer',
@@ -550,7 +550,7 @@ export const Directorate = () => {
             <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
               <AlertTriangle className="w-7 h-7 text-red-500" />
             </div>
-            <h2 className="text-xl font-black text-slate-800 text-center mb-2">
+            <h2 className="text-xl font-semibold text-slate-800 text-center mb-2">
               Remove Staff Member?
             </h2>
             <p className="text-slate-500 text-sm font-medium text-center mb-6">

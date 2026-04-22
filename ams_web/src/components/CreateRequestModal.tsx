@@ -312,7 +312,7 @@ export const CreateRequestModal = ({
             <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-orange-100 group-hover:scale-110 transition-transform">
               <ShoppingCart className="w-8 h-8 text-[#ff8000]" />
             </div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-4">
+            <h2 className="text-3xl font-semibold text-slate-800 tracking-tight mb-4">
               {baseRequest ? 'Requisition Updated!' : 'Requisition Submitted!'}
             </h2>
             <p className="text-slate-500 font-medium max-w-md mx-auto leading-relaxed">
@@ -320,7 +320,7 @@ export const CreateRequestModal = ({
                 ? 'Your changes have been saved. The requisition remains in the pipeline for executive review.'
                 : 'Your official procurement requisition has been successfully logged and forwarded to the Administration & Finance team for final review.'}
             </p>
-            <div className="mt-12 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">
+            <div className="mt-12 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-500">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
               Updating Pipeline...
             </div>
@@ -329,7 +329,7 @@ export const CreateRequestModal = ({
           <>
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/80">
               <div>
-                <h2 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-slate-800 tracking-tight flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#ff8000]" />{' '}
                   {requestMode === 'SHARED'
                     ? 'Official Purchase Requisition (Shared Asset)'
@@ -358,7 +358,7 @@ export const CreateRequestModal = ({
 
               <div className="grid grid-cols-3 gap-6">
                 <div className="space-y-1.5 group">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                     Requesting Department *
                   </label>
                   <div className="relative">
@@ -387,7 +387,7 @@ export const CreateRequestModal = ({
 
                 {!isHOD || requestMode === 'INDIVIDUAL' ? (
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                       Requester *
                     </label>
                     <div className="relative">
@@ -419,19 +419,19 @@ export const CreateRequestModal = ({
                   </div>
                 ) : (
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                       Requester (Shared)
                     </label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ff8000]" />
-                      <div className="w-full pl-9 pr-4 py-2.5 bg-orange-50 border border-orange-200 rounded-xl text-[#ff8000] text-sm font-black truncate">
+                      <div className="w-full pl-9 pr-4 py-2.5 bg-orange-50 border border-orange-200 rounded-xl text-[#ff8000] text-sm font-semibold truncate">
                         {user?.full_name} (HOD)
                       </div>
                     </div>
                   </div>
                 )}
                 <div className="space-y-1.5 group">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                     Urgency Level *
                   </label>
                   <div className="relative">
@@ -454,7 +454,7 @@ export const CreateRequestModal = ({
               </div>
 
               <div className="space-y-1.5 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Justification / Purpose of Procurement *
                 </label>
                 <div className="relative">
@@ -473,7 +473,7 @@ export const CreateRequestModal = ({
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                  <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
                     <ShoppingCart className="w-4 h-4 text-[#ff8000]" />{' '}
                     Goods/Services Requested
                   </h3>
@@ -488,9 +488,9 @@ export const CreateRequestModal = ({
 
                 <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    <thead className="bg-slate-100/50 border-b border-slate-200 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                       <tr>
-                        <th className="px-4 py-4 w-24 text-center text-slate-500 font-black uppercase tracking-widest text-[10px]">
+                        <th className="px-4 py-4 w-24 text-center text-slate-500 font-semibold uppercase tracking-widest text-[10px]">
                           Qty
                         </th>
                         <th className="px-4 py-4 w-1/4">Item Name</th>
@@ -573,7 +573,7 @@ export const CreateRequestModal = ({
                               className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold text-right"
                             />
                           </td>
-                          <td className="px-4 py-4 text-right text-sm font-black text-slate-800">
+                          <td className="px-4 py-4 text-right text-sm font-semibold text-slate-800">
                             {(item.quantity * item.unit_price).toLocaleString()}
                           </td>
                           <td className="px-4 py-4 text-center">
@@ -591,10 +591,10 @@ export const CreateRequestModal = ({
                     </tbody>
                   </table>
                   <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-end items-center gap-4">
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                       Subtotal Approved For Goods:
                     </span>
-                    <span className="text-lg font-black text-slate-800">
+                    <span className="text-lg font-semibold text-slate-800">
                       {itemsSubtotal.toLocaleString()} RWF
                     </span>
                   </div>
@@ -604,13 +604,13 @@ export const CreateRequestModal = ({
               <hr className="border-slate-100" />
 
               <div>
-                <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#ff8000]" /> Destination &
                   Logistics
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5 group col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Ship-to Address / Final End Destination *
                     </label>
                     <input
@@ -623,7 +623,7 @@ export const CreateRequestModal = ({
                     />
                   </div>
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Contact Person at Destination
                     </label>
                     <div className="relative">
@@ -638,7 +638,7 @@ export const CreateRequestModal = ({
                     </div>
                   </div>
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Contact Phone
                     </label>
                     <div className="relative">
@@ -658,14 +658,14 @@ export const CreateRequestModal = ({
               <hr className="border-slate-100" />
 
               <div>
-                <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <Calculator className="w-4 h-4 text-[#ff8000]" /> Accounting &
                   Final Authorization
                 </h3>
 
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Costs based on (Check A or B) *
                     </label>
                     <div className="flex gap-4">
@@ -695,7 +695,7 @@ export const CreateRequestModal = ({
                   </div>
 
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Est. Transport Fees (RWF)
                     </label>
                     <div className="relative">
@@ -713,7 +713,7 @@ export const CreateRequestModal = ({
                   </div>
 
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Budget Code (1)
                     </label>
                     <input
@@ -725,7 +725,7 @@ export const CreateRequestModal = ({
                     />
                   </div>
                   <div className="space-y-1.5 group">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Budget Code (2)
                     </label>
                     <input

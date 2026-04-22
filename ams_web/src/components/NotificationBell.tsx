@@ -108,7 +108,7 @@ export const NotificationBell = () => {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#ff8000] text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#ff8000] text-white text-[9px] font-semibold rounded-full flex items-center justify-center animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -118,7 +118,7 @@ export const NotificationBell = () => {
         <div className="absolute right-0 top-full mt-2 w-96 bg-white border border-slate-100 rounded-2xl shadow-2xl shadow-slate-200 z-50 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-900">
                 Notifications
               </h3>
               {unreadCount > 0 && (
@@ -132,7 +132,7 @@ export const NotificationBell = () => {
                 <button
                   onClick={() => markAllReadMutation.mutate()}
                   disabled={markAllReadMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
                   title="Mark all as read"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
@@ -170,7 +170,7 @@ export const NotificationBell = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <p
-                        className={`text-xs font-black text-slate-900 leading-tight ${!notif.is_read ? 'text-slate-900' : 'text-slate-600'}`}
+                        className={`text-xs font-semibold text-slate-900 leading-tight ${!notif.is_read ? 'text-slate-900' : 'text-slate-600'}`}
                       >
                         {notif.title.replace('✅ ', '')}
                       </p>
@@ -191,7 +191,7 @@ export const NotificationBell = () => {
           </div>
           {notifications.length > 0 && (
             <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-center">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
                 Showing last {notifications.length} notifications
               </p>
             </div>

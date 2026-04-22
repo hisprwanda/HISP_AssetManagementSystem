@@ -307,7 +307,7 @@ export const Layout = () => {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-base text-slate-800 tracking-tight leading-none">
+              <span className="font-semibold text-base text-slate-800 tracking-tight leading-none">
                 HISP-AMS
               </span>
               <span className="text-[9px] uppercase font-bold tracking-[0.2em] text-[#ff8000] mt-0.5">
@@ -385,7 +385,7 @@ export const Layout = () => {
                       {item.name === 'Incident Reports' &&
                         pendingIncidentsCount > 0 && (
                           <span
-                            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}
+                            className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}
                           >
                             {pendingIncidentsCount}
                           </span>
@@ -394,7 +394,7 @@ export const Layout = () => {
                         item.name === 'Procurement') &&
                         pendingRequestsCount > 0 && (
                           <span
-                            className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-950' : 'bg-orange-950 text-white shadow-sm'}`}
+                            className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-950' : 'bg-orange-950 text-white shadow-sm'}`}
                           >
                             {pendingRequestsCount}
                           </span>
@@ -416,7 +416,7 @@ export const Layout = () => {
               <span className="text-xs font-bold text-slate-800 truncate leading-tight">
                 {user?.full_name || 'Admin User'}
               </span>
-              <span className="text-[9px] text-[#e49f37] uppercase font-black tracking-wider">
+              <span className="text-[9px] text-[#e49f37] uppercase font-semibold tracking-wider">
                 {user?.role || 'SYSTEM ADMIN'}
               </span>
             </div>
@@ -471,7 +471,7 @@ export const Layout = () => {
               {showResults && searchQuery.length >= 2 && (
                 <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-xl border border-white rounded-3xl shadow-2xl overflow-hidden z-50">
                   <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Quick Results
                     </span>
                     {searchQuery.length > 0 && (
@@ -534,7 +534,7 @@ export const Layout = () => {
 
                   <button
                     onClick={handleSearchSubmit}
-                    className="w-full py-4 px-6 bg-[#ff8000] text-white text-xs font-black uppercase tracking-widest hover:bg-[#e49f37] transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-4 px-6 bg-[#ff8000] text-white text-xs font-semibold uppercase tracking-widest hover:bg-[#e49f37] transition-colors flex items-center justify-center gap-2"
                   >
                     View All Search Results <ArrowRight className="w-4 h-4" />
                   </button>
@@ -543,7 +543,7 @@ export const Layout = () => {
             </div>
           ) : (
             <div className="flex-1 flex items-center">
-              <h1 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
+              <h1 className="text-base font-semibold text-slate-800 tracking-tight flex items-center gap-2">
                 {headerTitle}
               </h1>
             </div>

@@ -59,7 +59,7 @@ export const DisposeAssetModal = ({
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
         <div className="flex items-center justify-between px-8 py-6 border-b border-orange-100 bg-orange-50/50">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
               Officially Dispose Asset
             </h2>
             <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mt-1">
@@ -80,7 +80,9 @@ export const DisposeAssetModal = ({
               <Trash2 className="w-6 h-6 text-red-500" />
             </div>
             <div>
-              <p className="text-sm font-black text-slate-800">{asset.name}</p>
+              <p className="text-sm font-semibold text-slate-800">
+                {asset.name}
+              </p>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 SN: {asset.serial_number}
               </p>
@@ -99,7 +101,7 @@ export const DisposeAssetModal = ({
           )}
 
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
               Disposal Date
             </label>
             <div className="relative">
@@ -117,7 +119,7 @@ export const DisposeAssetModal = ({
           </div>
 
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
               Disposal Value / Recovery (RWF)
             </label>
             <div className="relative">
@@ -139,7 +141,7 @@ export const DisposeAssetModal = ({
           </div>
 
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
+            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-red-500">
               Disposal Reason
             </label>
             <div className="relative">
@@ -169,7 +171,7 @@ export const DisposeAssetModal = ({
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-[2] py-3 bg-orange-600 hover:bg-orange-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
+            className="flex-[2] py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs uppercase tracking-widest rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

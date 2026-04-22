@@ -11,6 +11,12 @@ import {
 import { Department } from '../../departments/entities/department.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
 
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -46,4 +52,11 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.INACTIVE,
+  })
+  status: UserStatus;
 }

@@ -147,10 +147,10 @@ export const AuditTrail = () => {
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
             </div>
             <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">
                 {stat.label}
               </p>
-              <h3 className="text-xl font-black text-slate-800 tracking-tight">
+              <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
                 {stat.value}
               </h3>
             </div>
@@ -174,7 +174,7 @@ export const AuditTrail = () => {
               </div>
             </div>
 
-            <h3 className="text-sm font-black text-slate-800 mb-2 group-hover:text-[#ff8000] transition-colors">
+            <h3 className="text-sm font-semibold text-slate-800 mb-2 group-hover:text-[#ff8000] transition-colors">
               {cat.title}
             </h3>
             <p className="text-slate-500 text-[10px] font-medium leading-relaxed mb-4 flex-1">
@@ -183,7 +183,7 @@ export const AuditTrail = () => {
 
             <button
               onClick={() => navigate(cat.link)}
-              className="flex items-center gap-1.5 text-[10px] font-black text-[#ff8000] uppercase tracking-widest group-hover:translate-x-1 transition-transform"
+              className="flex items-center gap-1.5 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest group-hover:translate-x-1 transition-transform"
             >
               View Detailed Logs <ChevronRight className="w-3 h-3" />
             </button>

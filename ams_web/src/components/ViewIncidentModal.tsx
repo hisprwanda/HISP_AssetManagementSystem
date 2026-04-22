@@ -80,7 +80,7 @@ export const ViewIncidentModal = ({
                 <StatusIcon className={`w-6 h-6 ${status.color}`} />
               </div>
               <div className="min-w-0">
-                <DialogTitle className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                <DialogTitle className="text-xl font-semibold text-slate-800 tracking-tight flex items-center gap-2">
                   #{incident.id.slice(0, 8).toUpperCase()}
                 </DialogTitle>
                 <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">
@@ -89,7 +89,7 @@ export const ViewIncidentModal = ({
               </div>
             </div>
             <div
-              className={`px-3 py-1.5 rounded-xl border ${status.border} ${status.bg} ${status.color} text-[9px] font-black uppercase tracking-widest shadow-sm`}
+              className={`px-3 py-1.5 rounded-xl border ${status.border} ${status.bg} ${status.color} text-[9px] font-semibold uppercase tracking-widest shadow-sm`}
             >
               {incident.investigation_status}
             </div>
@@ -99,27 +99,27 @@ export const ViewIncidentModal = ({
         <div className="px-6 py-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
                 Reporter
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm">
                   <User className="w-4 h-4" />
                 </div>
-                <p className="text-xs font-black text-slate-700 truncate">
+                <p className="text-xs font-semibold text-slate-700 truncate">
                   {incident.reported_by?.full_name}
                 </p>
               </div>
             </div>
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
                 Reported Date
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm">
                   <Calendar className="w-4 h-4" />
                 </div>
-                <p className="text-xs font-black text-slate-700 truncate">
+                <p className="text-xs font-semibold text-slate-700 truncate">
                   {new Date(incident.reported_at).toLocaleDateString(
                     undefined,
                     {
@@ -134,7 +134,7 @@ export const ViewIncidentModal = ({
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
               <Laptop className="w-3.5 h-3.5" /> Affected Asset
             </h4>
             <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between group">
@@ -143,10 +143,10 @@ export const ViewIncidentModal = ({
                   <Laptop className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-slate-800 text-sm">
+                  <span className="font-semibold text-slate-800 text-sm">
                     {incident.asset?.name || 'Legacy Asset'}
                   </span>
-                  <span className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest">
+                  <span className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest">
                     {incident.asset?.tag_id || 'NO TAG'}
                   </span>
                 </div>
@@ -155,7 +155,7 @@ export const ViewIncidentModal = ({
                 <span className="text-[9px] font-bold text-slate-300 block mb-1">
                   SERIAL NUMBER
                 </span>
-                <span className="text-[10px] font-black text-slate-600 font-mono tracking-tighter">
+                <span className="text-[10px] font-semibold text-slate-600 font-mono tracking-tighter">
                   {incident.asset?.serial_number || 'N/A'}
                 </span>
               </div>
@@ -163,7 +163,7 @@ export const ViewIncidentModal = ({
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
               <MessageSquare className="w-3.5 h-3.5" /> Reporter Explanation
             </h4>
             <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl relative overflow-hidden italic shadow-inner">
@@ -173,7 +173,7 @@ export const ViewIncidentModal = ({
               </p>
               {incident.evidence_url && (
                 <div className="mt-4 pt-4 border-t border-slate-200/60 not-italic">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+                  <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">
                     Uploaded Photo Evidence
                   </p>
                   {incident.evidence_url.startsWith('data:image/') ? (
@@ -219,7 +219,7 @@ export const ViewIncidentModal = ({
           {(incident.investigation_remarks ||
             incident.investigation_status !== 'INVESTIGATING') && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" /> Investigation Audit Trail
               </h4>
               <div className="space-y-3">
@@ -228,7 +228,7 @@ export const ViewIncidentModal = ({
                   className={`p-5 bg-white border border-slate-200 rounded-2xl relative shadow-sm border-l-4 border-l-slate-400`}
                 >
                   <p
-                    className={`text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                    className={`text-[9px] text-slate-500 font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
                   >
                     <ShieldCheck className="w-3.5 h-3.5" /> Administrative
                     Findings
@@ -245,12 +245,12 @@ export const ViewIncidentModal = ({
                     className={`p-5 ${status.bg} border-2 ${status.border} rounded-2xl relative shadow-sm border-l-4 border-l-orange-500`}
                   >
                     <p
-                      className={`text-[9px] ${status.color} font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                      className={`text-[9px] ${status.color} font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
                     >
                       <ShieldAlert className="w-3.5 h-3.5" /> Executive
                       Strategic Review
                     </p>
-                    <p className="text-[11px] font-black text-slate-900 leading-relaxed whitespace-pre-wrap italic">
+                    <p className="text-[11px] font-semibold text-slate-900 leading-relaxed whitespace-pre-wrap italic">
                       "
                       {parseCEORemarks(incident.investigation_remarks) ||
                         'Final decision rendered.'}
@@ -273,14 +273,14 @@ export const ViewIncidentModal = ({
                     className={`p-5 ${incident.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100' : 'bg-orange-50 border-orange-100'} border-2 rounded-2xl relative shadow-sm border-l-4 ${incident.penalty_resolved_at ? 'border-l-emerald-500' : 'border-l-orange-500'} mt-4`}
                   >
                     <p
-                      className={`text-[9px] ${incident.penalty_resolved_at ? 'text-emerald-600' : 'text-orange-600'} font-black uppercase tracking-widest mb-2 flex items-center gap-2`}
+                      className={`text-[9px] ${incident.penalty_resolved_at ? 'text-emerald-600' : 'text-orange-600'} font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
                     >
                       <ShieldAlert className="w-3.5 h-3.5" /> Financial Penalty
                       Details
                     </p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[14px] font-black text-slate-900">
+                        <p className="text-[14px] font-semibold text-slate-900">
                           {Number(
                             incident.penalty_amount || 0,
                           ).toLocaleString()}{' '}
@@ -291,7 +291,7 @@ export const ViewIncidentModal = ({
                         </p>
                       </div>
                       <span
-                        className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${incident.penalty_resolved_at ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}
+                        className={`text-[8px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${incident.penalty_resolved_at ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}
                       >
                         {incident.penalty_resolved_at
                           ? `CLEARED ON ${new Date(incident.penalty_resolved_at).toLocaleDateString()}`
@@ -308,7 +308,7 @@ export const ViewIncidentModal = ({
         <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95"
+            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95"
           >
             Close Details
           </button>

@@ -303,7 +303,7 @@ export const Assets = () => {
   const getStatusStyle = (status: Asset['status']) => {
     switch (status) {
       case 'IN_STOCK':
-        return 'bg-orange-50 text-orange-950 border-orange-200 font-black';
+        return 'bg-orange-50 text-orange-950 border-orange-200 font-semibold';
       case 'ASSIGNED':
         return 'bg-slate-50 text-slate-500 border-slate-200';
       case 'BROKEN':
@@ -386,12 +386,12 @@ export const Assets = () => {
                       )}
                     </div>
                   </div>
-                  <h3 className="text-lg font-black text-slate-800 mb-1 line-clamp-1 group-hover:text-[#ff8000] transition-colors">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-1 line-clamp-1 group-hover:text-[#ff8000] transition-colors">
                     {cat.name}
                   </h3>
                   <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-2 mb-5">
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                      <span className="text-[9px] uppercase font-semibold tracking-widest text-slate-400">
                         Inventory
                       </span>
                       <span className="text-xs font-bold text-slate-700">
@@ -399,7 +399,7 @@ export const Assets = () => {
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                      <span className="text-[9px] uppercase font-semibold tracking-widest text-slate-400">
                         Depr. Rate
                       </span>
                       <span className="text-xs font-bold text-slate-700">
@@ -407,7 +407,7 @@ export const Assets = () => {
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-black tracking-widest text-slate-400">
+                      <span className="text-[9px] uppercase font-semibold tracking-widest text-slate-400">
                         Disposal
                       </span>
                       <span className="text-xs font-bold text-slate-700">
@@ -416,7 +416,7 @@ export const Assets = () => {
                     </div>
                   </div>
                   <div className="pt-3 border-t border-slate-100 mt-auto flex items-center justify-between">
-                    <span className="text-[10px] font-black text-[#ff8000] uppercase tracking-widest">
+                    <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest">
                       Explore Collection &rarr;
                     </span>
                   </div>
@@ -434,7 +434,7 @@ export const Assets = () => {
                     <AlertCircle className="w-5 h-5 text-orange-500" />
                   </div>
                 </div>
-                <h3 className="text-base font-black text-orange-800 mb-1">
+                <h3 className="text-base font-semibold text-orange-800 mb-1">
                   Uncategorized Assets
                 </h3>
                 <p className="text-[10px] font-bold text-orange-600/70 mb-4 leading-relaxed line-clamp-2">
@@ -442,7 +442,7 @@ export const Assets = () => {
                   Verify matching names.
                 </p>
                 <div className="mt-auto pt-4 border-t border-orange-100 flex items-center justify-between">
-                  <span className="text-[10px] font-black text-orange-600 uppercase tracking-wider">
+                  <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-wider">
                     Fix Records &rarr;
                   </span>
                 </div>
@@ -479,7 +479,7 @@ export const Assets = () => {
               <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
                 <AlertCircle className="w-7 h-7 text-red-500" />
               </div>
-              <h2 className="text-xl font-black text-slate-800 mb-2">
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">
                 Delete Category?
               </h2>
               <p className="text-slate-500 text-sm font-medium mb-6">
@@ -531,7 +531,7 @@ export const Assets = () => {
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <HeaderIcon className="w-5 h-5 text-[#e49f37]" />
-              <h1 className="text-xl font-black text-slate-800 tracking-tight">
+              <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
                 {selectedCategory?.name || 'Search Results'}
               </h1>
             </div>
@@ -598,25 +598,25 @@ export const Assets = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100/50">
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Asset Details
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Tag / Serial
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Classification
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Depreciation Value
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Disposal Value
                     </th>
-                    <th className="px-4 py-3 text-[9px] font-black uppercase tracking-widest text-slate-400 text-right">
+                    <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400 text-right">
                       Actions
                     </th>
                   </tr>
@@ -658,7 +658,7 @@ export const Assets = () => {
                                 <RowIcon className="w-5 h-5 text-[#ff8000]" />
                               </div>
                               <div>
-                                <div className="text-xs font-black text-slate-700 leading-none mb-1">
+                                <div className="text-xs font-semibold text-slate-700 leading-none mb-1">
                                   {asset.name}
                                 </div>
                                 <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
@@ -671,7 +671,7 @@ export const Assets = () => {
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-slate-600 transition-colors">
                                 <Tag className="w-3 h-3" />
-                                <span className="text-[9px] font-black uppercase tracking-wider">
+                                <span className="text-[9px] font-semibold uppercase tracking-wider">
                                   {asset.tag_id || 'N/A'}
                                 </span>
                               </div>
@@ -687,13 +687,13 @@ export const Assets = () => {
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-1.5 text-slate-500 whitespace-nowrap">
                                 <Building2 className="w-3 h-3 text-slate-400" />
-                                <span className="text-[9px] font-black uppercase tracking-tight">
+                                <span className="text-[9px] font-semibold uppercase tracking-tight">
                                   {asset.location || 'HQ Storage'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5 text-orange-500 whitespace-nowrap">
                                 <UserIcon className="w-3 h-3" />
-                                <span className="text-[9px] font-black uppercase tracking-tight">
+                                <span className="text-[9px] font-semibold uppercase tracking-tight">
                                   {asset.assigned_to?.full_name || 'Unassigned'}
                                 </span>
                               </div>
@@ -713,7 +713,7 @@ export const Assets = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
-                              <span className="text-sm font-black text-slate-700">
+                              <span className="text-sm font-semibold text-slate-700">
                                 {Number(
                                   asset.current_value || 0,
                                 ).toLocaleString()}{' '}
@@ -730,7 +730,7 @@ export const Assets = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#ff8000]">
+                              <span className="text-sm font-semibold text-[#ff8000]">
                                 {Number(
                                   asset.disposal_value || 0,
                                 ).toLocaleString()}{' '}
@@ -906,7 +906,7 @@ export const Assets = () => {
             <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl shadow-sm p-4 flex flex-col h-full">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">
+                  <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">
                     Requestable Items
                   </h3>
                   <p className="text-[10px] font-medium text-slate-400 mt-0.5 leading-tight">
@@ -914,7 +914,7 @@ export const Assets = () => {
                     category.
                   </p>
                 </div>
-                <span className="text-[9px] font-black text-[#ff8000] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg whitespace-nowrap">
+                <span className="text-[9px] font-semibold text-[#ff8000] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-lg whitespace-nowrap">
                   {requestableItems?.length || 0} items
                 </span>
               </div>
@@ -1040,7 +1040,7 @@ export const Assets = () => {
             <div className="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center mb-5 mx-auto">
               <AlertCircle className="w-7 h-7 text-red-500" />
             </div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">
+            <h2 className="text-xl font-semibold text-slate-800 mb-2">
               Delete Asset?
             </h2>
             <p className="text-slate-500 text-sm font-medium mb-6">

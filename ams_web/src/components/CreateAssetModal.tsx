@@ -139,7 +139,7 @@ export const CreateAssetModal = ({
       <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-100">
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
               Assign New Asset
             </h2>
             <p className="text-xs font-bold text-[#ff8000] uppercase tracking-wider mt-1">
@@ -158,13 +158,13 @@ export const CreateAssetModal = ({
             </div>
           )}
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Laptop className="w-4 h-4 text-[#e49f37]" /> Hardware
               Specifications
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Asset Name / Model *
                 </label>
                 <input
@@ -180,7 +180,7 @@ export const CreateAssetModal = ({
               </div>
 
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Category *
                 </label>
                 <div className="relative">
@@ -206,11 +206,11 @@ export const CreateAssetModal = ({
               </div>
 
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-[#ff8000]">
                   Initial Status
                 </label>
                 <div className="relative">
-                  <div className="w-full px-4 py-2.5 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-sm font-black flex items-center gap-2">
+                  <div className="w-full px-4 py-2.5 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-sm font-semibold flex items-center gap-2">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     IN STOCK (PENDING VERIFICATION)
                   </div>
@@ -224,12 +224,12 @@ export const CreateAssetModal = ({
 
           <hr className="border-slate-100" />
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Hash className="w-4 h-4 text-[#e49f37]" /> Identification
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Serial Number
                 </label>
                 <input
@@ -243,7 +243,7 @@ export const CreateAssetModal = ({
                 />
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Internal Tag ID *
                 </label>
                 <div className="relative">
@@ -265,13 +265,13 @@ export const CreateAssetModal = ({
 
           <hr className="border-slate-100" />
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-[#e49f37]" /> Deployment
               Details
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Owning Directorate *
                 </label>
                 <div className="relative">
@@ -299,7 +299,7 @@ export const CreateAssetModal = ({
               </div>
 
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Assigned To (Optional)
                 </label>
                 <div className="relative">
@@ -342,7 +342,7 @@ export const CreateAssetModal = ({
               </div>
 
               <div className="space-y-2 group col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Physical Location
                 </label>
                 <div className="relative">
@@ -363,13 +363,13 @@ export const CreateAssetModal = ({
 
           <hr className="border-slate-100" />
           <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Banknote className="w-4 h-4 text-[#e49f37]" /> Acquisition &
               Warranty
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Cost (RWF)
                 </label>
                 <div className="relative">
@@ -390,7 +390,7 @@ export const CreateAssetModal = ({
                 </div>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Purchase Date
                 </label>
                 <div className="relative">
@@ -409,7 +409,7 @@ export const CreateAssetModal = ({
                 </div>
               </div>
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
                   Warranty Expiry
                 </label>
                 <div className="relative">
@@ -431,10 +431,10 @@ export const CreateAssetModal = ({
 
             <div className="mt-4 p-4 bg-orange-50/50 border border-orange-100 rounded-2xl flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">
                   Initial Book Value (RWF)
                 </p>
-                <p className="text-sm font-black text-[#e49f37]">
+                <p className="text-sm font-semibold text-[#e49f37]">
                   {Number(formData.purchase_cost || 0).toLocaleString()} RWF
                 </p>
               </div>

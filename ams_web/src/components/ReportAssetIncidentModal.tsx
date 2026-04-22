@@ -192,7 +192,7 @@ export const ReportAssetIncidentModal = ({
             <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
               <CheckCircle2 className="w-10 h-10 text-[#ff8000]" />
             </div>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight mb-2">
               Report Logged!
             </h2>
             <p className="text-slate-500 font-medium px-8 text-sm">
@@ -208,7 +208,7 @@ export const ReportAssetIncidentModal = ({
                   <ShieldAlert className="w-6 h-6 text-[#ff8000]" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                  <DialogTitle className="text-xl font-semibold text-slate-800 tracking-tight leading-none">
                     Report Issue / Incident
                   </DialogTitle>
                   <DialogDescription className="text-slate-500 font-medium text-xs mt-1.5">
@@ -228,7 +228,7 @@ export const ReportAssetIncidentModal = ({
               )}
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Select Affected Assets *
                 </label>
 
@@ -236,7 +236,7 @@ export const ReportAssetIncidentModal = ({
                   className={`grid grid-cols-1 ${showShared ? 'sm:grid-cols-2' : ''} gap-4`}
                 >
                   <div className="space-y-2">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
+                    <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
                       <div className="w-1 h-1 rounded-full bg-[#ff8000]" />
                       My Assigned Assets
                     </p>
@@ -258,7 +258,7 @@ export const ReportAssetIncidentModal = ({
                               onChange={() => toggleAsset(asset.id)}
                             />
                             <div className="min-w-0">
-                              <p className="text-[11px] font-black text-slate-700 truncate">
+                              <p className="text-[11px] font-semibold text-slate-700 truncate">
                                 {asset.name}
                               </p>
                               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -270,7 +270,7 @@ export const ReportAssetIncidentModal = ({
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center p-4 text-center opacity-40">
                           <Laptop className="w-6 h-6 mb-2 text-slate-300" />
-                          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                          <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400">
                             No Assigned Equipment
                           </p>
                         </div>
@@ -280,7 +280,7 @@ export const ReportAssetIncidentModal = ({
 
                   {showShared && (
                     <div className="space-y-2">
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
+                      <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-tight ml-1 flex items-center gap-1.5 line-clamp-1">
                         <div className="w-1 h-1 rounded-full bg-blue-500" />
                         Shared Dept Assets
                       </p>
@@ -302,7 +302,7 @@ export const ReportAssetIncidentModal = ({
                                 onChange={() => toggleAsset(asset.id)}
                               />
                               <div className="min-w-0">
-                                <p className="text-[11px] font-black text-slate-700 truncate">
+                                <p className="text-[11px] font-semibold text-slate-700 truncate">
                                   {asset.name}
                                 </p>
                                 <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -314,7 +314,7 @@ export const ReportAssetIncidentModal = ({
                         ) : (
                           <div className="h-full flex flex-col items-center justify-center p-4 text-center opacity-40">
                             <ShieldAlert className="w-6 h-6 mb-2 text-slate-300" />
-                            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                            <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400">
                               No Shared Assets
                             </p>
                           </div>
@@ -325,7 +325,7 @@ export const ReportAssetIncidentModal = ({
                 </div>
 
                 {selectedAssetIds.length > 0 && (
-                  <p className="text-[9px] font-black text-[#ff8000] uppercase tracking-widest animate-in fade-in slide-in-from-left-2 duration-300">
+                  <p className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest animate-in fade-in slide-in-from-left-2 duration-300">
                     Selected {selectedAssetIds.length} item
                     {selectedAssetIds.length > 1 ? 's' : ''} to report
                   </p>
@@ -333,7 +333,7 @@ export const ReportAssetIncidentModal = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Incident Type *
                 </label>
                 <div className="flex gap-2">
@@ -342,7 +342,7 @@ export const ReportAssetIncidentModal = ({
                       key={t}
                       type="button"
                       onClick={() => setType(t)}
-                      className={`flex-1 py-2.5 rounded-xl text-[9px] font-black tracking-widest uppercase border transition-all ${
+                      className={`flex-1 py-2.5 rounded-xl text-[9px] font-semibold tracking-widest uppercase border transition-all ${
                         type === t
                           ? 'bg-orange-500 text-white border-orange-600 shadow-md'
                           : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
@@ -355,7 +355,7 @@ export const ReportAssetIncidentModal = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Incident Location *
                 </label>
                 <div className="relative">
@@ -376,7 +376,7 @@ export const ReportAssetIncidentModal = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Explain what happened *
                 </label>
                 <textarea
@@ -389,7 +389,7 @@ export const ReportAssetIncidentModal = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                   Evidence (Optional)
                 </label>
                 <div
@@ -418,7 +418,7 @@ export const ReportAssetIncidentModal = ({
                   </div>
                   <div>
                     <p
-                      className={`text-[10px] font-black uppercase tracking-widest ${selectedFile ? 'text-slate-800' : 'text-slate-500'}`}
+                      className={`text-[10px] font-semibold uppercase tracking-widest ${selectedFile ? 'text-slate-800' : 'text-slate-500'}`}
                     >
                       {selectedFile ? selectedFile.name : 'Upload proof'}
                     </p>
@@ -443,7 +443,7 @@ export const ReportAssetIncidentModal = ({
                           setEvidenceUrl('');
                           setSelectedFile(null);
                         }}
-                        className="px-3 py-1.5 bg-orange-600 text-white text-[9px] font-black uppercase rounded-lg shadow-lg"
+                        className="px-3 py-1.5 bg-orange-600 text-white text-[9px] font-semibold uppercase rounded-lg shadow-lg"
                       >
                         Remove Attachment
                       </button>
@@ -456,7 +456,7 @@ export const ReportAssetIncidentModal = ({
                 <button
                   type="submit"
                   disabled={isSubmitting || isReadingFile}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                 >
                   {isSubmitting || isReadingFile ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
