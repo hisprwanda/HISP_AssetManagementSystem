@@ -23,12 +23,19 @@ import {
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { AssetRequest, POData } from '../types/assets';
+
+interface RequestUI extends AssetRequest {
+  isBatch?: boolean;
+  batchItems?: AssetRequest[];
+}
 import { CreateRequestModal } from '../components/CreateRequestModal';
 import { ViewRequestModal } from '../components/ViewRequestModal';
 import { CEODecisionModal } from '../components/CEODecisionModal';
 import { FormalizeRequestModal } from '../components/FormalizeRequestModal';
 import { PurchaseOrderModal } from '../components/PurchaseOrderModal';
 import { Pagination } from '../components/Pagination';
+import { HODBulkReviewModal } from '../components/HODBulkReviewModal';
+import { FormalizeBulkRequestModal } from '../components/FormalizeBulkRequestModal';
 
 export const Requests = () => {
   const { user: currentUser, isAdmin, isHOD, isStaff, isCEO } = useAuth();
@@ -70,6 +77,12 @@ export const Requests = () => {
   );
   const [isPOModalOpen, setIsPOModalOpen] = useState(false);
   const [requestForPO, setRequestForPO] = useState<AssetRequest | null>(null);
+  const [isBulkReviewOpen, setIsBulkReviewOpen] = useState(false);
+  const [isBulkFormalizeOpen, setIsBulkFormalizeOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<{
+    batchNumber: string;
+    requests: AssetRequest[];
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -177,12 +190,45 @@ export const Requests = () => {
     setCurrentPage(1);
   }, [filterStatus, searchQuery, startDate, endDate]);
 
-  const paginatedRequests = useMemo(() => {
+  const displayRequests = useMemo(() => {
+    const batches: Record<string, AssetRequest[]> = {};
+    const singles: AssetRequest[] = [];
+
+    filteredRequests.forEach((r) => {
+      if (r.batch_number) {
+        if (!batches[r.batch_number]) batches[r.batch_number] = [];
+        batches[r.batch_number].push(r);
+      } else {
+        singles.push(r);
+      }
+    });
+
+    const collapsedBatches = Object.values(batches).map((items) => {
+      const template = items[0];
+      return {
+        ...template,
+        isBatch: true,
+        batchItems: items,
+        title:
+          items.length > 1
+            ? `Multiple Items (${items.length})`
+            : template.title,
+      };
+    });
+
+    const combined = [...singles, ...collapsedBatches].sort(
+      (a, b) =>
+        new Date(b.created_at || 0).getTime() -
+        new Date(a.created_at || 0).getTime(),
+    );
+
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredRequests.slice(start, start + itemsPerPage);
+    return combined.slice(start, start + itemsPerPage);
   }, [filteredRequests, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+
+  const paginatedRequests = displayRequests;
 
   const pendingCount =
     baseRequests.filter((r) => r.status === 'PENDING').length || 0;
@@ -202,6 +248,8 @@ export const Requests = () => {
     switch (status) {
       case 'PENDING':
         return 'bg-slate-50 text-slate-400 border-slate-100';
+      case 'PENDING_FORMALIZATION':
+        return 'bg-indigo-50 text-indigo-600 border-indigo-100 font-bold';
       case 'HOD_APPROVED':
       case 'APPROVED':
         return 'bg-slate-100 text-slate-600 border-slate-200';
@@ -545,13 +593,50 @@ export const Requests = () => {
                       <div className="flex justify-end gap-1 transition-opacity">
                         {isHOD && req.status === 'PENDING' && (
                           <button
-                            onClick={() => handleFormalize(req)}
+                            onClick={() => {
+                              const r = req as RequestUI;
+                              if (r.isBatch) {
+                                setSelectedBatch({
+                                  batchNumber: r.batch_number!,
+                                  requests: r.batchItems!,
+                                });
+                                setIsBulkReviewOpen(true);
+                              } else {
+                                handleFormalize(req);
+                              }
+                            }}
                             className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            title="Process Request"
+                            title={
+                              (req as RequestUI).isBatch
+                                ? 'Review Batch'
+                                : 'Process Request'
+                            }
                           >
-                            <Settings2 className="w-4 h-4" />
+                            {(req as RequestUI).isBatch ? (
+                              <CheckCircle2 className="w-4 h-4" />
+                            ) : (
+                              <Settings2 className="w-4 h-4" />
+                            )}
                           </button>
                         )}
+                        {isHOD &&
+                          req.status === 'PENDING_FORMALIZATION' &&
+                          (req as RequestUI).isBatch && (
+                            <button
+                              onClick={() => {
+                                const r = req as RequestUI;
+                                setSelectedBatch({
+                                  batchNumber: r.batch_number!,
+                                  requests: r.batchItems!,
+                                });
+                                setIsBulkFormalizeOpen(true);
+                              }}
+                              className="p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Fill Official Requisition"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          )}
                         <button
                           onClick={() => setRequestToView(req)}
                           className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
@@ -769,6 +854,30 @@ export const Requests = () => {
           }
         }}
       />
+
+      {selectedBatch && (
+        <HODBulkReviewModal
+          isOpen={isBulkReviewOpen}
+          onClose={() => {
+            setIsBulkReviewOpen(false);
+            setSelectedBatch(null);
+          }}
+          batchNumber={selectedBatch.batchNumber}
+          requests={selectedBatch.requests}
+        />
+      )}
+
+      {selectedBatch && (
+        <FormalizeBulkRequestModal
+          isOpen={isBulkFormalizeOpen}
+          onClose={() => {
+            setIsBulkFormalizeOpen(false);
+            setSelectedBatch(null);
+          }}
+          batchNumber={selectedBatch.batchNumber}
+          requests={selectedBatch.requests}
+        />
+      )}
     </div>
   );
 };

@@ -48,7 +48,7 @@ export const NotificationBell = () => {
       return res.data;
     },
     enabled: !!user?.id,
-    refetchInterval: 30000,
+    refetchInterval: 3000,
   });
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -108,7 +108,7 @@ export const NotificationBell = () => {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#ff8000] text-white text-[9px] font-semibold rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center animate-pulse shadow-sm shadow-red-500/50">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

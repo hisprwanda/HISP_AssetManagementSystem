@@ -11,6 +11,9 @@ import { AssetRequest } from 'src/assets-requests/entities/assets-request.entity
 import { AssetsService } from 'src/assets/assets.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
+import { ReportIncidentDto } from './dto/report-asset-incident.dto';
+import { ResolveIncidentDto } from './dto/resolve-asset-incident.dto';
+
 @Injectable()
 export class AssetIncidentsService {
   constructor(
@@ -21,14 +24,7 @@ export class AssetIncidentsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async reportIncident(dto: {
-    asset_id: string;
-    user_id: string;
-    type: string;
-    location: string;
-    explanation: string;
-    evidence_url?: string;
-  }) {
+  async reportIncident(dto: ReportIncidentDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -39,21 +35,18 @@ export class AssetIncidentsService {
       });
       if (!asset) throw new NotFoundException('Asset not found');
 
-      asset.status = dto.type === 'MISSING' ? 'MISSING' : 'BROKEN';
+      // Hybrid Rule: Automatically update asset status to BROKEN on report
+      asset.status = 'BROKEN';
       await queryRunner.manager.save(asset);
-      console.log('--- RECV INCIDENT REPORT ---');
-      console.log('Asset ID:', dto.asset_id);
-      console.log('Evidence URL Length:', dto.evidence_url?.length || 0);
-      console.log('Evidence URL Sample:', dto.evidence_url?.slice(0, 50));
 
       const incident = queryRunner.manager.create(AssetIncident, {
         asset: { id: dto.asset_id },
         reported_by: { id: dto.user_id },
         incident_type: dto.type,
         location: dto.location,
-        explanation: dto.explanation,
+        issue_description: dto.issue_description,
         evidence_url: dto.evidence_url,
-        investigation_status: 'INVESTIGATING',
+        status: 'PENDING',
       });
 
       const savedIncident = await queryRunner.manager.save(incident);
@@ -67,49 +60,24 @@ export class AssetIncidentsService {
     }
   }
 
-  async findAll() {
-    return this.incidentRepo.find({
-      relations: [
-        'asset',
-        'reported_by',
-        'reported_by.department',
-        'replacement_request',
-      ],
-      order: { reported_at: 'DESC' },
-    });
-  }
-  async forwardToCEO(incidentId: string, remarks: string) {
+  async startRepair(incidentId: string) {
     const incident = await this.incidentRepo.findOne({
       where: { id: incidentId },
-      relations: ['asset'],
     });
     if (!incident) throw new NotFoundException('Incident not found');
-    if (incident.investigation_status !== 'INVESTIGATING') {
+    if (incident.status !== 'PENDING') {
       throw new BadRequestException(
-        'Only items in current investigation can be forwarded.',
+        'Incident must be PENDING to start repair.',
       );
     }
 
-    incident.investigation_status = 'CEO_REVIEW';
-    incident.investigation_remarks = remarks;
-    const saved = await this.incidentRepo.save(incident);
-    try {
-      await this.notificationsService.notifyIncidentForwarded({
-        incidentId: saved.id,
-        assetName: saved.asset?.name || 'Assigned Asset',
-        adminRemarks: remarks,
-      });
-    } catch (e) {
-      console.error('Forward notification failed:', e);
-    }
-
-    return saved;
+    incident.status = 'IN_REPAIR';
+    return await this.incidentRepo.save(incident);
   }
 
   async resolveIncident(
     incidentId: string,
-    resolution: 'ACCEPTED' | 'DENIED',
-    remarks: string,
+    dto: ResolveIncidentDto,
     isCEOAction = false,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -129,33 +97,44 @@ export class AssetIncidentsService {
 
       if (!incident) throw new NotFoundException('Incident not found');
 
-      const currentStatus = incident.investigation_status;
-      if (currentStatus === 'ACCEPTED' || currentStatus === 'DENIED') {
+      if (
+        incident.status.startsWith('RESOLVED') ||
+        incident.status === 'REJECTED_LIABILITY'
+      ) {
         throw new BadRequestException(
           'This incident has already been resolved.',
         );
       }
 
-      if (currentStatus === 'CEO_REVIEW') {
-        incident.ceo_remarks = remarks;
-      } else {
-        incident.investigation_remarks = remarks;
+      incident.resolution_notes = dto.resolution_notes;
+      incident.status = dto.incident_status;
+
+      // Update Asset Status
+      if (incident.asset) {
+        incident.asset.status = dto.new_asset_status;
+
+        // If unfixable/replaced/liability, remove from current user if it's being disposed
+        if (dto.new_asset_status === 'DISPOSED') {
+          incident.asset.assigned_to = null;
+        }
+
+        await queryRunner.manager.save(incident.asset);
       }
 
-      incident.investigation_status = resolution;
-
-      if (resolution === 'ACCEPTED') {
+      // Outcome specific logic
+      if (dto.incident_status === 'RESOLVED_REPLACED') {
+        // Auto-generate replacement request
         const request = queryRunner.manager.create(AssetRequest, {
           requested_by: incident.reported_by,
           department: incident.reported_by.department,
           title: `Replacement for ${incident.asset.name}`,
-          description: `[AUTO-GENERATED REPLACEMENT] Previous asset (${incident.asset.tag_id}) was ${incident.incident_type}. Outcome: ${remarks}`,
+          description: `[AUTO-GENERATED REPLACEMENT] Previous asset (${incident.asset.tag_id}) was unfixable. Outcome: ${dto.resolution_notes}`,
           status: 'PENDING',
           items: [
             {
               name: incident.asset.name,
               quantity: 1,
-              description: 'Replacement for damaged/missing asset',
+              description: 'Replacement for damaged asset',
             },
           ],
           financials: {},
@@ -163,7 +142,8 @@ export class AssetIncidentsService {
         });
         const savedRequest = await queryRunner.manager.save(request);
         incident.replacement_request = savedRequest;
-      } else if (resolution === 'DENIED') {
+      } else if (dto.incident_status === 'REJECTED_LIABILITY') {
+        // Calculate penalty (Previous logic preserved for Liability case)
         const { current_value } = this.assetsService.calculateDepreciation(
           incident.asset,
         );
@@ -173,22 +153,18 @@ export class AssetIncidentsService {
       const updatedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
 
+      // Notifications
       try {
         await this.notificationsService.notifyIncidentVerdict({
           incidentId: updatedIncident.id,
-          resolution: updatedIncident.investigation_status as
-            | 'ACCEPTED'
-            | 'DENIED',
+          resolution:
+            updatedIncident.status === 'REJECTED_LIABILITY'
+              ? 'DENIED'
+              : 'ACCEPTED',
           assetName: updatedIncident.asset?.name || 'Assigned Asset',
           reporterId: updatedIncident.reported_by?.id,
           departmentId: updatedIncident.reported_by?.department?.id,
-          remarks:
-            updatedIncident.investigation_status === 'ACCEPTED' ||
-            updatedIncident.investigation_status === 'DENIED'
-              ? isCEOAction
-                ? updatedIncident.ceo_remarks
-                : updatedIncident.investigation_remarks
-              : remarks,
+          remarks: dto.resolution_notes,
           isCEO: isCEOAction,
         });
       } catch (e) {
@@ -203,6 +179,44 @@ export class AssetIncidentsService {
       await queryRunner.release();
     }
   }
+
+  async findAll() {
+    return this.incidentRepo.find({
+      relations: [
+        'asset',
+        'reported_by',
+        'reported_by.department',
+        'replacement_request',
+      ],
+      order: { reported_at: 'DESC' },
+    });
+  }
+
+  async forwardToCEO(incidentId: string, remarks: string) {
+    const incident = await this.incidentRepo.findOne({
+      where: { id: incidentId },
+      relations: ['asset'],
+    });
+    if (!incident) throw new NotFoundException('Incident not found');
+
+    // CEO can review items in repair or pending if they are high stakes
+    incident.status = 'IN_REPAIR'; // Or a dedicated CEO_REVIEW status if we want to keep it
+    incident.ceo_remarks = remarks;
+    const saved = await this.incidentRepo.save(incident);
+
+    try {
+      await this.notificationsService.notifyIncidentForwarded({
+        incidentId: saved.id,
+        assetName: saved.asset?.name || 'Assigned Asset',
+        adminRemarks: remarks,
+      });
+    } catch (e) {
+      console.error('Forward notification failed:', e);
+    }
+
+    return saved;
+  }
+
   async togglePenaltyResolution(incidentId: string) {
     const incident = await this.incidentRepo.findOne({
       where: { id: incidentId },
@@ -210,9 +224,9 @@ export class AssetIncidentsService {
     });
 
     if (!incident) throw new NotFoundException('Incident not found');
-    if (incident.investigation_status !== 'DENIED') {
+    if (incident.status !== 'REJECTED_LIABILITY') {
       throw new BadRequestException(
-        'Resolution only applicable to denied incidents with penalties.',
+        'Resolution only applicable to incidents with liability penalties.',
       );
     }
 
@@ -227,7 +241,7 @@ export class AssetIncidentsService {
         incidentId: saved.id,
         assetName: saved.asset?.name || 'Assigned Asset',
         recipientId: saved.reported_by?.id,
-        amount: saved.penalty_amount || 0,
+        amount: incident.penalty_amount || 0,
         isResolved: !!saved.penalty_resolved_at,
       });
     } catch (error) {

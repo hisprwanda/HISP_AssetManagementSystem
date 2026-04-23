@@ -5,8 +5,13 @@ import { AssetRequest } from './entities/assets-request.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Department } from 'src/departments/entities/department.entity';
 import { CreateAssetRequestDto } from './dto/create-assets-request.dto';
+import { CreateBulkRequestDto } from './dto/create-bulk-request.dto';
+import { ReviewBulkRequestDto } from './dto/review-bulk-request.dto';
+import { FormalizeBulkRequestDto } from './dto/formalize-bulk-request.dto';
 import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RequestableItem } from '../requestable-items/entities/requestable-item.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class AssetRequestsService {
@@ -15,6 +20,8 @@ export class AssetRequestsService {
     private readonly requestRepo: Repository<AssetRequest>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(RequestableItem)
+    private readonly itemRepo: Repository<RequestableItem>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -181,5 +188,112 @@ export class AssetRequestsService {
     }
 
     return saved;
+  }
+
+  async createBulkRequest(dto: CreateBulkRequestDto): Promise<AssetRequest[]> {
+    const batchNumber = 'REQ-BATCH-' + Date.now();
+    const user = await this.userRepo.findOne({
+      where: { id: dto.user_id },
+      relations: ['department'],
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const requestableItems = await this.itemRepo.findBy({
+      id: In(dto.requestable_item_ids),
+    });
+
+    const requests: AssetRequest[] = [];
+
+    for (const item of requestableItems) {
+      const request = this.requestRepo.create({
+        title: `Request for ${item.name}`,
+        description: dto.justification,
+        batch_number: batchNumber,
+        status: 'PENDING',
+        urgency: 'MEDIUM',
+        requested_by: user,
+        department: user.department,
+        items: [{ name: item.name, quantity: 1 }],
+        financials: { estimated_cost: 0 },
+        logistics: { justification: dto.justification },
+      });
+      requests.push(request);
+    }
+
+    return await this.requestRepo.save(requests);
+  }
+
+  async reviewBulkByHOD(
+    batchNumber: string,
+    dto: ReviewBulkRequestDto,
+  ): Promise<AssetRequest[]> {
+    const requests = await this.requestRepo.find({
+      where: { batch_number: batchNumber, status: 'PENDING' },
+    });
+
+    if (requests.length === 0) {
+      throw new NotFoundException(
+        `No pending requests found for batch ${batchNumber}`,
+      );
+    }
+
+    const updatedRequests = requests.map((req) => {
+      if (!dto.approve) {
+        req.status = 'REJECTED';
+      } else {
+        const isVetoed = dto.rejected_item_ids?.includes(req.id);
+        req.status = isVetoed ? 'REJECTED' : 'PENDING_FORMALIZATION';
+      }
+      if (dto.remarks) {
+        req.description = `${req.description || ''}\n\nHOD Remarks: ${dto.remarks}`;
+      }
+      return req;
+    });
+
+    return await this.requestRepo.save(updatedRequests);
+  }
+
+  async formalizeBulkRequest(
+    batchNumber: string,
+    dto: FormalizeBulkRequestDto,
+  ): Promise<AssetRequest[]> {
+    const requests = await this.requestRepo.find({
+      where: { batch_number: batchNumber, status: 'PENDING_FORMALIZATION' },
+    });
+
+    if (requests.length === 0) {
+      throw new NotFoundException(
+        `No pending formalization found for batch ${batchNumber}`,
+      );
+    }
+
+    const updatedRequests = requests.map((req) => {
+      const itemUpdate = dto.items.find((i) => i.id === req.id);
+      if (itemUpdate) {
+        req.items = [
+          {
+            name: itemUpdate.name,
+            quantity: itemUpdate.quantity,
+            unit_price: itemUpdate.unit_price,
+            description: '',
+          },
+        ];
+        req.financials = {
+          subtotal: itemUpdate.quantity * itemUpdate.unit_price,
+          transport_fees: dto.transport_fees / requests.length, // Distribute fees evenly
+          grand_total:
+            itemUpdate.quantity * itemUpdate.unit_price +
+            dto.transport_fees / requests.length,
+          cost_basis: 'MARKET_RESEARCH',
+        };
+      }
+      req.status = 'HOD_APPROVED';
+      req.urgency = dto.urgency;
+      if (dto.description) req.description = dto.description;
+      return req;
+    });
+
+    return await this.requestRepo.save(updatedRequests);
   }
 }

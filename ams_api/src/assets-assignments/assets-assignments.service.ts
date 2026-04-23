@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { AssetAssignment } from './entities/assets-assignment.entity';
 import { Asset } from '../assets/entities/asset.entity';
 import { User } from '../users/entities/user.entity';
@@ -12,6 +12,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateAssetAssignmentDto } from './dto/create-assets-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-assets-assignment.dto';
 import { PrepareAssignmentDto } from './dto/prepare-assignment.dto';
+import { PrepareBulkAssignmentDto } from './dto/prepare-bulk-assignment.dto';
 
 @Injectable()
 export class AssetAssignmentsService {
@@ -262,5 +263,141 @@ export class AssetAssignmentsService {
     }
 
     return await this.assignmentRepo.save(assignment);
+  }
+
+  async prepareBulkByAdmin(
+    dto: PrepareBulkAssignmentDto,
+  ): Promise<AssetAssignment[]> {
+    const user = await this.userRepo.findOne({ where: { id: dto.user_id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const assets = await this.assetRepo.findBy({ id: In(dto.asset_ids) });
+    if (assets.length !== dto.asset_ids.length) {
+      throw new BadRequestException('Some assets were not found');
+    }
+
+    const unavailable = assets.filter((a) => a.status !== 'IN_STOCK');
+    if (unavailable.length > 0) {
+      throw new BadRequestException(
+        `Some assets are not in stock: ${unavailable.map((a) => a.name).join(', ')}`,
+      );
+    }
+
+    const formNumber = 'RCPT-' + Date.now();
+    const assignments = assets.map((asset) => {
+      return this.assignmentRepo.create({
+        asset,
+        user,
+        form_number: formNumber,
+        form_status: 'PENDING_USER_SIGNATURE',
+        condition_on_assign: dto.condition_notes || 'Good Condition',
+        received_from_name: dto.received_from_name,
+        assigned_at: new Date(),
+      });
+    });
+
+    const saved = await this.assignmentRepo.save(assignments);
+
+    // Notify user once for the bulk assignment
+    await this.notificationsService.notifyAssignmentAction({
+      action: 'SENT_TO_USER',
+      assignmentId: formNumber, // Use formNumber for bulk notifications
+      assetName: `Batch of ${assets.length} items`,
+      userId: user.id,
+    });
+
+    return saved;
+  }
+
+  async signBulkByUser(
+    formNumber: string,
+    signatureName: string,
+  ): Promise<AssetAssignment[]> {
+    const assignments = await this.assignmentRepo.find({
+      where: { form_number: formNumber, form_status: 'PENDING_USER_SIGNATURE' },
+      relations: ['user', 'asset'],
+    });
+
+    if (assignments.length === 0) {
+      throw new NotFoundException(
+        'No pending bulk assignments found for this form number',
+      );
+    }
+
+    const updated = assignments.map((a) => {
+      a.user_signature_name = signatureName;
+      a.user_signed_at = new Date();
+      a.form_status = 'PENDING_ADMIN_REVIEW';
+      return a;
+    });
+
+    const saved = await this.assignmentRepo.save(updated);
+
+    // Notify admin once
+    if (saved[0].user) {
+      await this.notificationsService.notifyAssignmentAction({
+        action: 'SIGNED_BY_USER',
+        assignmentId: formNumber,
+        assetName: `Batch: ${formNumber}`,
+        userId: saved[0].user.id,
+      });
+    }
+
+    return saved;
+  }
+
+  async verifyBulkByAdmin(
+    formNumber: string,
+    approve: boolean,
+    remarks?: string,
+    adminSignatureName?: string,
+  ): Promise<AssetAssignment[]> {
+    const assignments = await this.assignmentRepo.find({
+      where: { form_number: formNumber },
+      relations: ['asset', 'user'],
+    });
+
+    if (assignments.length === 0) {
+      throw new NotFoundException(
+        'No bulk assignments found for this form number',
+      );
+    }
+
+    if (approve && !adminSignatureName) {
+      throw new BadRequestException(
+        'Admin signature is required for approval.',
+      );
+    }
+
+    for (const a of assignments) {
+      if (approve) {
+        a.form_status = 'APPROVED';
+        a.admin_signature_name = adminSignatureName!;
+        a.admin_signed_at = new Date();
+        if (a.asset) {
+          a.asset.status = 'ASSIGNED';
+          a.asset.assigned_to = a.user;
+          await this.assetRepo.save(a.asset);
+        }
+      } else {
+        a.form_status = 'REJECTED';
+        a.rejection_reason = remarks || 'Admin Rejected';
+        a.user_signature_name = null;
+        a.user_signed_at = null;
+      }
+    }
+
+    const saved = await this.assignmentRepo.save(assignments);
+
+    // Notify user once
+    await this.notificationsService.notifyAssignmentAction({
+      action: approve ? 'APPROVED' : 'REJECTED',
+      assignmentId: formNumber,
+      assetName: `Batch: ${formNumber}`,
+      userId: saved[0].user.id,
+      rejectionReason: remarks,
+    });
+
+    return saved;
   }
 }

@@ -21,10 +21,14 @@ export class AssetRequest {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ nullable: true })
+  batch_number: string;
+
   @Column({
     type: 'enum',
     enum: [
       'PENDING',
+      'PENDING_FORMALIZATION',
       'HOD_APPROVED',
       'APPROVED',
       'CEO_REVIEW',

@@ -36,7 +36,7 @@ export const ReportAssetIncidentModal = ({
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [type, setType] = useState('BROKEN');
   const [location, setLocation] = useState('');
-  const [explanation, setExplanation] = useState('');
+  const [issueDescription, setIssueDescription] = useState('');
   const [evidenceUrl, setEvidenceUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export const ReportAssetIncidentModal = ({
       user_id: string;
       type: string;
       location: string;
-      explanation: string;
+      issue_description: string;
       evidence_url?: string;
     }) => {
       const response = await api.post('/asset-incidents/report', payload);
@@ -109,7 +109,7 @@ export const ReportAssetIncidentModal = ({
     setSelectedAssetIds([]);
     setType('BROKEN');
     setLocation('');
-    setExplanation('');
+    setIssueDescription('');
     setEvidenceUrl('');
     setSelectedFile(null);
     setError(null);
@@ -140,7 +140,7 @@ export const ReportAssetIncidentModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedAssetIds.length === 0 || !location || !explanation) {
+    if (selectedAssetIds.length === 0 || !location || !issueDescription) {
       setError(
         'Please select at least one asset, provide location and explanation.',
       );
@@ -157,7 +157,7 @@ export const ReportAssetIncidentModal = ({
           user_id: currentUser?.id || '',
           type,
           location,
-          explanation,
+          issue_description: issueDescription,
           evidence_url: evidenceUrl || undefined,
         });
       }
@@ -380,8 +380,8 @@ export const ReportAssetIncidentModal = ({
                   Explain what happened *
                 </label>
                 <textarea
-                  value={explanation}
-                  onChange={(e) => setExplanation(e.target.value)}
+                  value={issueDescription}
+                  onChange={(e) => setIssueDescription(e.target.value)}
                   placeholder="Provide details..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all min-h-[85px] resize-none"
                   required

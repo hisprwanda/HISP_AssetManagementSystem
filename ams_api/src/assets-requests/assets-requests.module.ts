@@ -6,9 +6,11 @@ import { AssetRequestsService } from './assets-requests.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { User } from '../users/entities/user.entity';
 
+import { RequestableItem } from '../requestable-items/entities/requestable-item.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AssetRequest, User]),
+    TypeOrmModule.forFeature([AssetRequest, User, RequestableItem]),
     NotificationsModule,
   ],
   controllers: [AssetRequestsController],

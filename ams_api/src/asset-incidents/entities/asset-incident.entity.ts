@@ -31,23 +31,29 @@ export class AssetIncident {
   location: string;
 
   @Column('text')
-  explanation: string;
+  issue_description: string;
 
   @Column({ type: 'text', nullable: true })
   evidence_url: string;
 
   @Column({
     type: 'enum',
-    enum: ['INVESTIGATING', 'CEO_REVIEW', 'ACCEPTED', 'DENIED'],
-    default: 'INVESTIGATING',
+    enum: [
+      'PENDING',
+      'IN_REPAIR',
+      'RESOLVED_FIXED',
+      'RESOLVED_REPLACED',
+      'REJECTED_LIABILITY',
+    ],
+    default: 'PENDING',
   })
-  investigation_status: string;
+  status: string;
 
   @Column('numeric', { precision: 12, scale: 2, nullable: true })
   penalty_amount: number;
 
   @Column({ type: 'text', nullable: true })
-  investigation_remarks: string;
+  resolution_notes: string;
 
   @Column({ type: 'text', nullable: true })
   ceo_remarks: string;

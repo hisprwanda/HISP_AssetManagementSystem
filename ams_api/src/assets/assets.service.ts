@@ -4,8 +4,9 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Not, In } from 'typeorm';
 import { Asset } from './entities/asset.entity';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
@@ -222,16 +223,23 @@ export class AssetsService {
     return results;
   }
 
-  async findAll(): Promise<Asset[]> {
-    return await this.assetRepo.find({
-      relations: [
-        'category',
-        'department',
-        'assigned_to',
-        'assignment_history',
-        'assignment_history.user',
-      ],
-    });
+  async findAll(search?: string): Promise<Asset[]> {
+    const query = this.assetRepo
+      .createQueryBuilder('asset')
+      .leftJoinAndSelect('asset.category', 'category')
+      .leftJoinAndSelect('asset.department', 'department')
+      .leftJoinAndSelect('asset.assigned_to', 'assigned_to')
+      .leftJoinAndSelect('asset.assignment_history', 'assignment_history')
+      .leftJoinAndSelect('assignment_history.user', 'history_user');
+
+    if (search) {
+      query.where(
+        '(asset.name ILike :search OR asset.serial_number ILike :search OR category.name ILike :search OR asset.tag_id ILike :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    return await query.getMany();
   }
 
   async findOne(id: string): Promise<Asset> {
@@ -633,5 +641,46 @@ export class AssetsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleNightlyDepreciation(): Promise<{ updated: number }> {
+    console.log('[Cron] STARTING NIGHTLY FINANCIAL SYNC...');
+    const assets = await this.assetRepo.find({
+      where: { status: Not(In(['DISPOSED'])) },
+      relations: ['category'],
+    });
+
+    let updatedCount = 0;
+    const now = new Date();
+
+    for (const asset of assets) {
+      const dep = this.calculateDepreciation(asset);
+      asset.current_value = dep.current_value;
+      asset.accumulated_depreciation = dep.accumulated_depreciation;
+
+      // Check for End-of-Life triggers
+      const isDepreciated =
+        asset.current_value <= (asset.disposal_value || 0) ||
+        asset.current_value === 0;
+
+      const isWarrantyExpired =
+        asset.warranty_expiry && new Date(asset.warranty_expiry) < now;
+
+      if (isDepreciated || isWarrantyExpired) {
+        await this.notificationsService.notifyAssetEndOfLife({
+          assetName: asset.name,
+          serialNumber: asset.serial_number || 'N/A',
+          currentValue: asset.current_value,
+          reason: isDepreciated ? 'DEPRECIATED' : 'WARRANTY_EXPIRED',
+        });
+      }
+
+      await this.assetRepo.save(asset);
+      updatedCount++;
+    }
+
+    console.log(`[Cron] SYNC COMPLETE: ${updatedCount} assets updated.`);
+    return { updated: updatedCount };
   }
 }

@@ -28,18 +28,20 @@ export class AssetIncidentsController {
     return this.assetIncidentsService.forwardToCEO(id, dto.remarks);
   }
 
+  @Patch(':id/start-repair')
+  @ApiOperation({ summary: 'Mark an incident as currently in repair' })
+  startRepair(@Param('id') id: string) {
+    return this.assetIncidentsService.startRepair(id);
+  }
+
   @Patch(':id/resolve')
-  @ApiOperation({ summary: 'Resolve an investigation (Accept or Deny)' })
+  @ApiOperation({ summary: 'Resolve an incident with a specific outcome' })
   resolveIncident(@Param('id') id: string, @Body() dto: ResolveIncidentDto) {
-    return this.assetIncidentsService.resolveIncident(
-      id,
-      dto.resolution,
-      dto.remarks,
-    );
+    return this.assetIncidentsService.resolveIncident(id, dto);
   }
 
   @Patch(':id/resolve-penalty')
-  @ApiOperation({ summary: 'Mark a penalty as resolved' })
+  @ApiOperation({ summary: 'Mark a liability penalty as resolved' })
   resolvePenalty(@Param('id') id: string) {
     return this.assetIncidentsService.togglePenaltyResolution(id);
   }

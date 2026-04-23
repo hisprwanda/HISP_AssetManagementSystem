@@ -31,7 +31,7 @@ export class ReportIncidentDto {
   @ApiProperty({ example: 'Fell out my bag during field visit' })
   @IsString()
   @IsNotEmpty()
-  explanation: string;
+  issue_description: string;
 
   @ApiPropertyOptional({
     description: 'URL to uploaded photo or police report',

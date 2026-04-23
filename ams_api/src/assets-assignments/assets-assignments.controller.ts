@@ -14,6 +14,7 @@ import { AssetAssignmentsService } from './assets-assignments.service';
 import { CreateAssetAssignmentDto } from './dto/create-assets-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-assets-assignment.dto';
 import { PrepareAssignmentDto } from './dto/prepare-assignment.dto';
+import { PrepareBulkAssignmentDto } from './dto/prepare-bulk-assignment.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -119,6 +120,39 @@ export class AssetAssignmentsController {
   ) {
     return this.assetAssignmentsService.verifyByAdmin(
       id,
+      body.approve,
+      body.remarks,
+      body.adminSignatureName,
+    );
+  }
+
+  @Post('bulk/prepare')
+  @ApiOperation({ summary: 'Admin preparation of bulk receipt form' })
+  prepareBulkByAdmin(@Body() dto: PrepareBulkAssignmentDto) {
+    return this.assetAssignmentsService.prepareBulkByAdmin(dto);
+  }
+
+  @Patch('bulk/:formNumber/sign-user')
+  @ApiOperation({ summary: 'Record staff signature on bulk receipt form' })
+  signBulkByUser(
+    @Param('formNumber') formNumber: string,
+    @Body('signatureName') signatureName: string,
+  ) {
+    return this.assetAssignmentsService.signBulkByUser(
+      formNumber,
+      signatureName,
+    );
+  }
+
+  @Patch('bulk/:formNumber/verify')
+  @ApiOperation({ summary: 'Admin final approval/rejection of bulk receipt' })
+  verifyBulkByAdmin(
+    @Param('formNumber') formNumber: string,
+    @Body()
+    body: { approve: boolean; remarks?: string; adminSignatureName?: string },
+  ) {
+    return this.assetAssignmentsService.verifyBulkByAdmin(
+      formNumber,
       body.approve,
       body.remarks,
       body.adminSignatureName,

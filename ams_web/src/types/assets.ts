@@ -97,11 +97,13 @@ export interface AssetRequest {
   id: string;
   title: string;
   description: string;
+  batch_number?: string;
   quantity?: number;
   estimated_unit_cost?: number;
   urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status:
     | 'PENDING'
+    | 'PENDING_FORMALIZATION'
     | 'HOD_APPROVED'
     | 'APPROVED'
     | 'CEO_REVIEW'
@@ -142,12 +144,20 @@ export interface AssetIncident {
   asset: Asset;
   reported_by: User;
   incident_type: 'BROKEN' | 'MISSING';
-  explanation: string;
+  location: string;
+  issue_description: string;
+  explanation?: string; // Legacy support
   evidence_url?: string;
-  investigation_status: 'INVESTIGATING' | 'CEO_REVIEW' | 'ACCEPTED' | 'DENIED';
-  investigation_remarks?: string;
+  status:
+    | 'PENDING'
+    | 'IN_REPAIR'
+    | 'RESOLVED_FIXED'
+    | 'RESOLVED_REPLACED'
+    | 'REJECTED_LIABILITY';
+  investigation_status?: string; // Legacy support
+  resolution_notes?: string;
+  investigation_remarks?: string; // Legacy support
   penalty_amount?: number;
   penalty_resolved_at?: string | null;
-  resolved_at?: string;
   reported_at: string;
 }

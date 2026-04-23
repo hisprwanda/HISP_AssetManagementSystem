@@ -1,5 +1,4 @@
 import {
-  ShieldAlert,
   ShieldCheck,
   ShieldX,
   Calendar,
@@ -8,7 +7,9 @@ import {
   MessageSquare,
   FileText,
   Clock,
-  Download,
+  Hammer,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { AssetIncident } from '../types/assets';
 import {
@@ -35,6 +36,38 @@ export const ViewIncidentModal = ({
 
   const getStatusConfig = (status: string) => {
     switch (status) {
+      case 'RESOLVED_FIXED':
+        return {
+          icon: CheckCircle2,
+          color: 'text-emerald-600',
+          bg: 'bg-emerald-50',
+          border: 'border-emerald-200',
+          label: 'Repaired & Returned',
+        };
+      case 'RESOLVED_REPLACED':
+        return {
+          icon: CheckCircle2,
+          color: 'text-blue-600',
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+          label: 'Unfixable - Replaced',
+        };
+      case 'REJECTED_LIABILITY':
+        return {
+          icon: ShieldX,
+          color: 'text-red-600',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          label: 'Denied - Staff Liability',
+        };
+      case 'IN_REPAIR':
+        return {
+          icon: Hammer,
+          color: 'text-blue-500',
+          bg: 'bg-blue-50',
+          border: 'border-blue-100',
+          label: 'Currently In Repair',
+        };
       case 'ACCEPTED':
         return {
           icon: ShieldCheck,
@@ -57,12 +90,14 @@ export const ViewIncidentModal = ({
           color: 'text-amber-500',
           bg: 'bg-amber-50',
           border: 'border-amber-100',
-          label: 'Investigation In Progress',
+          label: 'Awaiting Review',
         };
     }
   };
 
-  const status = getStatusConfig(incident.investigation_status);
+  const status = getStatusConfig(
+    incident.status || incident.investigation_status || 'PENDING',
+  );
   const StatusIcon = status.icon;
 
   return (
@@ -91,7 +126,7 @@ export const ViewIncidentModal = ({
             <div
               className={`px-3 py-1.5 rounded-xl border ${status.border} ${status.bg} ${status.color} text-[9px] font-semibold uppercase tracking-widest shadow-sm`}
             >
-              {incident.investigation_status}
+              {status.label}
             </div>
           </div>
         </DialogHeader>
@@ -120,14 +155,7 @@ export const ViewIncidentModal = ({
                   <Calendar className="w-4 h-4" />
                 </div>
                 <p className="text-xs font-semibold text-slate-700 truncate">
-                  {new Date(incident.reported_at).toLocaleDateString(
-                    undefined,
-                    {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    },
-                  )}
+                  {new Date(incident.reported_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -164,151 +192,66 @@ export const ViewIncidentModal = ({
 
           <div className="space-y-3">
             <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <MessageSquare className="w-3.5 h-3.5" /> Reporter Explanation
+              <MessageSquare className="w-3.5 h-3.5" /> Issue Description
             </h4>
             <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl relative overflow-hidden italic shadow-inner">
               <div className="absolute top-0 left-0 w-1 h-full bg-slate-200" />
               <p className="text-xs text-slate-600 font-bold leading-relaxed whitespace-pre-wrap">
-                "{incident.explanation || 'No explanation provided'}"
+                "
+                {incident.issue_description ||
+                  incident.explanation ||
+                  'No explanation provided'}
+                "
               </p>
-              {incident.evidence_url && (
-                <div className="mt-4 pt-4 border-t border-slate-200/60 not-italic">
-                  <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">
-                    Uploaded Photo Evidence
-                  </p>
-                  {incident.evidence_url.startsWith('data:image/') ? (
-                    <div className="relative group rounded-xl overflow-hidden border border-slate-200 bg-white w-max max-w-[200px] shadow-sm">
-                      <img
-                        src={incident.evidence_url}
-                        alt="Evidence"
-                        className="object-cover max-h-32"
-                      />
-                      <a
-                        href={incident.evidence_url}
-                        download={`evidence-${incident.id}`}
-                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white font-bold text-[10px] uppercase"
-                      >
-                        <Download className="w-4 h-4 mr-1.5" /> Save Photo
-                      </a>
-                    </div>
-                  ) : incident.evidence_url.startsWith('data:') ? (
-                    <a
-                      href={incident.evidence_url}
-                      download={`evidence-${incident.id}`}
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-orange-600 hover:text-orange-700 hover:underline bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100 transition-colors"
-                    >
-                      <Download className="w-3 h-3" /> Download Attachment
-                    </a>
-                  ) : (
-                    <div className="flex flex-col gap-1">
-                      <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100">
-                        <ShieldAlert className="w-3 h-3" /> Legacy Link
-                        (Unreachable)
-                      </div>
-                      <p className="text-[8px] text-slate-400 font-medium ml-1">
-                        This report was created before the storage system
-                        update.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
 
-          {(incident.investigation_remarks ||
-            incident.investigation_status !== 'INVESTIGATING') && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          {(incident.resolution_notes || incident.investigation_remarks) && (
+            <div className="space-y-4">
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" /> Investigation Audit Trail
+                <FileText className="w-3.5 h-3.5" /> Resolution Details
               </h4>
-              <div className="space-y-3">
-                {/* Admin Findings */}
-                <div
-                  className={`p-5 bg-white border border-slate-200 rounded-2xl relative shadow-sm border-l-4 border-l-slate-400`}
-                >
-                  <p
-                    className={`text-[9px] text-slate-500 font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5" /> Administrative
-                    Findings
-                  </p>
-                  <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
-                    {parseAdminRemarks(incident.investigation_remarks) ||
-                      'The initial investigation was completed by the administration.'}
-                  </p>
-                </div>
-
-                {/* CEO Verdict (if exists) */}
-                {incident.investigation_remarks?.includes('CEO:') && (
-                  <div
-                    className={`p-5 ${status.bg} border-2 ${status.border} rounded-2xl relative shadow-sm border-l-4 border-l-orange-500`}
-                  >
-                    <p
-                      className={`text-[9px] ${status.color} font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
-                    >
-                      <ShieldAlert className="w-3.5 h-3.5" /> Executive
-                      Strategic Review
-                    </p>
-                    <p className="text-[11px] font-semibold text-slate-900 leading-relaxed whitespace-pre-wrap italic">
-                      "
-                      {parseCEORemarks(incident.investigation_remarks) ||
-                        'Final decision rendered.'}
-                      "
-                    </p>
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-black/5">
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full ${status.bg} border ${status.border}`}
-                      />
-                      <span className="text-[9px] font-bold text-slate-400">
-                        FINAL VERDICT RENDERED
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Penalty Details */}
-                {incident.investigation_status === 'DENIED' && (
-                  <div
-                    className={`p-5 ${incident.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100' : 'bg-orange-50 border-orange-100'} border-2 rounded-2xl relative shadow-sm border-l-4 ${incident.penalty_resolved_at ? 'border-l-emerald-500' : 'border-l-orange-500'} mt-4`}
-                  >
-                    <p
-                      className={`text-[9px] ${incident.penalty_resolved_at ? 'text-emerald-600' : 'text-orange-600'} font-semibold uppercase tracking-widest mb-2 flex items-center gap-2`}
-                    >
-                      <ShieldAlert className="w-3.5 h-3.5" /> Financial Penalty
-                      Details
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[14px] font-semibold text-slate-900">
-                          {Number(
-                            incident.penalty_amount || 0,
-                          ).toLocaleString()}{' '}
-                          RWF
-                        </p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                          Assessed Penalty Amount
-                        </p>
-                      </div>
-                      <span
-                        className={`text-[8px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${incident.penalty_resolved_at ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}
-                      >
-                        {incident.penalty_resolved_at
-                          ? `CLEARED ON ${new Date(incident.penalty_resolved_at).toLocaleDateString()}`
-                          : 'PENDING PAYMENT'}
-                      </span>
-                    </div>
-                  </div>
-                )}
+              <div className="p-5 bg-white border border-slate-200 rounded-2xl relative shadow-sm border-l-4 border-l-slate-400">
+                <p className="text-[9px] text-slate-500 font-semibold uppercase tracking-widest mb-2">
+                  Technical Resolution / Verdict
+                </p>
+                <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {incident.resolution_notes || incident.investigation_remarks}
+                </p>
               </div>
             </div>
           )}
+
+          {incident.penalty_amount &&
+            incident.status === 'REJECTED_LIABILITY' && (
+              <div className="p-5 bg-red-50 border-2 border-red-100 rounded-2xl relative shadow-sm border-l-4 border-l-red-500">
+                <p className="text-[9px] text-red-600 font-semibold uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Financial Penalty
+                  Applied
+                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[14px] font-semibold text-slate-900">
+                      {Number(incident.penalty_amount).toLocaleString()} RWF
+                    </p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                      Assessed Penalty Amount
+                    </p>
+                  </div>
+                  <span
+                    className={`text-[8px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${incident.penalty_resolved_at ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
+                  >
+                    {incident.penalty_resolved_at ? 'CLEARED' : 'PENDING'}
+                  </span>
+                </div>
+              </div>
+            )}
         </div>
 
-        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95"
+            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-semibold text-[10px] uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all active:scale-95"
           >
             Close Details
           </button>
@@ -316,17 +259,4 @@ export const ViewIncidentModal = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-const parseAdminRemarks = (remarks?: string) => {
-  if (!remarks) return '';
-  if (remarks.includes('ADMIN:')) {
-    return remarks.split('ADMIN:')[1]?.split('CEO:')[0]?.trim() || remarks;
-  }
-  return remarks;
-};
-
-const parseCEORemarks = (remarks?: string) => {
-  if (!remarks || !remarks.includes('CEO:')) return '';
-  return remarks.split('CEO:')[1]?.trim() || '';
 };

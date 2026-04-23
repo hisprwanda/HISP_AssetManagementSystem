@@ -279,8 +279,8 @@ export class NotificationsService {
     switch (action) {
       case 'SENT_TO_USER':
         recipients = [targetUser];
-        title = 'Action Required: Sign Asset Receipt Form';
-        message = `Administration has prepared your digital receipt form for "${assetName}". Please log in to your portal, review the details, and provide your digital signature.`;
+        title = 'Asset Receipt Signature Required';
+        message = `You have an Asset Receipt waiting for your signature for "${assetName}".`;
         break;
       case 'SIGNED_BY_USER':
         recipients = admins;
@@ -414,6 +414,45 @@ export class NotificationsService {
     });
 
     await this.notifRepo.save(notification);
+  }
+
+  async notifyAssetEndOfLife(params: {
+    assetName: string;
+    serialNumber: string;
+    currentValue: number;
+    reason: 'DEPRECIATED' | 'WARRANTY_EXPIRED';
+  }): Promise<void> {
+    const { assetName, serialNumber, currentValue, reason } = params;
+
+    const allUsers = await this.userRepo.find();
+    const recipients = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      return (
+        roleUpper.includes('ADMIN') ||
+        roleUpper.includes('FINANCE') ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+      );
+    });
+
+    const title = `Asset End-of-Life Alert: ${assetName}`;
+    const reasonText =
+      reason === 'DEPRECIATED'
+        ? 'has fully depreciated'
+        : 'warranty has expired';
+
+    const message = `The asset ${assetName} (Serial: ${serialNumber || 'N/A'}) ${reasonText}. It currently holds a value of ${Number(currentValue).toLocaleString()} RWF. Please schedule a review for potential disposal or replacement.`;
+
+    const notifications = recipients.map((user) => {
+      return this.notifRepo.create({
+        recipient: { id: user.id } as User,
+        title,
+        message,
+        type: 'ALERT',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
   }
 
   async getForUser(userId: string): Promise<Notification[]> {

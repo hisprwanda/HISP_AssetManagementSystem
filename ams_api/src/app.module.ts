@@ -14,9 +14,11 @@ import { AssetIncidentsModule } from './asset-incidents/asset-incidents.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RequestableItemsModule } from './requestable-items/requestable-items.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../.env'],

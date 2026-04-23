@@ -39,6 +39,10 @@ import { DisposeAssetModal } from '../components/DisposeAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 import { UploadScannedFormModal } from '../components/UploadScannedFormModal';
 import { Pagination } from '../components/Pagination';
+import { BulkRequestModal } from '../components/BulkRequestModal';
+import { BulkAssetReceiptModal } from '../components/BulkAssetReceiptModal';
+import { ShoppingCart, PackagePlus } from 'lucide-react';
+import { useDebounce } from '../hooks/useDebounce';
 
 import {
   Category,
@@ -118,6 +122,10 @@ export const Assets = () => {
   const [isRequestableSidebarOpen, setIsRequestableSidebarOpen] =
     useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [cartItems, setCartItems] = useState<RequestableItem[]>([]);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
+  const [isBulkReceiptModalOpen, setIsBulkReceiptModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const { data: categories, isLoading: loadingCats } = useQuery<Category[]>({
@@ -188,10 +196,14 @@ export const Assets = () => {
     setCurrentPage(1);
   }, [assetSearch, searchQuery]);
 
+  const debouncedSearch = useDebounce(assetSearch || searchQuery, 500);
+
   const { data: assets, isLoading: loadingAssets } = useQuery<Asset[]>({
-    queryKey: ['assets'],
+    queryKey: ['assets', debouncedSearch],
     queryFn: async () => {
-      const response = await api.get('/assets');
+      const response = await api.get('/assets', {
+        params: { search: debouncedSearch },
+      });
       return response.data;
     },
   });
@@ -212,31 +224,12 @@ export const Assets = () => {
     if (selectedCategory) {
       filtered = filtered.filter((a) => a.category?.id === selectedCategory.id);
     }
-    const qGlobal = searchQuery.toLowerCase().trim();
-    const qLocal = assetSearch.toLowerCase().trim();
 
-    if (qGlobal || qLocal) {
-      filtered = filtered.filter(
-        (asset) =>
-          asset.name?.toLowerCase().includes(qGlobal || qLocal) ||
-          asset.serial_number?.toLowerCase().includes(qGlobal || qLocal) ||
-          asset.tag_id?.toLowerCase().includes(qGlobal || qLocal) ||
-          asset.assigned_to?.full_name
-            ?.toLowerCase()
-            .includes(qGlobal || qLocal),
-      );
-    }
+    // Note: Global and local search are now handled by the backend via debouncedSearch
 
     return filtered;
-  }, [
-    assets,
-    selectedCategory,
-    searchQuery,
-    assetSearch,
-    isStaff,
-    isHOD,
-    currentUser,
-  ]);
+    return filtered;
+  }, [assets, selectedCategory, isStaff, isHOD, currentUser]);
 
   const paginatedAssets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -598,6 +591,39 @@ export const Assets = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                    {isAdmin && (
+                      <th className="px-6 py-4 w-10">
+                        <input
+                          type="checkbox"
+                          checked={
+                            paginatedAssets.length > 0 &&
+                            paginatedAssets
+                              .filter((a) => a.status === 'IN_STOCK')
+                              .every((a) => selectedAssetIds.includes(a.id))
+                          }
+                          onChange={(e) => {
+                            const inStockOnPage = paginatedAssets
+                              .filter((a) => a.status === 'IN_STOCK')
+                              .map((a) => a.id);
+                            if (e.target.checked) {
+                              setSelectedAssetIds([
+                                ...new Set([
+                                  ...selectedAssetIds,
+                                  ...inStockOnPage,
+                                ]),
+                              ]);
+                            } else {
+                              setSelectedAssetIds(
+                                selectedAssetIds.filter(
+                                  (id) => !inStockOnPage.includes(id),
+                                ),
+                              );
+                            }
+                          }}
+                          className="rounded border-slate-300 text-[#ff8000] focus:ring-[#ff8000]"
+                        />
+                      </th>
+                    )}
                     <th className="px-4 py-3 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                       Asset Details
                     </th>
@@ -650,8 +676,36 @@ export const Assets = () => {
                       return (
                         <tr
                           key={asset.id}
-                          className="hover:bg-white/60 transition-colors group"
+                          className={`hover:bg-white/60 transition-colors group ${
+                            selectedAssetIds.includes(asset.id)
+                              ? 'bg-orange-50/50'
+                              : ''
+                          }`}
                         >
+                          {isAdmin && (
+                            <td className="px-6 py-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedAssetIds.includes(asset.id)}
+                                disabled={asset.status !== 'IN_STOCK'}
+                                onChange={() => {
+                                  if (selectedAssetIds.includes(asset.id)) {
+                                    setSelectedAssetIds(
+                                      selectedAssetIds.filter(
+                                        (id) => id !== asset.id,
+                                      ),
+                                    );
+                                  } else {
+                                    setSelectedAssetIds([
+                                      ...selectedAssetIds,
+                                      asset.id,
+                                    ]);
+                                  }
+                                }}
+                                className="rounded border-slate-300 text-[#ff8000] focus:ring-[#ff8000] disabled:opacity-20"
+                              />
+                            </td>
+                          )}
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
@@ -887,7 +941,7 @@ export const Assets = () => {
           </div>
         </div>
 
-        {isAdmin && selectedCategory && (
+        {selectedCategory && (
           <div
             className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${
               isRequestableSidebarOpen
@@ -919,36 +973,38 @@ export const Assets = () => {
                 </span>
               </div>
 
-              <div className="flex gap-1.5 mb-3">
-                <input
-                  type="text"
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && newItemName.trim()) {
-                      e.preventDefault();
-                      addItemMutation.mutate(newItemName.trim());
-                    }
-                  }}
-                  placeholder="e.g. Laptop..."
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all"
-                />
-                <button
-                  onClick={() => {
-                    if (newItemName.trim())
-                      addItemMutation.mutate(newItemName.trim());
-                  }}
-                  disabled={!newItemName.trim() || addItemMutation.isPending}
-                  className="bg-[#ff8000] hover:bg-[#e49f37] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 transition-all shrink-0"
-                >
-                  {addItemMutation.isPending ? (
-                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <Plus className="w-3 h-3" />
-                  )}
-                  Add
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-1.5 mb-3">
+                  <input
+                    type="text"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newItemName.trim()) {
+                        e.preventDefault();
+                        addItemMutation.mutate(newItemName.trim());
+                      }
+                    }}
+                    placeholder="e.g. Laptop..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all"
+                  />
+                  <button
+                    onClick={() => {
+                      if (newItemName.trim())
+                        addItemMutation.mutate(newItemName.trim());
+                    }}
+                    disabled={!newItemName.trim() || addItemMutation.isPending}
+                    className="bg-[#ff8000] hover:bg-[#e49f37] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 transition-all shrink-0"
+                  >
+                    {addItemMutation.isPending ? (
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Plus className="w-3 h-3" />
+                    )}
+                    Add
+                  </button>
+                </div>
+              )}
 
               <div className="flex-1 overflow-y-auto max-h-[600px] pr-1 scrollbar-thin">
                 {loadingItems ? (
@@ -965,13 +1021,41 @@ export const Assets = () => {
                         <span className="text-xs font-bold text-slate-700 truncate">
                           {item.name}
                         </span>
-                        <button
-                          onClick={() => deleteItemMutation.mutate(item.id)}
-                          className="text-slate-200 hover:text-rose-500 transition-colors ml-2 shrink-0"
-                          title="Remove"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          {!isAdmin && (
+                            <button
+                              onClick={() => {
+                                if (!cartItems.find((c) => c.id === item.id)) {
+                                  setCartItems([...cartItems, item]);
+                                }
+                              }}
+                              disabled={
+                                !!cartItems.find((c) => c.id === item.id)
+                              }
+                              className={`p-1.5 rounded-lg transition-all ${
+                                cartItems.find((c) => c.id === item.id)
+                                  ? 'bg-orange-100 text-orange-600 cursor-not-allowed'
+                                  : 'text-[#ff8000] hover:bg-orange-50'
+                              }`}
+                              title={
+                                cartItems.find((c) => c.id === item.id)
+                                  ? 'In Cart'
+                                  : 'Add to Cart'
+                              }
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <button
+                              onClick={() => deleteItemMutation.mutate(item.id)}
+                              className="text-slate-200 hover:text-rose-500 transition-colors ml-2 shrink-0 p-1.5"
+                              title="Remove"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -997,6 +1081,100 @@ export const Assets = () => {
           </button>
         )}
       </div>
+
+      {/* Hardware Cart Bar (Admin) */}
+      {isAdmin && selectedAssetIds.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
+          <div className="bg-indigo-950 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <PackagePlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest leading-none mb-1">
+                  Hardware Handover Cart
+                </p>
+                <p className="text-sm font-bold leading-none">
+                  {selectedAssetIds.length} Assets Selected
+                </p>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-white/10" />
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedAssetIds([])}
+                className="text-xs font-bold text-indigo-300 hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => setIsBulkReceiptModalOpen(true)}
+                className="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
+              >
+                Assign Selected Assets
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Request Cart Bar */}
+      {cartItems.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
+          <div className="bg-slate-900 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#ff8000] flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <ShoppingCart className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                  Request Cart
+                </p>
+                <p className="text-sm font-bold leading-none">
+                  {cartItems.length} Items Selected
+                </p>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-white/10" />
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCartItems([])}
+                className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              >
+                Clear Cart
+              </button>
+              <button
+                onClick={() => setIsBulkModalOpen(true)}
+                className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-orange-500/20 transition-all active:scale-95"
+              >
+                Review & Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <BulkRequestModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        items={cartItems}
+        onSuccess={() => setCartItems([])}
+      />
+
+      <BulkAssetReceiptModal
+        isOpen={isBulkReceiptModalOpen}
+        onClose={() => setIsBulkReceiptModalOpen(false)}
+        selectedAssetIds={selectedAssetIds}
+        onSuccess={() => {
+          setSelectedAssetIds([]);
+          setIsBulkReceiptModalOpen(false);
+        }}
+      />
+
       <CreateAssetModal
         isOpen={isAssetModalOpen}
         onClose={() => setIsAssetModalOpen(false)}

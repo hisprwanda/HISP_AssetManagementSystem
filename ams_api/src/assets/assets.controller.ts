@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AssetsService } from './assets.service';
@@ -38,8 +39,8 @@ export class AssetsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all assets with relations' })
-  findAll() {
-    return this.assetsService.findAll();
+  findAll(@Query('search') search?: string) {
+    return this.assetsService.findAll(search);
   }
 
   @Get(':id')
@@ -68,6 +69,14 @@ export class AssetsController {
   @Post('recalculate')
   recalculateAll() {
     return this.assetsService.recalculateAll();
+  }
+
+  @Post('trigger-depreciation-sync')
+  @ApiOperation({
+    summary: 'Manually trigger the nightly financial sync and EOL alerts',
+  })
+  triggerSync() {
+    return this.assetsService.handleNightlyDepreciation();
   }
 
   @Patch(':id/initiate-return')

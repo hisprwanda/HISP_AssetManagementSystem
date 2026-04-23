@@ -1,9 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldAlert,
-  ShieldCheck,
   ShieldX,
   Search,
   Eye,
@@ -11,9 +10,9 @@ import {
   User as UserIcon,
   Laptop,
   Clock,
-  Trash2,
   CheckCircle2,
   Banknote,
+  Hammer,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
@@ -24,12 +23,9 @@ import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { Pagination } from '../components/Pagination';
 
 export const Incidents = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isFinanceAdmin, isAdmin, isHOD, isCEO, user } = useAuth();
   const { openIncident } = useOutletContext<{ openIncident: () => void }>();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [selectedIncident, setSelectedIncident] =
     useState<AssetIncident | null>(null);
@@ -41,21 +37,18 @@ export const Incidents = () => {
     useState<AssetIncident | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
 
   useEffect(() => {
-    setHeaderTitle('Incident Reports');
+    setHeaderTitle('IT Helpdesk / Incidents');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
 
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filterType, filterStatus, startDate, endDate]);
+  const [filterType] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: incidents, isLoading } = useQuery<AssetIncident[]>({
     queryKey: ['asset-incidents'],
@@ -91,7 +84,9 @@ export const Incidents = () => {
     }
 
     if (filterStatus !== 'ALL') {
-      result = result.filter((i) => i.investigation_status === filterStatus);
+      result = result.filter(
+        (i) => (i.status || i.investigation_status) === filterStatus,
+      );
     }
 
     if (searchQuery) {
@@ -100,24 +95,10 @@ export const Incidents = () => {
         (i) =>
           i.asset?.name?.toLowerCase().includes(q) ||
           i.reported_by?.full_name?.toLowerCase().includes(q) ||
-          i.explanation?.toLowerCase().includes(q),
+          (i.issue_description || i.explanation || '')
+            .toLowerCase()
+            .includes(q),
       );
-    }
-
-    if (startDate) {
-      result = result.filter((i) => {
-        const date = new Date(i.reported_at);
-        return date >= new Date(startDate);
-      });
-    }
-
-    if (endDate) {
-      result = result.filter((i) => {
-        const date = new Date(i.reported_at);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        return date <= end;
-      });
     }
 
     return result;
@@ -126,17 +107,52 @@ export const Incidents = () => {
     filterType,
     filterStatus,
     searchQuery,
-    startDate,
-    endDate,
+    isHOD,
     isAdmin,
     isFinanceAdmin,
-    isHOD,
     user,
   ]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterType, filterStatus, searchQuery, startDate, endDate]);
+  const stats = useMemo(() => {
+    if (!incidents)
+      return {
+        pending: 0,
+        repairing: 0,
+        resolved: 0,
+        liability: 0,
+        settled: 0,
+      };
+
+    let filtered = incidents;
+    if (isHOD && !isAdmin && !isFinanceAdmin) {
+      filtered = incidents.filter(
+        (i) =>
+          i.reported_by?.department?.id === user?.department?.id ||
+          i.asset?.department?.id === user?.department?.id,
+      );
+    }
+
+    return {
+      pending: filtered.filter(
+        (i) =>
+          (i.status || i.investigation_status) === 'PENDING' ||
+          i.status === 'INVESTIGATING',
+      ).length,
+      repairing: filtered.filter((i) => i.status === 'IN_REPAIR').length,
+      resolved: filtered.filter(
+        (i) =>
+          i.status?.startsWith('RESOLVED') ||
+          i.investigation_status === 'ACCEPTED',
+      ).length,
+      liability: filtered.filter(
+        (i) =>
+          (i.status === 'REJECTED_LIABILITY' ||
+            i.investigation_status === 'DENIED') &&
+          !i.penalty_resolved_at,
+      ).length,
+      settled: filtered.filter((i) => i.penalty_resolved_at).length,
+    };
+  }, [incidents, isHOD, isAdmin, isFinanceAdmin, user]);
 
   const paginatedIncidents = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -145,48 +161,20 @@ export const Incidents = () => {
 
   const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage);
 
-  const stats = useMemo(() => {
-    if (!incidents) return { investigating: 0, accepted: 0, denied: 0 };
-
-    let filteredForStats = incidents;
-    if (isHOD && !isAdmin && !isFinanceAdmin) {
-      filteredForStats = incidents.filter(
-        (i) =>
-          i.reported_by?.department?.id === user?.department?.id ||
-          i.asset?.department?.id === user?.department?.id,
-      );
-    }
-
-    const deniedIncidents = filteredForStats.filter(
-      (i) => i.investigation_status === 'DENIED',
-    );
-    const resolvedPenalties = deniedIncidents.filter(
-      (i) => i.penalty_resolved_at,
-    ).length;
-
-    return {
-      investigating: filteredForStats.filter(
-        (i) => i.investigation_status === 'INVESTIGATING',
-      ).length,
-      ceo_review: filteredForStats.filter(
-        (i) => i.investigation_status === 'CEO_REVIEW',
-      ).length,
-      accepted: filteredForStats.filter(
-        (i) => i.investigation_status === 'ACCEPTED',
-      ).length,
-      denied_pending: deniedIncidents.length - resolvedPenalties,
-      resolved_penalties: resolvedPenalties,
-    };
-  }, [incidents, isHOD, isAdmin, isFinanceAdmin, user]);
-
-  const getStatusStyle = (status: AssetIncident['investigation_status']) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
+      case 'RESOLVED_FIXED':
+      case 'RESOLVED_REPLACED':
       case 'ACCEPTED':
-        return 'bg-slate-50 text-slate-950 border-slate-200 font-semibold';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-100 font-bold';
+      case 'REJECTED_LIABILITY':
       case 'DENIED':
-        return 'bg-orange-50 text-orange-600 border-orange-100 italic';
-      case 'CEO_REVIEW':
-        return 'bg-amber-50 text-amber-600 border-amber-100 font-bold';
+        return 'bg-red-50 text-red-600 border-red-100 font-bold';
+      case 'IN_REPAIR':
+        return 'bg-blue-50 text-blue-600 border-blue-100 font-bold';
+      case 'PENDING':
+      case 'INVESTIGATING':
+        return 'bg-amber-50 text-amber-600 border-amber-100 font-bold animate-pulse';
       default:
         return 'bg-slate-50 text-slate-500 border-slate-200';
     }
@@ -195,21 +183,6 @@ export const Incidents = () => {
   const handleResolve = (incident: AssetIncident) => {
     setSelectedIncident(incident);
     setIsResolveModalOpen(true);
-  };
-
-  const getDepartmentName = (inc: AssetIncident) => {
-    if (typeof inc.asset?.department === 'string') return inc.asset.department;
-    if (inc.asset?.department?.name) return inc.asset.department.name;
-
-    if (typeof inc.reported_by?.department === 'string')
-      return inc.reported_by.department;
-    if (inc.reported_by?.department?.name)
-      return inc.reported_by.department.name;
-    return 'Operations / Central';
-  };
-
-  const getInvestigationRemarks = (inc: AssetIncident) => {
-    return inc.investigation_remarks || '';
   };
 
   if (!isAdmin && !isFinanceAdmin && !isHOD && !isCEO) {
@@ -231,211 +204,127 @@ export const Incidents = () => {
 
   return (
     <>
-      <div className="flex flex-col h-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
+      <div className="flex flex-col h-full space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex-1" />
-          <div className="flex gap-2">
-            {(isHOD || isAdmin || isCEO) && (
-              <button
-                onClick={openIncident}
-                className="px-4 py-2 bg-orange-600 border border-orange-600 text-white rounded-xl font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm hover:shadow-md flex items-center gap-2 group"
+          {(isHOD || isAdmin || isCEO) && (
+            <button
+              onClick={openIncident}
+              className="px-6 py-2.5 bg-orange-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-100 hover:bg-orange-700 flex items-center gap-2 group"
+            >
+              <ShieldAlert className="w-4 h-4 text-orange-200" /> Report
+              Equipment Issue
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {[
+            {
+              label: 'Pending Review',
+              value: stats.pending,
+              icon: Clock,
+              color: 'amber',
+              sub: 'NEW',
+            },
+            {
+              label: 'In Repair',
+              value: stats.repairing,
+              icon: Hammer,
+              color: 'blue',
+              sub: 'ACTIVE',
+            },
+            {
+              label: 'Resolved',
+              value: stats.resolved,
+              icon: CheckCircle2,
+              color: 'emerald',
+              sub: 'DONE',
+            },
+            {
+              label: 'Liability Cases',
+              value: stats.liability,
+              icon: ShieldAlert,
+              color: 'red',
+              sub: 'BILLABLE',
+            },
+            {
+              label: 'Penalty Settled',
+              value: stats.settled,
+              icon: Banknote,
+              color: 'slate',
+              sub: 'CLEARED',
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4"
+            >
+              <div
+                className={`w-10 h-10 rounded-xl bg-${stat.color}-50 flex items-center justify-center border border-${stat.color}-100`}
               >
-                <ShieldAlert className="w-3.5 h-3.5 text-orange-200" /> Report
-                Incident
-              </button>
-            )}
-          </div>
+                <stat.icon className={`w-5 h-5 text-${stat.color}-500`} />
+              </div>
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
+                  {stat.label}
+                </p>
+                <h3 className="text-xl font-bold text-slate-800 leading-none">
+                  {stat.value}{' '}
+                  <span className="text-[10px] font-bold text-slate-300 ml-1">
+                    {stat.sub}
+                  </span>
+                </h3>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
-          <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100">
-                <Clock className="w-4 h-4 text-[#ff8000]" />
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
-                  Investigating
-                </p>
-                <h3 className="text-lg font-semibold text-slate-800 leading-none">
-                  {stats.investigating}{' '}
-                  <span className="text-[9px] font-bold text-slate-400">
-                    ADM
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-3 rounded-xl border border-amber-100 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
-                <ShieldAlert className="w-4 h-4 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
-                  CEO Review
-                </p>
-                <h3 className="text-lg font-semibold text-slate-800 leading-none animate-pulse">
-                  {stats.ceo_review}{' '}
-                  <span className="text-[9px] font-bold text-amber-300">
-                    EXEC
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100">
-                <ShieldCheck className="w-4 h-4 text-slate-400" />
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
-                  Accepted
-                </p>
-                <h3 className="text-lg font-semibold text-slate-800 leading-none">
-                  {stats.accepted}{' '}
-                  <span className="text-[9px] font-bold text-slate-300">
-                    RESOLVED
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div
-            onClick={
-              isAdmin || isFinanceAdmin || isCEO
-                ? () => navigate('/penalties')
-                : undefined
-            }
-            className={`bg-white p-3 rounded-xl border border-orange-100 shadow-sm flex items-center justify-between transition-all group text-left ${
-              isAdmin || isFinanceAdmin || isCEO
-                ? 'hover:scale-105 hover:shadow-md cursor-pointer'
-                : ''
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-orange-100 transition-colors">
-                <ShieldX className="w-4 h-4 text-[#ff8000]" />
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 group-hover:text-[#ff8000] transition-colors">
-                  Denied
-                </p>
-                <h3 className="text-lg font-semibold text-slate-800 leading-none">
-                  {stats.denied_pending}{' '}
-                  <span className="text-[9px] font-bold text-orange-200">
-                    PENDING
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm flex items-center justify-between group">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
-                  Settled
-                </p>
-                <h3 className="text-lg font-semibold text-slate-800 leading-none text-emerald-600">
-                  {stats.resolved_penalties}{' '}
-                  <span className="text-[9px] font-bold text-emerald-300">
-                    PAID
-                  </span>
-                </h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-3 flex flex-col md:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <div className="bg-white/60 backdrop-blur-md border border-white p-2 rounded-2xl shadow-sm flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
             <input
               type="text"
               placeholder="Search by asset, tag, or personnel..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent border-none pl-10 pr-4 py-2 text-sm focus:ring-0 outline-none font-medium text-slate-700 placeholder:text-slate-400"
+              className="w-full bg-transparent border-none pl-10 pr-4 py-2 text-sm focus:ring-0 outline-none font-bold text-slate-700 placeholder:text-slate-400"
             />
           </div>
-          <div className="flex flex-col md:flex-row gap-2 items-center">
-            <div className="flex items-center gap-2 bg-slate-100/50 p-1 px-2 rounded-lg border border-slate-200">
-              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                DATE RANGE:
-              </span>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
-              />
-              <span className="text-slate-300 mx-1">—</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
-              />
-              {(startDate || endDate) && (
-                <button
-                  onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
-                  }}
-                  className="ml-2 p-0.5 hover:bg-white rounded-md transition-colors"
-                >
-                  <Trash2 className="w-3 h-3 text-rose-400" />
-                </button>
-              )}
-            </div>
-            <div className="flex gap-1.5 p-1 bg-slate-100/50 rounded-lg">
-              {['ALL', 'BROKEN', 'MISSING'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilterType(type)}
-                  className={`px-4 py-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest transition-all ${filterType === type ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex">
+          <div className="flex gap-2">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[9px] font-semibold uppercase tracking-widest text-slate-600 outline-none focus:ring-1 focus:ring-[#ff8000]/20"
+              className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-600 outline-none focus:ring-2 focus:ring-orange-500/20"
             >
               <option value="ALL">All Status</option>
-              <option value="INVESTIGATING">INVESTIGATING</option>
-              <option value="ACCEPTED">ACCEPTED</option>
-              <option value="DENIED">DENIED</option>
+              <option value="PENDING">PENDING</option>
+              <option value="IN_REPAIR">IN REPAIR</option>
+              <option value="RESOLVED_FIXED">RESOLVED (FIXED)</option>
+              <option value="RESOLVED_REPLACED">RESOLVED (REPLACED)</option>
+              <option value="REJECTED_LIABILITY">REJECTED (LIABILITY)</option>
             </select>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[500px]">
-          <div className="overflow-x-auto flex-1">
+        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col">
+          <div className="overflow-x-auto flex-1 custom-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100/50">
-                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                <tr className="bg-slate-50/50 border-b border-slate-100">
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     Incident Details
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     Affected Asset
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                    Reporter & Department
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Reporter
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                    Status & Outcome
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Status
                   </th>
-                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">
                     Actions
                   </th>
                 </tr>
@@ -445,9 +334,9 @@ export const Incidents = () => {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-8 py-20 text-center text-xs font-semibold text-slate-300 uppercase tracking-widest"
+                      className="px-8 py-20 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest animate-pulse"
                     >
-                      Compiling Investigation Data...
+                      Synchronizing Helpdesk Records...
                     </td>
                   </tr>
                 )}
@@ -456,109 +345,86 @@ export const Incidents = () => {
                   paginatedIncidents.map((inc) => (
                     <tr
                       key={inc.id}
-                      className="hover:bg-slate-50/50 transition-colors group"
+                      className="hover:bg-slate-50/30 transition-colors group"
                     >
-                      <td className="px-8 py-5">
+                      <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           <div
-                            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
-                              inc.incident_type === 'MISSING'
-                                ? 'bg-slate-50 text-slate-400 border-slate-100'
-                                : 'bg-orange-50 text-orange-500 border-orange-100'
-                            }`}
+                            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${inc.incident_type === 'MISSING' ? 'bg-slate-50 text-slate-400' : 'bg-orange-50 text-orange-500'}`}
                           >
                             <ShieldAlert className="w-5 h-5" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs font-semibold text-slate-900 truncate">
+                            <p className="text-xs font-bold text-slate-900 truncate">
                               #{inc.id.slice(0, 8).toUpperCase()} -{' '}
                               {inc.incident_type}
                             </p>
                             <p className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter truncate max-w-[200px]">
-                              {inc.explanation}
+                              {inc.issue_description || inc.explanation}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-8 py-5">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-semibold text-slate-700 flex items-center gap-2">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-bold text-slate-700 flex items-center gap-2">
                             <Laptop className="w-3.5 h-3.5 text-slate-400" />{' '}
                             {inc.asset?.name || 'Legacy Asset'}
                           </span>
-                          <span className="text-[8px] font-semibold text-[#ff8000] uppercase tracking-widest">
+                          <span className="text-[9px] font-bold text-orange-600 uppercase tracking-widest mt-1">
                             {inc.asset?.tag_id || 'NO TAG'}
                           </span>
                         </div>
                       </td>
 
-                      <td className="px-8 py-5">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-semibold text-slate-700 flex items-center gap-2">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-bold text-slate-700 flex items-center gap-2">
                             <UserIcon className="w-3.5 h-3.5 text-slate-400" />{' '}
                             {inc.reported_by?.full_name}
                           </span>
-                          <span className="text-[8px] font-semibold text-[#ff8000] uppercase tracking-widest">
-                            {getDepartmentName(inc)}
-                          </span>
-                          <span className="text-[8px] font-semibold text-slate-300 uppercase mt-0.5 flex items-center gap-1.5">
+                          <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 flex items-center gap-1.5">
                             <Calendar className="w-3 h-3" />{' '}
                             {new Date(inc.reported_at).toLocaleDateString()}
                           </span>
                         </div>
                       </td>
 
-                      <td className="px-8 py-5">
-                        <div className="flex flex-col gap-2">
-                          <div
-                            className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${getStatusStyle(inc.investigation_status)} shadow-sm`}
-                          >
-                            {inc.investigation_status}
-                          </div>
-                          {getInvestigationRemarks(inc) && (
-                            <p
-                              className="text-[9px] font-bold text-slate-500 italic max-w-[150px] truncate"
-                              title={getInvestigationRemarks(inc)}
-                            >
-                              "{getInvestigationRemarks(inc)}"
-                            </p>
-                          )}
+                      <td className="px-8 py-6">
+                        <div
+                          className={`inline-flex px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest border shadow-sm ${getStatusStyle(inc.status || inc.investigation_status || 'PENDING')}`}
+                        >
+                          {inc.status || inc.investigation_status || 'PENDING'}
                         </div>
                       </td>
 
-                      <td className="px-8 py-5">
-                        <div className="flex items-center justify-end gap-2 pr-2">
-                          {((inc.investigation_status === 'INVESTIGATING' &&
-                            (isAdmin || isFinanceAdmin)) ||
-                            (inc.investigation_status === 'CEO_REVIEW' &&
-                              isCEO)) && (
-                            <button
-                              onClick={() => handleResolve(inc)}
-                              className="p-2 bg-orange-50 text-[#ff8000] hover:bg-[#ff8000] hover:text-white rounded-lg transition-all shadow-sm border border-orange-100"
-                              title={
-                                isCEO
-                                  ? 'Strategic Review'
-                                  : 'Resolve Investigation'
-                              }
-                            >
-                              <ShieldAlert className="w-4 h-4" />
-                            </button>
-                          )}
-                          {inc.investigation_status === 'DENIED' &&
+                      <td className="px-8 py-6">
+                        <div className="flex items-center justify-end gap-2">
+                          {(isAdmin || isFinanceAdmin || isCEO) &&
+                            (inc.status === 'PENDING' ||
+                              inc.status === 'IN_REPAIR' ||
+                              inc.investigation_status === 'INVESTIGATING') && (
+                              <button
+                                onClick={() => handleResolve(inc)}
+                                className="p-2 bg-slate-900 text-white hover:bg-black rounded-lg transition-all shadow-sm transform active:scale-90"
+                                title="Resolve Ticket"
+                              >
+                                <Hammer className="w-4 h-4" />
+                              </button>
+                            )}
+                          <button
+                            onClick={() => setIncidentToView(inc)}
+                            className="p-2 bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 rounded-lg transition-all shadow-sm transform active:scale-90"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          {(inc.status === 'REJECTED_LIABILITY' ||
+                            inc.investigation_status === 'DENIED') &&
                             (isAdmin || isFinanceAdmin) && (
                               <button
                                 onClick={() => setIncidentToSettle(inc)}
-                                className={`p-2 rounded-lg transition-all border shadow-sm ${
-                                  inc.penalty_resolved_at
-                                    ? 'bg-emerald-50 border-emerald-100 text-emerald-500'
-                                    : 'bg-orange-50 border-orange-100 text-orange-500 hover:bg-orange-100'
-                                }`}
-                                title={
-                                  inc.penalty_resolved_at
-                                    ? 'Penalty Fully Settled'
-                                    : 'Resolve Penalty'
-                                }
+                                className={`p-2 rounded-lg border shadow-sm transition-all ${inc.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100 text-emerald-500' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-100'}`}
                               >
                                 {inc.penalty_resolved_at ? (
                                   <CheckCircle2 className="w-4 h-4" />
@@ -567,37 +433,10 @@ export const Incidents = () => {
                                 )}
                               </button>
                             )}
-                          <button
-                            onClick={() => setIncidentToView(inc)}
-                            className="p-2 bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-lg transition-all border border-slate-100"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {(isFinanceAdmin || isAdmin || isCEO) && (
-                            <button className="p-2 bg-red-50 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all border border-red-100">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
                   ))}
-                {(!incidents || filteredIncidents.length === 0) &&
-                  !isLoading && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="px-8 py-32 text-center text-slate-400"
-                      >
-                        <div className="flex flex-col items-center">
-                          <CheckCircle2 className="w-12 h-12 text-emerald-100 mb-4" />
-                          <p className="text-sm font-semibold uppercase tracking-[0.2em] opacity-40">
-                            No investigation logs found
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
               </tbody>
             </table>
           </div>
@@ -610,16 +449,14 @@ export const Incidents = () => {
           />
         </div>
 
-        {selectedIncident && (
-          <ResolveIncidentModal
-            isOpen={isResolveModalOpen}
-            onClose={() => {
-              setIsResolveModalOpen(false);
-              setSelectedIncident(null);
-            }}
-            incident={selectedIncident}
-          />
-        )}
+        <ResolveIncidentModal
+          isOpen={isResolveModalOpen}
+          onClose={() => {
+            setIsResolveModalOpen(false);
+            setSelectedIncident(null);
+          }}
+          incident={selectedIncident!}
+        />
 
         <ViewIncidentModal
           isOpen={!!incidentToView}
@@ -635,10 +472,10 @@ export const Incidents = () => {
               penaltyMutation.mutate(incidentToSettle.id);
             }
           }}
-          title="Confirm Action"
-          message={`Confirm that the penalty for #${incidentToSettle?.id.slice(0, 8).toUpperCase()} has been fully settled by the personnel?`}
-          confirmText="Confirm"
-          cancelText="Cancel"
+          title="Confirm Payment"
+          message={`Confirm that the penalty for #${incidentToSettle?.id.slice(0, 8).toUpperCase()} has been fully settled?`}
+          confirmText="Yes, Settled"
+          cancelText="No, Pending"
           variant="info"
           isLoading={penaltyMutation.isPending}
         />
