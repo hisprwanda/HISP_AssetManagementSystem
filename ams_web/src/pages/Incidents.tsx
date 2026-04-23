@@ -136,7 +136,7 @@ export const Incidents = () => {
       pending: filtered.filter(
         (i) =>
           (i.status || i.investigation_status) === 'PENDING' ||
-          i.status === 'INVESTIGATING',
+          i.investigation_status === 'INVESTIGATING',
       ).length,
       repairing: filtered.filter((i) => i.status === 'IN_REPAIR').length,
       resolved: filtered.filter(

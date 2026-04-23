@@ -47,8 +47,7 @@ export const HODBulkReviewModal: React.FC<HODBulkReviewModalProps> = ({
 
   const requester = requests[0]?.requested_by;
   const date = requests[0]?.created_at;
-  const justification =
-    requests[0]?.logistics?.justification || requests[0]?.description;
+  const justification = requests[0]?.description || 'No justification provided';
 
   const toggleVeto = (id: string) => {
     setVetoedIds((prev) =>
