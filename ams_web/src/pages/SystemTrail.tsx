@@ -45,6 +45,7 @@ interface User {
   phone_number: string;
   role: string;
   department?: { name: string; type: string };
+  status?: string;
   created_at: string;
 }
 
@@ -570,9 +571,15 @@ export const SystemTrail = () => {
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
-                        ACTIVE
-                      </span>
+                      {user.status === 'ACTIVE' ? (
+                        <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
+                          ACTIVE
+                        </span>
+                      ) : (
+                        <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100 shadow-sm">
+                          {user.status || 'INACTIVE'}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

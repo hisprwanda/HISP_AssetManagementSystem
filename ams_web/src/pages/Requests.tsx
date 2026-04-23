@@ -109,11 +109,11 @@ export const Requests = () => {
       queryClient.invalidateQueries({ queryKey: ['assets-requests'] });
     },
   });
-  const filteredRequests = useMemo(() => {
+  const baseRequests = useMemo(() => {
     if (!requests) return [];
     let filtered = requests;
 
-    if (isStaff) {
+    if (isRequesterOnly) {
       filtered = filtered.filter((r) => r.requested_by?.id === currentUser?.id);
     } else if (isHOD) {
       filtered = filtered.filter(
@@ -130,6 +130,11 @@ export const Requests = () => {
           r.status === 'FULFILLED',
       );
     }
+    return filtered;
+  }, [requests, isRequesterOnly, isHOD, isAdmin, isCEO, currentUser]);
+
+  const filteredRequests = useMemo(() => {
+    let filtered = baseRequests;
 
     if (filterStatus !== 'ALL') {
       filtered = filtered.filter((r) => r.status === filterStatus);
@@ -166,18 +171,7 @@ export const Requests = () => {
         new Date(b.created_at || 0).getTime() -
         new Date(a.created_at || 0).getTime(),
     );
-  }, [
-    requests,
-    filterStatus,
-    searchQuery,
-    startDate,
-    endDate,
-    currentUser,
-    isHOD,
-    isStaff,
-    isAdmin,
-    isCEO,
-  ]);
+  }, [filterStatus, searchQuery, startDate, endDate, baseRequests]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -191,10 +185,10 @@ export const Requests = () => {
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
 
   const pendingCount =
-    requests?.filter((r) => r.status === 'PENDING').length || 0;
+    baseRequests.filter((r) => r.status === 'PENDING').length || 0;
   const pendingValue =
-    requests
-      ?.filter((r) => r.status === 'PENDING')
+    baseRequests
+      .filter((r) => r.status === 'PENDING')
       .reduce((sum, r) => {
         const val =
           r.financials?.grand_total ??
@@ -202,7 +196,7 @@ export const Requests = () => {
         return sum + val;
       }, 0) || 0;
   const fulfilledCount =
-    requests?.filter((r) => r.status === 'FULFILLED').length || 0;
+    baseRequests.filter((r) => r.status === 'FULFILLED').length || 0;
 
   const getStatusStyle = (status: string) => {
     switch (status) {

@@ -12,6 +12,7 @@ import {
   X,
   Search,
   Eye,
+  Phone,
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -35,6 +36,7 @@ interface User {
   id: string;
   full_name: string;
   email: string;
+  phone_number?: string;
   role: string;
   departmentId: string;
 }
@@ -389,6 +391,9 @@ export const Directorate = () => {
                   Personnel
                 </th>
                 <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                  Phone Number
+                </th>
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Contact
                 </th>
                 <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -403,7 +408,7 @@ export const Directorate = () => {
               {loadingStaff && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="p-8 text-center text-slate-400 font-bold"
                   >
                     <div className="flex items-center justify-center gap-2">
@@ -417,7 +422,7 @@ export const Directorate = () => {
               {!loadingStaff && filteredStaff.length === 0 && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="p-12 text-center text-slate-400 font-bold"
                   >
                     {staffSearch
@@ -451,6 +456,12 @@ export const Directorate = () => {
                         </span>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="flex items-center gap-2 text-sm text-slate-600 font-medium">
+                      <Phone className="w-4 h-4 text-slate-400" />
+                      {user.phone_number || 'N/A'}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="flex items-center gap-2 text-sm text-slate-600 font-medium">

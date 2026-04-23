@@ -52,7 +52,23 @@ export const EditUserModal = ({
       setFullName(user.full_name);
       setEmail(user.email);
       setPhoneNumber(user.phone_number || '');
-      setRole(user.role);
+
+      const ALL_ROLES = [
+        'Staff',
+        'HOD',
+        'Admin and Finance Director',
+        'Finance Officer',
+        'Operations Officer',
+        'SYSTEM_ADMIN',
+        'Office of the CEO',
+        'HR',
+        'Procurement',
+      ];
+      setRole(
+        ALL_ROLES.find((r) => r.toLowerCase() === user.role?.toLowerCase()) ||
+          'Staff',
+      );
+
       setError(null);
     }
   }, [user]);

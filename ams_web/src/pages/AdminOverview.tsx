@@ -349,21 +349,21 @@ export const AdminOverview = () => {
                           }
                         }}
                         disabled={!!isProcessing}
-                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-500 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:border-orange-200 hover:text-[#ff8000] hover:bg-orange-50 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                        className="flex-1 py-3 bg-white border border-slate-200 text-slate-500 rounded-xl text-[9px] font-medium uppercase tracking-widest hover:border-orange-200 hover:text-[#ff8000] hover:bg-orange-50 transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
                       >
                         <FileText className="w-3.5 h-3.5" /> Acknowledge
                       </button>
                       <button
                         onClick={() => setFinalizeAsset(asset)}
                         disabled={!!isProcessing}
-                        className="flex-[1.2] py-3 bg-[#ff8000] text-white rounded-xl text-[10px] font-semibold uppercase tracking-[0.15em] hover:bg-[#e49f37] transition-all shadow-lg shadow-orange-100 flex items-center justify-center gap-2 disabled:opacity-50 transform active:scale-95"
+                        className="flex-[1.2] py-3 bg-[#ff8000] text-white rounded-xl text-[9px] font-medium uppercase tracking-[0.15em] hover:bg-[#e49f37] transition-all shadow-lg shadow-orange-100 flex items-center justify-center gap-1.5 disabled:opacity-50 transform active:scale-95"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Accept (Good)
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Accept
                       </button>
                       <button
                         onClick={() => setDamageAsset(asset)}
                         disabled={!!isProcessing}
-                        className="flex-1 py-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-rose-100 hover:border-rose-200 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                        className="flex-1 py-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl text-[9px] font-medium uppercase tracking-widest hover:bg-rose-100 hover:border-rose-200 transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
                       >
                         <AlertTriangle className="w-3.5 h-3.5" /> Damage
                       </button>

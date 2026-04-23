@@ -427,12 +427,7 @@ export const StaffOverview = () => {
             </p>
             <p className="text-[9px] text-slate-400 leading-relaxed font-semibold max-w-2xl italic">
               Assets listed in this registry are officially tied to your
-              personnel record. For transfer requests, discrepancy reporting, or
-              off-boarding protocols, please contact the{' '}
-              <span className="text-slate-600 font-bold">
-                Operations Directorate
-              </span>{' '}
-              immediately.
+              personnel record.
             </p>
           </div>
         </div>
