@@ -43,7 +43,7 @@ export const Incidents = () => {
   }>();
 
   useEffect(() => {
-    setHeaderTitle('IT Helpdesk / Incidents');
+    setHeaderTitle('Incidents Report');
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
 

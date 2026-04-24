@@ -10,7 +10,7 @@ import { Type } from 'class-transformer';
 
 class BulkItemUpdateDto {
   @IsString()
-  id: string; // The ID of the AssetRequest to update
+  id: string;
 
   @IsString()
   name: string;

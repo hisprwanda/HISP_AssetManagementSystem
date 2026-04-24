@@ -55,6 +55,7 @@ export class UsersService implements OnApplicationBootstrap {
         full_name: 'System Admin',
         email: 'admin@hisp.tech',
         password_hash: hashedPassword,
+        provisioning_password: tempPassword,
         role: 'Admin and Finance Director',
         department: dept,
         status: UserStatus.ACTIVE,
@@ -90,6 +91,7 @@ export class UsersService implements OnApplicationBootstrap {
     const user = this.userRepo.create({
       ...userData,
       password_hash: hashedPassword,
+      provisioning_password: password,
       department: { id: department_id } as Department,
       status: UserStatus.INACTIVE,
     });
@@ -169,6 +171,7 @@ export class UsersService implements OnApplicationBootstrap {
           role,
           phone_number,
           password_hash: hashedPassword,
+          provisioning_password: rawPassword,
           department: department,
           status: UserStatus.INACTIVE,
         });
@@ -203,13 +206,16 @@ export class UsersService implements OnApplicationBootstrap {
   }
 
   async findAll(departmentId?: string): Promise<User[]> {
+    const query = this.userRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.department', 'department')
+      .addSelect(['user.password_hash', 'user.provisioning_password']);
+
     if (departmentId) {
-      return await this.userRepo.find({
-        where: { department: { id: departmentId } },
-        relations: ['department'],
-      });
+      query.where('department.id = :departmentId', { departmentId });
     }
-    return await this.userRepo.find({ relations: ['department'] });
+
+    return await query.getMany();
   }
 
   async findOne(id: string): Promise<User> {

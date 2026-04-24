@@ -51,12 +51,34 @@ export const PurchaseOrderModal = ({
   );
   const [vendorSignName, setVendorSignName] = useState('');
   const [vendorSignDate, setVendorSignDate] = useState('');
+  const [billTo, setBillTo] = useState('HISP Rwanda Ltd\nTIN: 103036818');
+  const [shipTo, setShipTo] = useState(
+    'HISP Rwanda LTD\nKimihurura/Rugando/KG 6 Avenue/ Plot 49\n0784506828 / 0788620185',
+  );
 
   useEffect(() => {
     if (isOpen && request) {
-      setPoNumber(
-        `PO-${request.id.slice(0, 4).toUpperCase()}-${new Date().getFullYear()}`,
-      );
+      if (request.purchase_order) {
+        const po = request.purchase_order;
+        setVendorDetails(po.vendor_details);
+        setPoNumber(po.po_number);
+        setOrderDate(po.order_date);
+        setPaymentTerms(po.payment_terms);
+        setSpecialInstructions(po.special_instructions);
+        setPeriodOfPerformance(po.period_of_performance);
+        setShippingCost(po.shipping_cost);
+        setOtherCost(po.other_cost);
+        setHispSignName(po.hisp_sign_name);
+        setHispSignDate(po.hisp_sign_date);
+        setVendorSignName(po.vendor_sign_name);
+        setVendorSignDate(po.vendor_sign_date);
+        if (po.bill_to) setBillTo(po.bill_to);
+        if (po.ship_to) setShipTo(po.ship_to);
+      } else {
+        setPoNumber(
+          `PO-${request.id.slice(0, 4).toUpperCase()}-${new Date().getFullYear()}`,
+        );
+      }
     }
   }, [isOpen, request]);
 
@@ -142,15 +164,13 @@ export const PurchaseOrderModal = ({
           <div>
             <div class="section-header">Bill To</div>
             <div class="box" style="min-height:70px">
-              <div class="value">HISP Rwanda Ltd</div>
-              <div style="font-size:10px;color:#94a3b8;margin-top:4px">TIN: 103036818</div>
+              <div class="value" style="white-space:pre-wrap">${billTo || '—'}</div>
             </div>
           </div>
           <div>
             <div class="section-header">Ship To / Deliver To</div>
             <div class="box" style="min-height:70px">
-              <div class="value">HISP Rwanda LTD</div>
-              <div style="font-size:10px;color:#94a3b8;margin-top:4px">Kimihurura/Rugando/KG 6 Avenue/ Plot 49<br>0784506828 / 0788620185</div>
+              <div class="value" style="white-space:pre-wrap">${shipTo || '—'}</div>
             </div>
           </div>
         </div>
@@ -327,27 +347,19 @@ export const PurchaseOrderModal = ({
             <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-200/50">
               <div className="space-y-2">
                 <RequisitionLabel label="Bill To" icon={FileText} />
-                <div className="bg-white/60 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-xs font-semibold text-slate-800 tracking-tight">
-                    HISP Rwanda Ltd
-                  </p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">
-                    TIN: 103036818
-                  </p>
-                </div>
+                <textarea
+                  value={billTo}
+                  onChange={(e) => setBillTo(e.target.value)}
+                  className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-xs font-bold text-slate-700 min-h-[100px] resize-none shadow-sm transition-all"
+                />
               </div>
               <div className="space-y-2">
                 <RequisitionLabel label="Ship To / Deliver To" icon={Truck} />
-                <div className="bg-white/60 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-xs font-semibold text-slate-800 tracking-tight">
-                    HISP Rwanda LTD
-                  </p>
-                  <p className="text-[10px] font-medium text-slate-500 mt-1 leading-snug">
-                    Kimihurura/Rugando/KG 6 Avenue/ Plot 49
-                    <br />
-                    0784506828 / 0788620185
-                  </p>
-                </div>
+                <textarea
+                  value={shipTo}
+                  onChange={(e) => setShipTo(e.target.value)}
+                  className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-xs font-bold text-slate-700 min-h-[100px] resize-none shadow-sm transition-all"
+                />
               </div>
             </div>
           </div>
@@ -636,6 +648,8 @@ export const PurchaseOrderModal = ({
                   vendor_sign_name: vendorSignName,
                   vendor_sign_date: vendorSignDate,
                   authorized_by: hispSignName,
+                  bill_to: billTo,
+                  ship_to: shipTo,
                 })
               }
               disabled={isPending || !vendorDetails || !poNumber}

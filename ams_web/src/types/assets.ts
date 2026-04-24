@@ -60,6 +60,8 @@ export interface POData {
   vendor_sign_name: string;
   vendor_sign_date: string;
   authorized_by: string;
+  bill_to?: string;
+  ship_to?: string;
 }
 
 export interface Asset {

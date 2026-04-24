@@ -30,6 +30,7 @@ interface Department {
   name: string;
   type: string;
   status: string;
+  users?: User[];
 }
 
 interface User {
@@ -237,17 +238,33 @@ export const Directorate = () => {
                       Status
                     </span>
                     <span
-                      className={`text-sm font-bold flex items-center gap-1 ${dept.status === 'Inactive' ? 'text-slate-400' : 'text-emerald-600'}`}
+                      className={`text-sm font-bold flex items-center gap-1 ${
+                        dept.status === 'Inactive' ||
+                        !dept.users ||
+                        dept.users.length === 0
+                          ? 'text-slate-400'
+                          : 'text-emerald-600'
+                      }`}
                     >
                       <div
-                        className={`w-1.5 h-1.5 rounded-full animate-pulse ${dept.status === 'Inactive' ? 'bg-slate-300' : 'bg-emerald-500'}`}
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          dept.status === 'Inactive' ||
+                          !dept.users ||
+                          dept.users.length === 0
+                            ? 'bg-slate-300'
+                            : 'bg-emerald-500 animate-pulse'
+                        }`}
                       />{' '}
-                      {dept.status || 'Active'}
+                      {dept.status === 'Inactive' ||
+                      !dept.users ||
+                      dept.users.length === 0
+                        ? 'Inactive'
+                        : 'Active'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
                     <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest">
-                      Personnel &rarr;
+                      {dept.users?.length || 0} Personnel &rarr;
                     </span>
                   </div>
                 </div>

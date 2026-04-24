@@ -128,20 +128,32 @@ export const Requests = () => {
 
     if (isRequesterOnly) {
       filtered = filtered.filter((r) => r.requested_by?.id === currentUser?.id);
-    } else if (isHOD) {
-      filtered = filtered.filter(
-        (r) => r.department?.id === currentUser?.department?.id,
-      );
-    } else if (isAdmin) {
-      filtered = filtered.filter((r) => r.status !== 'PENDING');
-    } else if (isCEO) {
-      filtered = filtered.filter(
-        (r) =>
-          r.status === 'CEO_REVIEW' ||
-          r.status === 'CEO_APPROVED' ||
-          r.status === 'REJECTED' ||
-          r.status === 'FULFILLED',
-      );
+    } else {
+      filtered = filtered.filter((r) => {
+        // 1. CEO Privilege: See global review pipeline + own department if HOD
+        if (isCEO) {
+          const isCeoPipeline = [
+            'CEO_REVIEW',
+            'CEO_APPROVED',
+            'REJECTED',
+            'FULFILLED',
+          ].includes(r.status);
+          const isFromMyDept = r.department?.id === currentUser?.department?.id;
+          return isCeoPipeline || (isHOD && isFromMyDept);
+        }
+
+        // 2. Admin Privilege: See everything formalized (passed HOD)
+        if (isAdmin) {
+          return r.status !== 'PENDING';
+        }
+
+        // 3. HOD Privilege: See department only
+        if (isHOD) {
+          return r.department?.id === currentUser?.department?.id;
+        }
+
+        return true;
+      });
     }
     return filtered;
   }, [requests, isRequesterOnly, isHOD, isAdmin, isCEO, currentUser]);

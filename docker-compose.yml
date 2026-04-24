@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://opera-sizes-administrators-staffing.trycloudflare.com
+      - VITE_API_URL=https://provide-prepaid-scotia-joe.trycloudflare.com
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped

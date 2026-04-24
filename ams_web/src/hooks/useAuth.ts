@@ -25,7 +25,8 @@ export const useAuth = () => {
 
   const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
 
-  const isCEO = roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
+  const isCEO =
+    roleUpper === 'CEO' || (deptUpper.includes('OFFICE OF THE CEO') && isHOD);
   const isStaff =
     roleUpper.includes('STAFF') || (!isFinanceAdmin && !isHOD && !isCEO);
 

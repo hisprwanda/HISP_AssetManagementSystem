@@ -7,10 +7,10 @@ export const AuthProvider = ({
   children: React.ReactNode;
 }): React.ReactElement => {
   const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem('hisp_token'),
+    sessionStorage.getItem('hisp_token'),
   );
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('hisp_user');
+    const saved = sessionStorage.getItem('hisp_user');
     try {
       return saved ? JSON.parse(saved) : null;
     } catch {
@@ -20,23 +20,23 @@ export const AuthProvider = ({
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('hisp_token', token);
+      sessionStorage.setItem('hisp_token', token);
     } else {
-      localStorage.removeItem('hisp_token');
-      localStorage.removeItem('hisp_user');
+      sessionStorage.removeItem('hisp_token');
+      sessionStorage.removeItem('hisp_user');
     }
   }, [token]);
 
   const login = (newToken: string, userData: User) => {
-    localStorage.setItem('hisp_user', JSON.stringify(userData));
-    localStorage.setItem('hisp_token', newToken);
+    sessionStorage.setItem('hisp_user', JSON.stringify(userData));
+    sessionStorage.setItem('hisp_token', newToken);
     setUser(userData);
     setToken(newToken);
   };
 
   const logout = () => {
-    localStorage.removeItem('hisp_token');
-    localStorage.removeItem('hisp_user');
+    sessionStorage.removeItem('hisp_token');
+    sessionStorage.removeItem('hisp_user');
     setToken(null);
     setUser(null);
   };

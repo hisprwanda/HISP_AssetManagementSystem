@@ -232,7 +232,7 @@ export const Layout = () => {
 
       if (isAdmin || isCEO) {
         baseItems.push({
-          name: 'Incident Reports',
+          name: 'Incidents Report',
           path: '/incidents',
           icon: AlertTriangle,
         });
@@ -269,7 +269,7 @@ export const Layout = () => {
 
       if (isHOD) {
         items.push({
-          name: 'Incident Reports',
+          name: 'Incidents Report',
           path: '/incidents',
           icon: AlertTriangle,
         });
@@ -353,7 +353,7 @@ export const Layout = () => {
             const isAuditActive =
               isAuditItem && auditPaths.includes(location.pathname);
             const isIncidentActive =
-              item.name === 'Incident Reports' &&
+              item.name === 'Incidents Report' &&
               (location.pathname === '/incidents' ||
                 location.pathname === '/penalties');
 
@@ -382,7 +382,7 @@ export const Layout = () => {
                           {item.name}
                         </span>
                       </div>
-                      {item.name === 'Incident Reports' &&
+                      {item.name === 'Incidents Report' &&
                         pendingIncidentsCount > 0 && (
                           <span
                             className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}

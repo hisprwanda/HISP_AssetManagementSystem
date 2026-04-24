@@ -24,6 +24,37 @@ import { api } from '../lib/api';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { Pagination } from '../components/Pagination';
 
+declare global {
+  interface Window {
+    XLSX: {
+      read: (
+        data: unknown,
+        options: unknown,
+      ) => {
+        SheetNames: string[];
+        Sheets: Record<string, unknown>;
+      };
+      utils: {
+        sheet_to_json: (
+          worksheet: unknown,
+          options?: unknown,
+        ) => Record<string, unknown>[];
+      };
+    };
+    ExcelJS: unknown;
+  }
+}
+
+interface Department {
+  id: string;
+  name: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
 const getCategoryIcon = (categoryName?: string) => {
   const name = (categoryName || '').toLowerCase();
   if (name.includes('laptop') || name.includes('computer')) return Laptop;
@@ -57,10 +88,18 @@ export const AssetTrail = () => {
   useEffect(() => {
     setHeaderTitle('Asset Trail');
 
-    if (!(window as unknown as { XLSX: unknown }).XLSX) {
+    if (!window.XLSX) {
       const script = document.createElement('script');
       script.src =
         'https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
+    if (!window.ExcelJS) {
+      const script = document.createElement('script');
+      script.src =
+        'https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js';
       script.async = true;
       document.body.appendChild(script);
     }
@@ -83,6 +122,22 @@ export const AssetTrail = () => {
     queryKey: ['assets'],
     queryFn: async () => {
       const response = await api.get('/assets');
+      return response.data;
+    },
+  });
+
+  const { data: allDepartments } = useQuery<Department[]>({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const response = await api.get('/departments');
+      return response.data;
+    },
+  });
+
+  const { data: allCategories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await api.get('/categories');
       return response.data;
     },
   });
@@ -260,46 +315,138 @@ export const AssetTrail = () => {
     document.body.removeChild(link);
   };
 
-  const handleDownloadTemplate = () => {
-    const headers = [
-      'Tag ID',
-      'Asset Name',
-      'Category',
-      'Serial Number',
-      'Department',
-      'Personnel',
-      'Location',
-      'Status',
-      'Purchase Cost',
-      'Current Value',
-      'Purchase Date',
-    ];
-    const csvContent =
-      headers.join(',') +
-      '\n"TAG-001","MacBook Pro M2","LAPTOP","SN12345678","ICT","Personnel Name","HQ","ASSIGNED","2500000","2100000","2024-01-15"';
+  const handleDownloadTemplate = async () => {
+    if (!window.ExcelJS) {
+      alert(
+        'Excel provisioning engine is still loading. Please wait a moment and try again.',
+      );
+      return;
+    }
 
-    const blob = new Blob(['\ufeff' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
+    const workbook = new (window.ExcelJS as any).Workbook(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const worksheet = workbook.addWorksheet('Asset Registry Template');
+    const dataSheet = workbook.addWorksheet('Valid Data');
+    dataSheet.state = 'hidden';
+
+    // 1. Setup Data Sheet
+    const deptNames = allDepartments?.map((d) => d.name) ||
+      deptOptions || ['ICT', 'Admin and Finance', 'Office of the CEO'];
+
+    const catNames = allCategories?.map((c) => c.name) ||
+      categoryOptions || ['Laptops', 'Monitors', 'Furniture'];
+
+    const statusOptions = [
+      'IN_STOCK',
+      'ASSIGNED',
+      'BROKEN',
+      'MISSING',
+      'DISPOSED',
+    ];
+
+    deptNames.forEach((name, i) => {
+      dataSheet.getCell(i + 1, 1).value = name;
+    });
+
+    catNames.forEach((name, i) => {
+      dataSheet.getCell(i + 1, 2).value = name;
+    });
+
+    statusOptions.forEach((status, i) => {
+      dataSheet.getCell(i + 1, 3).value = status;
+    });
+
+    // 2. Setup Template Sheet
+    worksheet.columns = [
+      { header: 'Tag ID', key: 'tag_id', width: 15 },
+      { header: 'Asset Name', key: 'name', width: 25 },
+      { header: 'Category', key: 'category', width: 20 },
+      { header: 'Serial Number', key: 'serial', width: 20 },
+      { header: 'Department', key: 'dept', width: 25 },
+      { header: 'Personnel', key: 'personnel', width: 20 },
+      { header: 'Location', key: 'location', width: 15 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Purchase Cost', key: 'cost', width: 15 },
+      { header: 'Current Value', key: 'value', width: 15 },
+      { header: 'Purchase Date', key: 'date', width: 15 },
+    ];
+
+    // Add example row
+    worksheet.addRow({
+      tag_id: 'TAG-001',
+      name: 'MacBook Pro M2',
+      category: catNames[0] || 'Laptops',
+      serial: 'SN12345678',
+      dept: deptNames[0] || 'ICT',
+      personnel: 'Name of Staff',
+      location: 'HQ',
+      status: 'IN_STOCK',
+      cost: 2500000,
+      value: 2100000,
+      date: '2024-01-15',
+    });
+
+    // 3. Add Data Validations
+    for (let i = 2; i <= 500; i++) {
+      // Category Dropdown (Column C)
+      worksheet.getCell(`C${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`'Valid Data'!$B$1:$B$${catNames.length}`],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Category',
+        error: 'Please select an asset category from the dropdown.',
+      };
+
+      // Department Dropdown (Column E)
+      worksheet.getCell(`E${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`'Valid Data'!$A$1:$A$${deptNames.length}`],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Department',
+        error: 'Please select a valid organizational unit from the dropdown.',
+      };
+
+      // Status Dropdown (Column H)
+      worksheet.getCell(`H${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`'Valid Data'!$C$1:$C$${statusOptions.length}`],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Status',
+        error: 'Please select a valid asset status from the dropdown.',
+      };
+    }
+
+    // 4. Styling
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFF8000' },
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.height = 25;
+
+    // 5. Save
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'hisp_bulk_asset_template.csv');
+    link.setAttribute('download', 'hisp_asset_registry_template.xlsx');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const xlsx = (
-      window as unknown as {
-        XLSX: {
-          read: (data: unknown, options: unknown) => unknown;
-          utils: { sheet_to_json: (ws: unknown, opts: unknown) => unknown[] };
-        };
-      }
-    ).XLSX;
+    const xlsx = window.XLSX;
     if (!file || !xlsx) return;
 
     const reader = new FileReader();
@@ -645,10 +792,10 @@ export const AssetTrail = () => {
                 <button
                   onClick={handleDownloadTemplate}
                   className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-semibold text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                  title="Download CSV Template"
+                  title="Download Excel Template"
                 >
                   <FileSpreadsheet className="w-3 h-3" />
-                  Download csv Template
+                  Download Excel Template
                 </button>
               </div>
             </div>

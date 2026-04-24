@@ -53,12 +53,17 @@ export const StaffOverview = () => {
       userAssetsCount: userAssets.length,
       recentOutcomes: incidents
         ? incidents
-            .filter(
-              (i) =>
-                i.reported_by?.id === currentUser?.id &&
-                (i.investigation_status === 'ACCEPTED' ||
-                  i.investigation_status === 'DENIED'),
-            )
+            .filter((i) => {
+              const isRelevant =
+                i.reported_by?.id === currentUser?.id ||
+                i.asset?.assigned_to?.id === currentUser?.id;
+              const isOutcome =
+                i.investigation_status === 'ACCEPTED' ||
+                i.investigation_status === 'DENIED' ||
+                i.status === 'REJECTED_LIABILITY' ||
+                i.status?.startsWith('RESOLVED');
+              return isRelevant && isOutcome;
+            })
             .sort(
               (a, b) =>
                 new Date(b.reported_at).getTime() -
@@ -152,17 +157,24 @@ export const StaffOverview = () => {
                         <td className="px-4 py-3">
                           <div
                             className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-transparent ${
-                              incident.investigation_status === 'ACCEPTED'
-                                ? 'bg-orange-50 text-orange-950 border-orange-200'
-                                : 'bg-orange-50 text-orange-600 border-orange-100'
+                              incident.status === 'REJECTED_LIABILITY' ||
+                              incident.investigation_status === 'DENIED'
+                                ? 'bg-red-50 text-red-600 border-red-100'
+                                : 'bg-orange-50 text-orange-950 border-orange-200'
                             }`}
                           >
                             <span
-                              className={`w-1 h-1 rounded-full ${incident.investigation_status === 'ACCEPTED' ? 'bg-white' : 'bg-orange-600'}`}
+                              className={`w-1 h-1 rounded-full ${
+                                incident.status === 'REJECTED_LIABILITY' ||
+                                incident.investigation_status === 'DENIED'
+                                  ? 'bg-red-500'
+                                  : 'bg-orange-500'
+                              }`}
                             />
-                            {incident.investigation_status === 'ACCEPTED'
-                              ? 'Approved'
-                              : 'Denied'}
+                            {incident.status === 'REJECTED_LIABILITY' ||
+                            incident.investigation_status === 'DENIED'
+                              ? 'Denied'
+                              : 'Approved'}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -184,11 +196,17 @@ export const StaffOverview = () => {
                           <div className="flex items-start gap-4">
                             <div className="flex-1 max-w-sm">
                               <p className="text-xs font-semibold text-slate-500 leading-relaxed italic line-clamp-1">
-                                {incident.investigation_status === 'ACCEPTED'
-                                  ? 'Replacement requisition initiated. Check My Requests tab.'
-                                  : `Claim Denied: ${incident.investigation_remarks || 'Awaiting financial resolution.'}`}
+                                {incident.status === 'REJECTED_LIABILITY' ||
+                                incident.investigation_status === 'DENIED'
+                                  ? `Claim Denied: ${incident.resolution_notes || incident.investigation_remarks || 'Awaiting financial resolution.'}`
+                                  : incident.status === 'RESOLVED_REPLACED'
+                                    ? 'Replacement requisition initiated. Check My Requests tab.'
+                                    : incident.resolution_notes ||
+                                      incident.investigation_remarks ||
+                                      'Investigation complete.'}
                               </p>
-                              {incident.investigation_status === 'DENIED' && (
+                              {(incident.investigation_status === 'DENIED' ||
+                                incident.status === 'REJECTED_LIABILITY') && (
                                 <div className="mt-1.5 flex items-center gap-3">
                                   {incident.penalty_resolved_at ? (
                                     <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[9px] uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm animate-in zoom-in duration-300">
@@ -217,10 +235,10 @@ export const StaffOverview = () => {
                                           : 'Please contact the Directorate of Finance and Administration (DFA) regarding penalty resolution and asset clearance.',
                                       )
                                     }
-                                    className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-                                    title="Resolution Instructions"
+                                    className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-500 transition-colors shadow-sm"
+                                    title="View Resolution Instructions"
                                   >
-                                    <AlertCircle className="w-3 h-3 rotate-180" />
+                                    View
                                   </button>
                                 </div>
                               )}
@@ -435,15 +453,7 @@ export const StaffOverview = () => {
 
       {resolutionNotice && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-orange-950/20 backdrop-blur-md">
-          <div className="bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full border border-white/20 relative">
-            <div className="absolute top-0 right-0 p-4">
-              <button
-                onClick={() => setResolutionNotice(null)}
-                className="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 font-semibold"
-              >
-                ✕
-              </button>
-            </div>
+          <div className="bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full border border-white/20 relative flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
               <ShieldAlert className="w-8 h-8 text-[#ff8000]" />
             </div>

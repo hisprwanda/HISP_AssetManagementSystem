@@ -31,6 +31,9 @@ export class User {
   @Column({ select: false })
   password_hash: string;
 
+  @Column({ nullable: true })
+  provisioning_password: string;
+
   @Column()
   role: string; // 'Staff', 'HOD', 'Admin and Finance Director', 'Finance Officer', 'Operations Officer', 'SYSTEM_ADMIN', 'Office of the CEO'
 

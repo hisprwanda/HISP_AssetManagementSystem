@@ -148,18 +148,15 @@ export class NotificationsService {
 
     for (const user of allUsers) {
       const roleUpper = user.role.toUpperCase();
-      const isAdmin =
-        roleUpper.includes('SYSTEM_ADMIN') ||
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('FINANCE') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
       const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
+      const isCEO =
+        roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
 
       if (user.id === reporterId) {
         recipients.push({ user, role: 'reporter' });
       } else if (isHOD && user.department?.id === departmentId) {
         recipients.push({ user, role: 'hod' });
-      } else if (isAdmin) {
+      } else if (isCEO) {
         recipients.push({ user, role: 'admin' });
       }
     }

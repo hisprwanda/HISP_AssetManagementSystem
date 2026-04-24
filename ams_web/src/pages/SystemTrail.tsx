@@ -35,7 +35,13 @@ declare global {
         sheet_to_json: (worksheet: unknown) => Record<string, unknown>[];
       };
     };
+    ExcelJS: unknown;
   }
+}
+
+interface Department {
+  id: string;
+  name: string;
 }
 
 interface User {
@@ -46,6 +52,8 @@ interface User {
   role: string;
   department?: { name: string; type: string };
   status?: string;
+  password_hash?: string;
+  provisioning_password?: string;
   created_at: string;
 }
 
@@ -82,6 +90,13 @@ export const SystemTrail = () => {
       script.async = true;
       document.body.appendChild(script);
     }
+    if (!window.ExcelJS) {
+      const script = document.createElement('script');
+      script.src =
+        'https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
     return () => setHeaderTitle('');
   }, [setHeaderTitle]);
 
@@ -102,6 +117,14 @@ export const SystemTrail = () => {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await api.get('/users');
+      return response.data;
+    },
+  });
+
+  const { data: allDepartments } = useQuery<Department[]>({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const response = await api.get('/departments');
       return response.data;
     },
   });
@@ -208,28 +231,94 @@ export const SystemTrail = () => {
     },
   });
 
-  const handleDownloadTemplate = () => {
-    const headers = [
-      'Full Name',
-      'Email',
-      'Phone Number',
-      'Role',
-      'Department',
-    ];
-    const csvContent =
-      headers.join(',') +
-      '\n"Jane Doe","jane.doe@example.com","0780000000","STAFF","ICT"';
+  const handleDownloadTemplate = async () => {
+    if (!window.ExcelJS) {
+      alert(
+        'Excel provisioning engine is still loading. Please wait a moment and try again.',
+      );
+      return;
+    }
 
-    const blob = new Blob(['\ufeff' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
+    const workbook = new (window.ExcelJS as any).Workbook(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const worksheet = workbook.addWorksheet('Registration Template');
+    const dataSheet = workbook.addWorksheet('Valid Data');
+    dataSheet.state = 'hidden';
+
+    const deptNames = allDepartments?.map((d) => d.name) ||
+      deptOptions || ['Admin and Finance', 'Office of the CEO'];
+
+    const roles = [
+      'STAFF',
+      'HOD',
+      'FINANCE_OFFICER',
+      'OPERATIONS_OFFICER',
+      'ADMIN AND FINANCE DIRECTOR',
+    ];
+
+    deptNames.forEach((name, i) => {
+      dataSheet.getCell(i + 1, 1).value = name;
+    });
+
+    roles.forEach((role, i) => {
+      dataSheet.getCell(i + 1, 2).value = role;
+    });
+    worksheet.columns = [
+      { header: 'Full Name', key: 'name', width: 25 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Phone Number', key: 'phone', width: 20 },
+      { header: 'Role', key: 'role', width: 20 },
+      { header: 'Department', key: 'dept', width: 30 },
+      { header: 'Password', key: 'pass', width: 15 },
+    ];
+    worksheet.addRow({
+      name: 'Name of Staff',
+      email: '[EMAIL_ADDRESS]',
+      phone: '0780000000',
+      role: 'STAFF',
+      dept: deptNames[0] || 'ICT',
+      pass: 'xxxxxxxxx',
+    });
+
+    for (let i = 2; i <= 500; i++) {
+      worksheet.getCell(`D${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`'Valid Data'!$B$1:$B$${roles.length}`],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Role',
+        error: 'Please select a role from the dropdown list.',
+      };
+      worksheet.getCell(`E${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`'Valid Data'!$A$1:$A$${deptNames.length}`],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Department',
+        error: 'Please select a valid organizational unit from the dropdown.',
+      };
+    }
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFF8000' },
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.height = 25;
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'hisp_bulk_user_template.csv');
+    link.setAttribute('download', 'hisp_bulk_provisioning_template.xlsx');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleExportLogs = () => {
@@ -247,6 +336,7 @@ export const SystemTrail = () => {
       'Phone Number',
       'Role',
       'Department',
+      'Provisioning Password',
       'Provisioned At',
     ];
 
@@ -263,6 +353,7 @@ export const SystemTrail = () => {
       escapeCSV(u.phone_number || 'N/A'),
       escapeCSV(u.role).toUpperCase(),
       escapeCSV(u.department?.name || 'Unassigned'),
+      escapeCSV(u.provisioning_password || '********'),
       escapeCSV(new Date(u.created_at).toLocaleDateString()),
     ]);
 
@@ -659,10 +750,10 @@ export const SystemTrail = () => {
                 <button
                   onClick={handleDownloadTemplate}
                   className="px-2.5 py-1.5 bg-orange-50 text-[#ff8000] border border-orange-100 rounded-lg font-semibold text-[8px] uppercase tracking-widest hover:bg-[#ff8000] hover:text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                  title="Download CSV Template"
+                  title="Download Excel Template"
                 >
                   <FileSpreadsheet className="w-3 h-3" />
-                  Download csv Template
+                  Download Excel Template
                 </button>
               </div>
             </div>

@@ -36,6 +36,11 @@ import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 import { Pagination } from '../components/Pagination';
 
+interface Department {
+  id: string;
+  name: string;
+}
+
 export const CEOOverview = () => {
   const navigate = useNavigate();
   const { user: currentUser, isCEO } = useAuth();
@@ -76,6 +81,15 @@ export const CEOOverview = () => {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await api.get('/users');
+      return response.data;
+    },
+    enabled: isCEO,
+  });
+
+  const { data: allDepartments } = useQuery<Department[]>({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const response = await api.get('/departments');
       return response.data;
     },
     enabled: isCEO,
@@ -141,6 +155,10 @@ export const CEOOverview = () => {
       totalUsers: users?.length || 0,
       totalDepreciation,
       topDepartments,
+      activeDeptCount:
+        allDepartments?.filter(
+          (d) => d.status === 'Active' || (d.users && d.users.length > 0),
+        ).length || 0,
       categories: Object.entries(categories).sort(
         (a, b) => b[1].value - a[1].value,
       ),
@@ -174,7 +192,7 @@ export const CEOOverview = () => {
           new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
       ),
     };
-  }, [assets, requests, users, incidents, currentUser]);
+  }, [assets, requests, users, incidents, currentUser, allDepartments]);
 
   const paginatedPersonalAssets = useMemo(() => {
     if (!stats) return [];
@@ -288,7 +306,7 @@ export const CEOOverview = () => {
           },
           {
             label: 'Directorates',
-            value: stats.topDepartments.length,
+            value: stats.activeDeptCount,
             unit: 'ACTIVE',
             icon: Building2,
             color: 'slate',
@@ -299,13 +317,13 @@ export const CEOOverview = () => {
           <Link
             key={i}
             to={stat.path}
-            className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block relative overflow-hidden"
+            className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-colors block relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
                 <stat.icon className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" />
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-4 h-4 text-slate-200 group-hover:text-[#ff8000] transition-all" />
             </div>
             <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
@@ -471,7 +489,7 @@ export const CEOOverview = () => {
                   </div>
                   <Link
                     to="/requests"
-                    className="px-8 py-4 bg-white text-[#ff8000] rounded-2xl text-[11px] font-semibold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap"
+                    className="px-8 py-4 bg-white text-[#ff8000] rounded-2xl text-[11px] font-semibold uppercase tracking-widest transition-all active:scale-95 shadow-2xl whitespace-nowrap"
                   >
                     Review Queue
                   </Link>
@@ -508,7 +526,7 @@ export const CEOOverview = () => {
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#ff8000] transform -translate-x-full group-hover:translate-x-0 transition-transform" />
                       <div className="flex items-center gap-6">
-                        <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center border border-slate-100 text-[#ff8000] group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center border border-slate-100 text-[#ff8000] transition-transform">
                           <FileText className="w-6 h-6" />
                         </div>
                         <div className="min-w-0">
@@ -668,7 +686,7 @@ export const CEOOverview = () => {
                 className="mt-8 block w-full py-4 bg-slate-50 hover:bg-[#ff8000] hover:text-white rounded-2xl text-center text-[10px] font-semibold uppercase tracking-widest text-slate-500 transition-all border border-slate-100 group shadow-inner"
               >
                 Corporate Roster{' '}
-                <ArrowRight className="w-3.5 h-3.5 inline ml-1 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 inline ml-1 transition-transform" />
               </Link>
             </div>
 
