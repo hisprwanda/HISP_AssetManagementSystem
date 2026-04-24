@@ -32,7 +32,10 @@ declare global {
         Sheets: Record<string, unknown>;
       };
       utils: {
-        sheet_to_json: (worksheet: unknown) => Record<string, unknown>[];
+        sheet_to_json: (
+          worksheet: unknown,
+          options?: unknown,
+        ) => Record<string, unknown>[];
       };
     };
     ExcelJS: unknown;

@@ -39,6 +39,8 @@ import { Pagination } from '../components/Pagination';
 interface Department {
   id: string;
   name: string;
+  status?: string;
+  users?: any[];
 }
 
 export const CEOOverview = () => {
