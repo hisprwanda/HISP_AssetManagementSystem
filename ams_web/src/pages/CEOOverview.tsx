@@ -40,7 +40,7 @@ interface Department {
   id: string;
   name: string;
   status?: string;
-  users?: any[];
+  users?: User[];
 }
 
 export const CEOOverview = () => {
