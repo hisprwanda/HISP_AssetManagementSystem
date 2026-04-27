@@ -62,6 +62,8 @@ export interface POData {
   authorized_by: string;
   bill_to?: string;
   ship_to?: string;
+  scanned_po_url?: string;
+  is_digitally_signed?: boolean;
 }
 
 export interface Asset {
@@ -90,6 +92,7 @@ export interface Asset {
   disposal_date?: string;
   disposal_reason?: string;
   assignment_history?: AssetAssignment[];
+  incidents?: AssetIncident[];
   is_shared?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -153,12 +156,14 @@ export interface AssetIncident {
   status:
     | 'PENDING'
     | 'IN_REPAIR'
+    | 'CEO_REVIEW'
     | 'RESOLVED_FIXED'
     | 'RESOLVED_REPLACED'
     | 'REJECTED_LIABILITY';
   investigation_status?: string; // Legacy support
   resolution_notes?: string;
   investigation_remarks?: string; // Legacy support
+  ceo_remarks?: string;
   penalty_amount?: number;
   penalty_resolved_at?: string | null;
   reported_at: string;

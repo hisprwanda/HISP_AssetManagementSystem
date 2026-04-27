@@ -89,7 +89,7 @@ export class Asset {
   @Column({ type: 'varchar', nullable: true })
   assigned_to_user_id: string | null;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'assigned_to_user_id' })
   assigned_to?: User | null;
 

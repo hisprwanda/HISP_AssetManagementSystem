@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, FileText, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetRequest } from '../types/assets';
+import { useAuth } from '../hooks/useAuth';
 
 interface FormalizeBulkRequestModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface RequisitionItem {
 export const FormalizeBulkRequestModal: React.FC<
   FormalizeBulkRequestModalProps
 > = ({ isOpen, onClose, batchNumber, requests }) => {
+  const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [items, setItems] = useState<RequisitionItem[]>([]);
   const [transportFees, setTransportFees] = useState(0);
@@ -117,8 +119,10 @@ export const FormalizeBulkRequestModal: React.FC<
               Requisition Officialized
             </h2>
             <p className="text-slate-500 font-medium">
-              The official purchase requisition for batch {batchNumber} has been
-              sent to Admin.
+              The official purchase requisition for batch {batchNumber} has been{' '}
+              {isAdmin
+                ? 'forwarded to the Office of the CEO for final review.'
+                : 'sent to Admin.'}
             </p>
           </div>
         ) : (

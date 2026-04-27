@@ -55,6 +55,11 @@ export const PurchaseOrderModal = ({
   const [shipTo, setShipTo] = useState(
     'HISP Rwanda LTD\nKimihurura/Rugando/KG 6 Avenue/ Plot 49\n0784506828 / 0788620185',
   );
+  const [isDigitallySigned, setIsDigitallySigned] = useState(false);
+  const [signingMethod, setSigningMethod] = useState<'digital' | 'physical'>(
+    'digital',
+  );
+  const [scannedPoUrl, setScannedPoUrl] = useState('');
 
   useEffect(() => {
     if (isOpen && request) {
@@ -74,9 +79,17 @@ export const PurchaseOrderModal = ({
         setVendorSignDate(po.vendor_sign_date);
         if (po.bill_to) setBillTo(po.bill_to);
         if (po.ship_to) setShipTo(po.ship_to);
+        setIsDigitallySigned(!!po.is_digitally_signed);
+        setScannedPoUrl(po.scanned_po_url || '');
       } else {
         setPoNumber(
           `PO-${request.id.slice(0, 4).toUpperCase()}-${new Date().getFullYear()}`,
+        );
+      }
+
+      if (request.purchase_order) {
+        setSigningMethod(
+          request.purchase_order.is_digitally_signed ? 'digital' : 'physical',
         );
       }
     }
@@ -211,7 +224,7 @@ export const PurchaseOrderModal = ({
             <div class="box">
               <div class="label">Name &amp; Title</div><div class="value">${hispSignName || '—'}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-                <div><div class="label">Signature</div><div class="sign-line"></div></div>
+                <div><div class="label">Signature</div><div class="sign-line" style="font-family:'Dancing Script', cursive;font-size:24px;text-align:center;border:none;display:flex;align-items:center;justify-content:center">${hispSignName}</div></div>
                 <div><div class="label">Date</div><div class="value" style="margin-top:8px">${hispSignDate}</div></div>
               </div>
             </div>
@@ -221,12 +234,35 @@ export const PurchaseOrderModal = ({
             <div class="box">
               <div class="label">Name &amp; Title</div><div class="value">${vendorSignName || '—'}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-                <div><div class="label">Signature</div><div class="sign-line"></div></div>
+                <div>
+                  <div class="label">Signature</div>
+                  <div class="sign-line" style="${isDigitallySigned ? "font-family:'Dancing Script', cursive;font-size:24px;text-align:center;border:none;display:flex;align-items:center;justify-content:center" : ''}">
+                    ${isDigitallySigned ? vendorSignName : ''}
+                  </div>
+                </div>
                 <div><div class="label">Date</div><div class="value" style="margin-top:8px">${vendorSignDate || '—'}</div></div>
               </div>
             </div>
           </div>
         </div>
+
+        ${
+          isDigitallySigned
+            ? `
+        <div style="margin-top:20px;padding:12px;background:#f0fdf4;border:1px solid #dcfce7;border-radius:8px;text-align:center">
+          <span style="color:#166534;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px">✓ Digitally Signed & Accepted via HISP AMS</span>
+        </div>`
+            : ''
+        }
+
+        ${
+          scannedPoUrl
+            ? `
+        <div style="margin-top:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;text-align:center">
+          <span style="color:#64748b;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px">Permanent Scanned Record Attached to System</span>
+        </div>`
+            : ''
+        }
 
         <div class="footer">
           <p>Financial commitment is only established upon mutual signature of this Purchase Order by both HISP and the vendor.</p>
@@ -505,7 +541,35 @@ export const PurchaseOrderModal = ({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-10 pt-4">
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
+            <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
+              <PenTool className="w-4 h-4 text-[#ff8000]" />
+              Signing Authorization Method
+            </h3>
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setSigningMethod('digital');
+                  setIsDigitallySigned(true);
+                }}
+                className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${signingMethod === 'digital' ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Digital Signing
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSigningMethod('physical');
+                  setIsDigitallySigned(false);
+                }}
+                className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${signingMethod === 'physical' ? 'bg-white text-[#ff8000] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Physical Signing
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-10">
             <div className="space-y-4">
               <RequisitionLabel
                 label="HISP Authorized Signatory"
@@ -514,11 +578,11 @@ export const PurchaseOrderModal = ({
               <div className="bg-orange-50/30 p-8 rounded-[2.5rem] border border-orange-100 space-y-6">
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest pl-1">
-                    Name & Title *
+                    Name & Title {signingMethod === 'digital' ? '*' : ''}
                   </label>
                   <input
                     type="text"
-                    required
+                    required={signingMethod === 'digital'}
                     value={hispSignName}
                     onChange={(e) => setHispSignName(e.target.value)}
                     placeholder="Name and Title of authorized HISP signatory..."
@@ -530,28 +594,56 @@ export const PurchaseOrderModal = ({
                     <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Signature
                     </label>
-                    <div className="h-10 border-b border-orange-200 flex items-center justify-center text-[10px] italic text-orange-300 font-medium">
-                      Digital Trace Active
+                    <div className="h-10 border-b border-orange-200 flex items-center justify-center text-[10px] italic text-orange-300 font-medium uppercase tracking-widest">
+                      {signingMethod === 'digital'
+                        ? 'Digital Trace Active'
+                        : 'Physical Sign Area'}
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-semibold text-[#ff8000] uppercase tracking-widest pl-1">
                       Sign Date
                     </label>
-                    <input
-                      type="date"
-                      value={hispSignDate}
-                      onChange={(e) => setHispSignDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-semibold text-slate-700 outline-none"
-                    />
+                    {signingMethod === 'digital' ? (
+                      <input
+                        type="date"
+                        value={hispSignDate}
+                        onChange={(e) => setHispSignDate(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-semibold text-slate-700 outline-none"
+                      />
+                    ) : (
+                      <div className="h-10 border-b border-orange-200 flex items-center justify-center text-[10px] italic text-orange-300 font-medium uppercase tracking-widest">
+                        Date Manual Fill
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <RequisitionLabel label="Vendor Acceptance" icon={PenTool} />
-              <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+              <div className="flex items-center justify-between">
+                <RequisitionLabel label="Vendor Acceptance" icon={PenTool} />
+                {signingMethod === 'digital' && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      Vendor Present?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsDigitallySigned(!isDigitallySigned)}
+                      className={`w-8 h-4 rounded-full transition-all relative ${isDigitallySigned ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${isDigitallySigned ? 'left-4.5' : 'left-0.5'}`}
+                      />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div
+                className={`${isDigitallySigned && signingMethod === 'digital' ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'} p-8 rounded-[2.5rem] border space-y-6 transition-colors`}
+              >
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                     Name & Title
@@ -561,7 +653,7 @@ export const PurchaseOrderModal = ({
                     value={vendorSignName}
                     onChange={(e) => setVendorSignName(e.target.value)}
                     placeholder="Vendor signatory name..."
-                    className="w-full px-5 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 text-xs font-semibold text-slate-800 shadow-sm transition-all"
+                    className={`w-full px-5 py-3 bg-white border rounded-2xl outline-none focus:ring-4 text-xs font-semibold text-slate-800 shadow-sm transition-all ${isDigitallySigned && signingMethod === 'digital' ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-slate-200 focus:ring-slate-500/10 focus:border-slate-500'}`}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -569,20 +661,42 @@ export const PurchaseOrderModal = ({
                     <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Stamp/Signature
                     </label>
-                    <div className="h-10 border-b border-slate-200"></div>
+                    {isDigitallySigned && signingMethod === 'digital' ? (
+                      <div className="h-10 border-b border-emerald-200 flex items-center justify-center text-lg font-['Dancing_Script',_cursive] text-emerald-600 font-bold">
+                        {vendorSignName || 'Awaiting Signature'}
+                      </div>
+                    ) : (
+                      <div className="h-10 border-b border-slate-200 flex items-center justify-center text-[10px] italic text-slate-300 font-medium uppercase tracking-widest">
+                        {signingMethod === 'digital'
+                          ? 'Manual Fill'
+                          : 'Physical Stamp Area'}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
                       Sign Date
                     </label>
-                    <input
-                      type="date"
-                      value={vendorSignDate}
-                      onChange={(e) => setVendorSignDate(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none"
-                    />
+                    {signingMethod === 'digital' ? (
+                      <input
+                        type="date"
+                        value={vendorSignDate}
+                        onChange={(e) => setVendorSignDate(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none"
+                      />
+                    ) : (
+                      <div className="h-10 border-b border-slate-200 flex items-center justify-center text-[10px] italic text-slate-300 font-medium uppercase tracking-widest">
+                        Date Manual Fill
+                      </div>
+                    )}
                   </div>
                 </div>
+                {isDigitallySigned && signingMethod === 'digital' && (
+                  <p className="text-[9px] font-bold text-emerald-600 italic bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                    * By typing the name above, the vendor agrees to the terms
+                    of this Purchase Order digitally.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -650,6 +764,8 @@ export const PurchaseOrderModal = ({
                   authorized_by: hispSignName,
                   bill_to: billTo,
                   ship_to: shipTo,
+                  is_digitally_signed: signingMethod === 'digital',
+                  scanned_po_url: scannedPoUrl,
                 })
               }
               disabled={isPending || !vendorDetails || !poNumber}
@@ -666,6 +782,13 @@ export const PurchaseOrderModal = ({
           </div>
         </div>
       </div>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+      `,
+        }}
+      />
     </>
   );
 };

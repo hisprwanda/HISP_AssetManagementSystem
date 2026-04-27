@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Banknote,
   ArrowRight,
@@ -16,24 +16,53 @@ import {
   RotateCcw,
   CheckCircle2,
   AlertTriangle,
+  Box,
+  Eye,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { Asset, AssetRequest, User } from '../types/assets';
+import {
+  Asset,
+  AssetRequest,
+  User,
+  AssetIncident as AssetIncidentType,
+} from '../types/assets';
 import { Pagination } from '../components/Pagination';
 import { toast } from 'react-hot-toast';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { DamageReportModal } from '../components/DamageReportModal';
+import { ViewAssetModal } from '../components/ViewAssetModal';
+import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+import { AssetAssignment as AssetAssignmentType } from '../types/assets';
 
 export const AdminOverview = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user: currentUser } = useAuth();
   const [requestsPage, setRequestsPage] = useState(1);
+  const [inventoryPage, setInventoryPage] = useState(1);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [finalizeAsset, setFinalizeAsset] = useState<Asset | null>(null);
   const [damageAsset, setDamageAsset] = useState<Asset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [signingAssignment, setSigningAssignment] =
+    useState<AssetAssignmentType | null>(null);
+  const [incidentToSettle, setIncidentToSettle] =
+    useState<AssetIncidentType | null>(null);
   const itemsPerPage = 10;
+
+  const queryClient = useQueryClient();
+  const penaltyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.patch(`/asset-incidents/${id}/resolve-penalty`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
+      toast.success('Penalty settled successfully.');
+      setIncidentToSettle(null);
+    },
+  });
 
   const { data: assets } = useQuery<Asset[]>({
     queryKey: ['assets'],
@@ -58,6 +87,14 @@ export const AdminOverview = () => {
       return response.data;
     },
     enabled: isAdmin,
+  });
+
+  const { data: incidents } = useQuery<AssetIncidentType[]>({
+    queryKey: ['asset-incidents'],
+    queryFn: async () => {
+      const response = await api.get('/asset-incidents');
+      return response.data;
+    },
   });
 
   const stats = useMemo(() => {
@@ -126,8 +163,25 @@ export const AdminOverview = () => {
             new Date(a.created_at || 0).getTime(),
         ),
       pendingReturns: assets.filter((a) => a.status === 'RETURN_PENDING'),
+      userAssets: assets.filter((a) => {
+        const isAssigned = a.assigned_to?.id === currentUser?.id;
+        const hasActivePenalty = incidents?.some(
+          (i) =>
+            i.asset?.id === a.id &&
+            i.reported_by?.id === currentUser?.id &&
+            i.status === 'REJECTED_LIABILITY' &&
+            !i.penalty_resolved_at,
+        );
+        return isAssigned || hasActivePenalty;
+      }),
+      personalPenalties: incidents?.filter(
+        (i) =>
+          i.reported_by?.id === currentUser?.id &&
+          i.status === 'REJECTED_LIABILITY' &&
+          !i.penalty_resolved_at,
+      ),
     };
-  }, [assets, requests, users]);
+  }, [assets, requests, users, currentUser, incidents]);
 
   const paginatedRequests = useMemo(() => {
     if (!stats) return [];
@@ -137,6 +191,16 @@ export const AdminOverview = () => {
 
   const requestsTotalPages = Math.ceil(
     (stats?.recentRequests.length || 0) / itemsPerPage,
+  );
+
+  const paginatedUserAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (inventoryPage - 1) * itemsPerPage;
+    return stats.userAssets.slice(start, start + itemsPerPage);
+  }, [stats, inventoryPage, itemsPerPage]);
+
+  const inventoryTotalPages = Math.ceil(
+    (stats?.userAssets.length || 0) / itemsPerPage,
   );
 
   if (!stats) return null;
@@ -232,7 +296,7 @@ export const AdminOverview = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-9 space-y-6">
           {((stats.pendingRequestsCount || 0) > 0 ||
             (stats.brokenAssets || 0) > 0) && (
             <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 relative overflow-hidden group">
@@ -267,6 +331,39 @@ export const AdminOverview = () => {
                   >
                     Resolve Requisitions
                   </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {stats.personalPenalties && stats.personalPenalties.length > 0 && (
+            <div className="bg-red-50 border border-red-100 rounded-xl p-5 relative overflow-hidden group animate-in slide-in-from-top-4 duration-500 mb-6">
+              <div className="absolute top-0 right-0 w-32 h-full bg-red-500/5 blur-[60px] -translate-y-1/2 translate-x-1/2" />
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-red-200 shadow-sm shrink-0">
+                    <Banknote className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-red-900 uppercase tracking-[0.1em]">
+                      Pending Liability Penalty
+                    </h3>
+                    <p className="text-red-500 text-[10px] font-medium leading-relaxed">
+                      You have {stats.personalPenalties.length} unresolved
+                      liability penalty(ies) following a recent incident
+                      investigation.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() =>
+                      setIncidentToSettle(stats.personalPenalties![0])
+                    }
+                    className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all shadow-md shadow-red-100 flex items-center gap-2"
+                  >
+                    <Banknote className="w-3.5 h-3.5" /> Settle Penalty
+                  </button>
                 </div>
               </div>
             </div>
@@ -439,6 +536,201 @@ export const AdminOverview = () => {
             }}
           />
 
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-8">
+            <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40 mb-6">
+              <h3 className="text-[11px] font-semibold text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
+                <div className="w-1.5 h-4 bg-[#ff8000] rounded-full shadow-[0_0_12px_rgba(255,128,0,0.3)]" />
+                My Asset Inventory
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100/50 bg-slate-50/50">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Asset
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Assignment Date
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/50">
+                  {stats.userAssets.length > 0 ? (
+                    paginatedUserAssets.map((asset) => (
+                      <tr key={asset.id} className="group hover:bg-white/60">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">
+                              <Box className="w-4 h-4 text-slate-400 group-hover:text-[#ff8000]" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-800 tracking-tight leading-none mb-1 group-hover:text-[#ff8000] transition-colors">
+                                {asset.name}
+                              </p>
+                              <code className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 transition-colors">
+                                {asset.tag_id || 'NON-TAGGED'}
+                              </code>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 bg-slate-100/50 px-2 py-1 rounded-md border border-slate-200/50">
+                            {asset.category?.name || 'General'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-transparent shadow-sm ${
+                              asset.status === 'IN_STOCK' &&
+                              asset.assignment_history?.some(
+                                (a) =>
+                                  a.form_status === 'PENDING_USER_SIGNATURE',
+                              )
+                                ? 'bg-orange-600 text-white border-orange-500 animate-pulse'
+                                : stats.personalPenalties?.some(
+                                      (p) => p.asset?.id === asset.id,
+                                    )
+                                  ? 'bg-red-50 text-red-600 border-red-200 font-bold'
+                                  : asset.status === 'BROKEN'
+                                    ? 'bg-orange-50 text-orange-600 border-orange-200'
+                                    : asset.status === 'MISSING'
+                                      ? 'bg-orange-50 text-orange-600 border-orange-100 italic'
+                                      : 'bg-slate-50 text-slate-500 border-slate-200'
+                            }`}
+                          >
+                            <span
+                              className={`w-1 h-1 rounded-full ${
+                                asset.status === 'IN_STOCK' &&
+                                asset.assignment_history?.some(
+                                  (a) =>
+                                    a.form_status === 'PENDING_USER_SIGNATURE',
+                                )
+                                  ? 'bg-white'
+                                  : asset.status === 'BROKEN'
+                                    ? 'bg-orange-500'
+                                    : asset.status === 'MISSING'
+                                      ? 'bg-orange-400'
+                                      : 'bg-slate-300'
+                              }`}
+                            />
+                            {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            )
+                              ? 'Signature Required'
+                              : stats.personalPenalties?.some(
+                                    (p) => p.asset?.id === asset.id,
+                                  )
+                                ? 'Liability Penalty'
+                                : asset.status === 'ASSIGNED'
+                                  ? 'Assigned'
+                                  : asset.status === 'BROKEN'
+                                    ? 'Broken'
+                                    : asset.status === 'MISSING'
+                                      ? 'Missing'
+                                      : asset.status.replace('_', ' ')}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5 text-slate-500">
+                            <CalendarIcon className="w-3.5 h-3.5 opacity-40 text-slate-400" />
+                            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                              {asset.purchase_date
+                                ? new Date(
+                                    asset.purchase_date,
+                                  ).toLocaleDateString('en-GB', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })
+                                : 'MAR 2024'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
+                          {asset.status === 'IN_STOCK' &&
+                            asset.assignment_history?.some(
+                              (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                            ) && (
+                              <button
+                                onClick={() => {
+                                  const pending =
+                                    asset.assignment_history?.find(
+                                      (a) =>
+                                        a.form_status ===
+                                        'PENDING_USER_SIGNATURE',
+                                    );
+                                  if (pending)
+                                    setSigningAssignment({
+                                      ...pending,
+                                      asset,
+                                    } as unknown as AssetAssignmentType);
+                                }}
+                                className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors"
+                                title="Sign Receipt Form"
+                              >
+                                Sign Form
+                              </button>
+                            )}
+                          {stats.personalPenalties?.some(
+                            (p) => p.asset?.id === asset.id,
+                          ) && (
+                            <button
+                              onClick={() =>
+                                setIncidentToSettle(
+                                  stats.personalPenalties!.find(
+                                    (p) => p.asset?.id === asset.id,
+                                  )!,
+                                )
+                              }
+                              className="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-all flex items-center gap-1.5"
+                            >
+                              <Banknote className="w-3.5 h-3.5" />
+                              Settle Penalty
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedAsset(asset)}
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                            title="View Asset Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="py-12 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-widest opacity-20"
+                      >
+                        No Personal Unit Assignments Found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={inventoryPage}
+              totalPages={inventoryTotalPages}
+              onPageChange={setInventoryPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={stats.userAssets.length}
+            />
+          </div>
+
           <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm min-h-[500px]">
             <div className="flex items-center justify-between mb-8 px-1">
               <div className="flex flex-col">
@@ -545,8 +837,24 @@ export const AdminOverview = () => {
               totalItems={stats.recentRequests.length}
             />
           </div>
+
+          <ConfirmActionModal
+            isOpen={!!incidentToSettle}
+            onClose={() => setIncidentToSettle(null)}
+            onConfirm={() => {
+              if (incidentToSettle) {
+                penaltyMutation.mutate(incidentToSettle.id);
+              }
+            }}
+            title="Confirm Payment"
+            message={`Confirm that you have settled the penalty of **${Number(incidentToSettle?.penalty_amount).toLocaleString()} RWF** for incident **#${incidentToSettle?.id.slice(0, 8).toUpperCase()}**?`}
+            confirmText="Yes, Settled"
+            cancelText="No, Pending"
+            variant="danger"
+            isLoading={penaltyMutation.isPending}
+          />
         </div>
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-3 space-y-6">
           <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:border-[#ff8000] transition-all">
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#ff8000]/5 rounded-full blur-[40px] translate-y-1/2 translate-x-1/2" />
             <div className="relative z-10 flex flex-col items-center text-center">
@@ -616,6 +924,17 @@ export const AdminOverview = () => {
           </div>
         </div>
       </div>
+      <ViewAssetModal
+        isOpen={!!selectedAsset}
+        onClose={() => setSelectedAsset(null)}
+        asset={selectedAsset}
+      />
+
+      <AssetReceiptFormModal
+        isOpen={!!signingAssignment}
+        onClose={() => setSigningAssignment(null)}
+        assignment={signingAssignment}
+      />
     </div>
   );
 };

@@ -251,6 +251,8 @@ export class AssetsService {
         'assigned_to',
         'assignment_history',
         'assignment_history.user',
+        'incidents',
+        'incidents.reported_by',
       ],
     });
 

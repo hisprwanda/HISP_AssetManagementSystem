@@ -27,7 +27,7 @@ export const AssetReceiptFormModal = ({
   onClose,
   assignment,
 }: AssetReceiptFormModalProps) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [signatureName, setSignatureName] = useState('');
   const [adminSignatureName, setAdminSignatureName] = useState('');
@@ -164,6 +164,7 @@ export const AssetReceiptFormModal = ({
   };
 
   const canEdit = isAdmin && isPreparing;
+  const isRecipient = currentUser?.id === assignment.user?.id;
 
   if (showSuccess) {
     return (
@@ -578,7 +579,7 @@ export const AssetReceiptFormModal = ({
             )}
           </div>
         </div>
-        {!isAdmin &&
+        {isRecipient &&
           (assignment.form_status === 'PENDING_USER_SIGNATURE' ||
             assignment.form_status === 'REJECTED') && (
             <div className="p-8 border-t border-slate-100 bg-white flex flex-col gap-6 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-20">

@@ -10,6 +10,7 @@ import { Asset } from 'src/assets/entities/asset.entity';
 import { AssetRequest } from 'src/assets-requests/entities/assets-request.entity';
 import { AssetsService } from 'src/assets/assets.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { UsersService } from 'src/users/users.service';
 
 import { ReportIncidentDto } from './dto/report-asset-incident.dto';
 import { ResolveIncidentDto } from './dto/resolve-asset-incident.dto';
@@ -22,6 +23,7 @@ export class AssetIncidentsService {
     private readonly assetsService: AssetsService,
     private readonly dataSource: DataSource,
     private readonly notificationsService: NotificationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   async reportIncident(dto: ReportIncidentDto) {
@@ -48,6 +50,24 @@ export class AssetIncidentsService {
         evidence_url: dto.evidence_url,
         status: 'PENDING',
       });
+
+      // Business Rule: If an Admin/Finance user reports an incident, it goes immediately to CEO
+      const reporter = await this.usersService.findOne(dto.user_id);
+      if (reporter) {
+        const roleUpper = reporter.role.toUpperCase();
+        const deptUpper = (reporter.department?.name || '').toUpperCase();
+        const isAdmin =
+          roleUpper.includes('ADMIN') ||
+          roleUpper.includes('SYSTEM_ADMIN') ||
+          roleUpper.includes('FINANCE') ||
+          deptUpper.includes('ADMIN AND FINANCE') ||
+          deptUpper.includes('ADMIN & FINANCE') ||
+          deptUpper.includes('FINANCE');
+
+        if (isAdmin) {
+          incident.status = 'CEO_REVIEW';
+        }
+      }
 
       const savedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
@@ -200,7 +220,7 @@ export class AssetIncidentsService {
     if (!incident) throw new NotFoundException('Incident not found');
 
     // CEO can review items in repair or pending if they are high stakes
-    incident.status = 'IN_REPAIR'; // Or a dedicated CEO_REVIEW status if we want to keep it
+    incident.status = 'CEO_REVIEW';
     incident.ceo_remarks = remarks;
     const saved = await this.incidentRepo.save(incident);
 

@@ -3,11 +3,21 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ResolveIncidentDto {
   @ApiProperty({
-    enum: ['RESOLVED_FIXED', 'RESOLVED_REPLACED', 'REJECTED_LIABILITY'],
+    enum: [
+      'RESOLVED_FIXED',
+      'RESOLVED_REPLACED',
+      'REJECTED_LIABILITY',
+      'CEO_REVIEW',
+    ],
   })
   @IsString()
   @IsNotEmpty()
-  @IsIn(['RESOLVED_FIXED', 'RESOLVED_REPLACED', 'REJECTED_LIABILITY'])
+  @IsIn([
+    'RESOLVED_FIXED',
+    'RESOLVED_REPLACED',
+    'REJECTED_LIABILITY',
+    'CEO_REVIEW',
+  ])
   incident_status: string;
 
   @ApiProperty({

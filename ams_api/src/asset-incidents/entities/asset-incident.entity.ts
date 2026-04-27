@@ -20,7 +20,7 @@ export class AssetIncident {
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'reported_by_id' })
   reported_by: User;
 
@@ -44,6 +44,7 @@ export class AssetIncident {
       'RESOLVED_FIXED',
       'RESOLVED_REPLACED',
       'REJECTED_LIABILITY',
+      'CEO_REVIEW',
     ],
     default: 'PENDING',
   })

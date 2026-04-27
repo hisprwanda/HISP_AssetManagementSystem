@@ -9,6 +9,7 @@ import {
   Trash2,
   Clock,
   Calendar,
+  Banknote,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Asset } from '@/types/assets';
@@ -164,6 +165,35 @@ export const ViewAssetModal = ({
                   RWF
                 </p>
               </div>
+            </div>
+          )}
+
+          {asset.incidents?.some(
+            (i) =>
+              i.reported_by?.id === user?.id &&
+              i.status === 'REJECTED_LIABILITY' &&
+              !i.penalty_resolved_at,
+          ) && (
+            <div className="bg-red-50 rounded-2xl p-4 border-2 border-red-100 space-y-2 mb-6">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-red-600 flex items-center gap-2">
+                <Banknote className="w-3.5 h-3.5" /> Liability Penalty Active
+              </p>
+              <p className="text-[11px] font-medium text-red-500 leading-relaxed">
+                You have an outstanding liability penalty for this asset. Please
+                contact Administration to settle the amount of{' '}
+                <span className="font-bold">
+                  {asset.incidents
+                    .find(
+                      (i) =>
+                        i.reported_by?.id === user?.id &&
+                        i.status === 'REJECTED_LIABILITY' &&
+                        !i.penalty_resolved_at,
+                    )
+                    ?.penalty_amount?.toLocaleString()}{' '}
+                  RWF
+                </span>
+                .
+              </p>
             </div>
           )}
 

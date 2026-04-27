@@ -355,7 +355,7 @@ export const CEOOverview = () => {
           </div>
 
           <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[250px]">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-orange-100/30 bg-orange-50/20">
@@ -428,7 +428,7 @@ export const CEOOverview = () => {
                                     asset,
                                   } as unknown as AssetAssignment);
                               }}
-                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
+                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors flex items-center gap-2"
                             >
                               <FileCheck className="w-3.5 h-3.5" /> Sign Form
                             </button>
@@ -518,7 +518,7 @@ export const CEOOverview = () => {
                 </Link>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 min-h-[300px]">
                 {paginatedRequests.length > 0 ? (
                   paginatedRequests.map((req) => (
                     <div
@@ -591,7 +591,7 @@ export const CEOOverview = () => {
                   </p>
                 </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-6 min-h-[400px]">
                 {paginatedFeed.map((item, idx) => (
                   <div
                     key={idx}
@@ -711,7 +711,7 @@ export const CEOOverview = () => {
                     </div>
                     <div className="h-2.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
                       <div
-                        className="h-full bg-orange-400 group-hover/item:bg-[#ff8000] transition-all duration-1000 ease-out shadow-sm"
+                        className="h-full bg-orange-400 group-hover/item:bg-[#ff8000] transition-all shadow-sm"
                         style={{
                           width: `${(data.value / (stats.totalValue || 1)) * 100}%`,
                         }}

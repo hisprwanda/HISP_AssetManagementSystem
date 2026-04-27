@@ -318,7 +318,9 @@ export const CreateRequestModal = ({
             <p className="text-slate-500 font-medium max-w-md mx-auto leading-relaxed">
               {baseRequest
                 ? 'Your changes have been saved. The requisition remains in the pipeline for executive review.'
-                : 'Your official procurement requisition has been successfully logged and forwarded to the Administration & Finance team for final review.'}
+                : isAdmin
+                  ? 'Your official procurement requisition has been successfully logged and forwarded to the Office of the CEO for final review.'
+                  : 'Your official procurement requisition has been successfully logged and forwarded to the Administration & Finance team for final review.'}
             </p>
             <div className="mt-12 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-500">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />

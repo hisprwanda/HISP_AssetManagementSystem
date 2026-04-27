@@ -9,6 +9,7 @@ import {
   Search,
   Plus,
   FileText,
+  FileUp,
   Banknote,
   Building2,
   User as UserIcon,
@@ -36,6 +37,7 @@ import { PurchaseOrderModal } from '../components/PurchaseOrderModal';
 import { Pagination } from '../components/Pagination';
 import { HODBulkReviewModal } from '../components/HODBulkReviewModal';
 import { FormalizeBulkRequestModal } from '../components/FormalizeBulkRequestModal';
+import { UploadSignedPOModal } from '../components/UploadSignedPOModal';
 
 export const Requests = () => {
   const { user: currentUser, isAdmin, isHOD, isStaff, isCEO } = useAuth();
@@ -83,6 +85,9 @@ export const Requests = () => {
     batchNumber: string;
     requests: AssetRequest[];
   } | null>(null);
+  const [isUploadPOModalOpen, setIsUploadPOModalOpen] = useState(false);
+  const [requestForUploadPO, setRequestForUploadPO] =
+    useState<AssetRequest | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -757,18 +762,33 @@ export const Requests = () => {
                           </>
                         )}
                         {isAdmin && req.status === 'ORDERED' && (
-                          <button
-                            onClick={() =>
-                              updateStatusMutation.mutate({
-                                id: req.id,
-                                status: 'FULFILLED',
-                              })
-                            }
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
-                            title="Mark as Fulfilled (Received)"
-                          >
-                            <PackageCheck className="w-4 h-4" />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => {
+                                setRequestForUploadPO(req);
+                                setIsUploadPOModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Upload Scanned PO"
+                            >
+                              <FileUp className="w-4 h-4" />
+                            </button>
+                            {(req.purchase_order?.scanned_po_url ||
+                              req.purchase_order?.is_digitally_signed) && (
+                              <button
+                                onClick={() =>
+                                  updateStatusMutation.mutate({
+                                    id: req.id,
+                                    status: 'FULFILLED',
+                                  })
+                                }
+                                className="p-1.5 text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                title="Mark as Fulfilled (Received)"
+                              >
+                                <PackageCheck className="w-4 h-4" />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
@@ -785,6 +805,14 @@ export const Requests = () => {
           totalItems={filteredRequests.length}
         />
       </div>
+      <UploadSignedPOModal
+        isOpen={isUploadPOModalOpen}
+        onClose={() => {
+          setIsUploadPOModalOpen(false);
+          setRequestForUploadPO(null);
+        }}
+        request={requestForUploadPO}
+      />
       <CreateRequestModal
         isOpen={isCreateModalOpen}
         onClose={() => {

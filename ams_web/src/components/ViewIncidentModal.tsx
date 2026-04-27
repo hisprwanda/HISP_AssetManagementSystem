@@ -10,6 +10,7 @@ import {
   Hammer,
   CheckCircle2,
   AlertTriangle,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { AssetIncident } from '../types/assets';
 import {
@@ -205,6 +206,44 @@ export const ViewIncidentModal = ({
               </p>
             </div>
           </div>
+
+          {incident.ceo_remarks && (
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" /> Admin Preliminary Remarks
+              </h4>
+              <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl relative shadow-sm border-l-4 border-l-blue-400">
+                <p className="text-[11px] font-bold text-slate-700 leading-relaxed whitespace-pre-wrap italic">
+                  "{incident.ceo_remarks}"
+                </p>
+              </div>
+            </div>
+          )}
+
+          {incident.evidence_url && (
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <ImageIcon className="w-3.5 h-3.5" /> Photo Evidence
+              </h4>
+              <div className="relative group rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+                <img
+                  src={incident.evidence_url}
+                  alt="Incident Evidence"
+                  className="w-full h-auto max-h-[300px] object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://placehold.co/600x400?text=Evidence+Image+Unavailable';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                  <p className="text-[10px] text-white font-medium">
+                    Evidence captured on{' '}
+                    {new Date(incident.reported_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {(incident.resolution_notes || incident.investigation_remarks) && (
             <div className="space-y-4">

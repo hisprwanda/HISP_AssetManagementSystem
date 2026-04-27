@@ -10,6 +10,7 @@ import { User, UserStatus } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Department } from 'src/departments/entities/department.entity';
+import { Asset } from 'src/assets/entities/asset.entity';
 
 @Injectable()
 export class UsersService implements OnApplicationBootstrap {
@@ -276,6 +277,17 @@ export class UsersService implements OnApplicationBootstrap {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
+
+    // Reset any assigned assets to 'IN_STOCK' before removing the user
+    const assetRepo = this.dataSource.getRepository(Asset);
+    await assetRepo.update(
+      { assigned_to: { id } },
+      {
+        status: 'IN_STOCK',
+        assigned_to: null,
+      },
+    );
+
     await this.userRepo.remove(user);
   }
 }

@@ -19,7 +19,9 @@ export class AssetAssignment {
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 
-  @ManyToOne(() => User, (user) => user.asset_assignments)
+  @ManyToOne(() => User, (user) => user.asset_assignments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -71,11 +71,22 @@ export const Incidents = () => {
     if (!incidents) return [];
     let result = incidents;
 
-    if (isHOD && !isAdmin && !isFinanceAdmin) {
+    if (isHOD && !isAdmin && !isFinanceAdmin && !isCEO) {
       result = result.filter(
         (i) =>
           i.reported_by?.department?.id === user?.department?.id ||
           i.asset?.department?.id === user?.department?.id,
+      );
+    }
+
+    if (isCEO && !isAdmin && !isFinanceAdmin) {
+      result = result.filter(
+        (i) =>
+          (i.status || i.investigation_status) === 'CEO_REVIEW' ||
+          i.status?.startsWith('RESOLVED') ||
+          i.investigation_status === 'ACCEPTED' ||
+          i.status === 'REJECTED_LIABILITY' ||
+          i.investigation_status === 'DENIED',
       );
     }
 
@@ -107,6 +118,7 @@ export const Incidents = () => {
     filterType,
     filterStatus,
     searchQuery,
+    isCEO,
     isHOD,
     isAdmin,
     isFinanceAdmin,
@@ -124,7 +136,7 @@ export const Incidents = () => {
       };
 
     let filtered = incidents;
-    if (isHOD && !isAdmin && !isFinanceAdmin) {
+    if (isHOD && !isAdmin && !isFinanceAdmin && !isCEO) {
       filtered = incidents.filter(
         (i) =>
           i.reported_by?.department?.id === user?.department?.id ||
@@ -132,10 +144,22 @@ export const Incidents = () => {
       );
     }
 
+    if (isCEO && !isAdmin && !isFinanceAdmin) {
+      filtered = incidents.filter(
+        (i) =>
+          (i.status || i.investigation_status) === 'CEO_REVIEW' ||
+          i.status?.startsWith('RESOLVED') ||
+          i.investigation_status === 'ACCEPTED' ||
+          i.status === 'REJECTED_LIABILITY' ||
+          i.investigation_status === 'DENIED',
+      );
+    }
+
     return {
       pending: filtered.filter(
         (i) =>
           (i.status || i.investigation_status) === 'PENDING' ||
+          (i.status || i.investigation_status) === 'CEO_REVIEW' ||
           i.investigation_status === 'INVESTIGATING',
       ).length,
       repairing: filtered.filter((i) => i.status === 'IN_REPAIR').length,
@@ -152,7 +176,7 @@ export const Incidents = () => {
       ).length,
       settled: filtered.filter((i) => i.penalty_resolved_at).length,
     };
-  }, [incidents, isHOD, isAdmin, isFinanceAdmin, user]);
+  }, [incidents, isCEO, isHOD, isAdmin, isFinanceAdmin, user]);
 
   const paginatedIncidents = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -174,6 +198,7 @@ export const Incidents = () => {
         return 'bg-blue-50 text-blue-600 border-blue-100 font-bold';
       case 'PENDING':
       case 'INVESTIGATING':
+      case 'CEO_REVIEW':
         return 'bg-amber-50 text-amber-600 border-amber-100 font-bold animate-pulse';
       default:
         return 'bg-slate-50 text-slate-500 border-slate-200';
@@ -303,6 +328,7 @@ export const Incidents = () => {
               <option value="RESOLVED_FIXED">RESOLVED (FIXED)</option>
               <option value="RESOLVED_REPLACED">RESOLVED (REPLACED)</option>
               <option value="REJECTED_LIABILITY">REJECTED (LIABILITY)</option>
+              <option value="CEO_REVIEW">CEO REVIEW</option>
             </select>
           </div>
         </div>
@@ -404,6 +430,7 @@ export const Incidents = () => {
                           {(isAdmin || isFinanceAdmin || isCEO) &&
                             (inc.status === 'PENDING' ||
                               inc.status === 'IN_REPAIR' ||
+                              inc.status === 'CEO_REVIEW' ||
                               inc.investigation_status === 'INVESTIGATING') && (
                               <button
                                 onClick={() => handleResolve(inc)}
@@ -423,8 +450,12 @@ export const Incidents = () => {
                             inc.investigation_status === 'DENIED') &&
                             (isAdmin || isFinanceAdmin) && (
                               <button
-                                onClick={() => setIncidentToSettle(inc)}
-                                className={`p-2 rounded-lg border shadow-sm transition-all ${inc.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100 text-emerald-500' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-100'}`}
+                                onClick={() => {
+                                  if (!inc.penalty_resolved_at) {
+                                    setIncidentToSettle(inc);
+                                  }
+                                }}
+                                className={`p-2 rounded-lg border shadow-sm transition-all ${inc.penalty_resolved_at ? 'bg-emerald-50 border-emerald-100 text-emerald-500 cursor-default' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-100'}`}
                               >
                                 {inc.penalty_resolved_at ? (
                                   <CheckCircle2 className="w-4 h-4" />

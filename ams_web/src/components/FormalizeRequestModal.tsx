@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetRequest } from '../types/assets';
+import { useAuth } from '../hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ export const FormalizeRequestModal = ({
   onClose,
   request,
 }: FormalizeRequestModalProps) => {
+  const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
 
   const [items, setItems] = useState<NonNullable<AssetRequest['items']>>([]);
@@ -164,8 +166,9 @@ export const FormalizeRequestModal = ({
               Requisition Formalized!
             </h2>
             <p className="text-slate-500 font-medium px-8">
-              The request has been updated and forwarded to Administration &
-              Finance for verification.
+              The request has been formalized and forwarded to{' '}
+              {isAdmin ? 'the Office of the CEO' : 'Administration & Finance'}{' '}
+              for final review.
             </p>
           </div>
         ) : (

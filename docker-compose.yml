@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://provide-prepaid-scotia-joe.trycloudflare.com
+      - VITE_API_URL=https://analytical-prince-driver-experiments.trycloudflare.com
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped

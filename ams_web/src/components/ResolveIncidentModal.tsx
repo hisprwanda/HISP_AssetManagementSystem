@@ -9,6 +9,8 @@ import {
   Hammer,
   RotateCcw,
   Trash2,
+  Image as ImageIcon,
+  FileText,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetIncident } from '../types/assets';
@@ -20,6 +22,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from './ui/dialog';
+import { useAuth } from '../hooks/useAuth';
 
 interface ResolveIncidentModalProps {
   isOpen: boolean;
@@ -27,7 +30,11 @@ interface ResolveIncidentModalProps {
   incident: AssetIncident;
 }
 
-type Outcome = 'RESOLVED_FIXED' | 'RESOLVED_REPLACED' | 'REJECTED_LIABILITY';
+type Outcome =
+  | 'RESOLVED_FIXED'
+  | 'RESOLVED_REPLACED'
+  | 'REJECTED_LIABILITY'
+  | 'CEO_REVIEW';
 
 export const ResolveIncidentModal = ({
   isOpen,
@@ -35,6 +42,7 @@ export const ResolveIncidentModal = ({
   incident,
 }: ResolveIncidentModalProps) => {
   const queryClient = useQueryClient();
+  const { isCEO } = useAuth();
 
   const [outcome, setOutcome] = useState<Outcome>('RESOLVED_FIXED');
   const [resolutionNotes, setResolutionNotes] = useState('');
@@ -89,6 +97,8 @@ export const ResolveIncidentModal = ({
     let newAssetStatus = 'ASSIGNED';
     if (outcome === 'RESOLVED_REPLACED' || outcome === 'REJECTED_LIABILITY') {
       newAssetStatus = 'DISPOSED';
+    } else if (outcome === 'CEO_REVIEW') {
+      newAssetStatus = 'BROKEN';
     }
 
     mutation.mutate({
@@ -125,7 +135,7 @@ export const ResolveIncidentModal = ({
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-semibold text-slate-800 tracking-tight">
-                    IT Helpdesk Resolution
+                    Incidents Report Resolution
                   </DialogTitle>
                   <DialogDescription className="text-slate-500 font-medium text-[10px]">
                     Ticket{' '}
@@ -138,7 +148,10 @@ export const ResolveIncidentModal = ({
               </div>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="px-6 py-4 space-y-6 overflow-y-auto max-h-[65vh] custom-scrollbar"
+            >
               {error && (
                 <div className="p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2 text-red-600 text-[10px] font-semibold uppercase tracking-widest">
                   <AlertCircle className="w-4 h-4 shrink-0" />
@@ -175,6 +188,33 @@ export const ResolveIncidentModal = ({
                     "{incident.issue_description || incident.explanation}"
                   </p>
                 </div>
+
+                {incident.ceo_remarks && (
+                  <div className="pt-3 border-t border-slate-200/60 mt-2">
+                    <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Admin Preliminary
+                      Remarks
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-700 bg-blue-50/50 p-2.5 rounded-lg border border-blue-100/50 leading-relaxed italic">
+                      "{incident.ceo_remarks}"
+                    </p>
+                  </div>
+                )}
+
+                {incident.evidence_url && (
+                  <div className="pt-3 border-t border-slate-200/60 mt-2">
+                    <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center gap-2">
+                      <ImageIcon className="w-3.5 h-3.5" /> Photo Evidence
+                    </p>
+                    <div className="relative group rounded-lg overflow-hidden border border-slate-200/50 bg-white/50">
+                      <img
+                        src={incident.evidence_url}
+                        alt="Evidence"
+                        className="w-full h-auto max-h-[150px] object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {incident.status === 'PENDING' && (
@@ -215,38 +255,47 @@ export const ResolveIncidentModal = ({
                       color: 'red',
                       sub: 'Asset DISPOSED + Penalty Fee',
                     },
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => setOutcome(opt.id as Outcome)}
-                      className={`p-3 rounded-xl border-2 transition-all flex items-center gap-4 text-left ${
-                        outcome === opt.id
-                          ? `bg-${opt.color}-50 border-${opt.color}-500/30 shadow-sm`
-                          : 'bg-white border-slate-100 hover:border-slate-200'
-                      }`}
-                    >
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    {
+                      id: 'CEO_REVIEW',
+                      label: 'Forward to CEO for Review',
+                      icon: Send,
+                      color: 'blue',
+                      sub: 'Complex Case + Requires Executive Decision',
+                    },
+                  ]
+                    .filter((opt) => !isCEO || opt.id !== 'CEO_REVIEW')
+                    .map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setOutcome(opt.id as Outcome)}
+                        className={`p-3 rounded-xl border-2 transition-all flex items-center gap-4 text-left ${
                           outcome === opt.id
-                            ? `bg-${opt.color}-500 text-white shadow-md`
-                            : 'bg-slate-100 text-slate-400'
+                            ? `bg-${opt.color}-50 border-${opt.color}-500/30 shadow-sm`
+                            : 'bg-white border-slate-100 hover:border-slate-200'
                         }`}
                       >
-                        <opt.icon className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p
-                          className={`text-[10px] font-semibold uppercase tracking-widest ${outcome === opt.id ? `text-${opt.color}-900` : 'text-slate-500'}`}
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            outcome === opt.id
+                              ? `bg-${opt.color}-500 text-white shadow-md`
+                              : 'bg-slate-100 text-slate-400'
+                          }`}
                         >
-                          {opt.label}
-                        </p>
-                        <p className="text-[8px] font-bold text-slate-400 leading-none mt-0.5 uppercase tracking-tighter">
-                          {opt.sub}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+                          <opt.icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <p
+                            className={`text-[10px] font-semibold uppercase tracking-widest ${outcome === opt.id ? `text-${opt.color}-900` : 'text-slate-500'}`}
+                          >
+                            {opt.label}
+                          </p>
+                          <p className="text-[8px] font-bold text-slate-400 leading-none mt-0.5 uppercase tracking-tighter">
+                            {opt.sub}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
                 </div>
               </div>
 

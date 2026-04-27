@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssetRequest } from './entities/assets-request.entity';
+import { PurchaseOrderData } from './entities/assets-request.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Department } from 'src/departments/entities/department.entity';
 import { CreateAssetRequestDto } from './dto/create-assets-request.dto';
@@ -295,5 +296,15 @@ export class AssetRequestsService {
     });
 
     return await this.requestRepo.save(updatedRequests);
+  }
+
+  async uploadPoScanned(id: string, fileUrl: string): Promise<AssetRequest> {
+    const request = await this.findOne(id);
+    if (!request.purchase_order) {
+      request.purchase_order = {} as PurchaseOrderData;
+    }
+    request.purchase_order.scanned_po_url = fileUrl;
+    request.status = 'ORDERED'; // Ensure it's marked as ordered if a PO is uploaded
+    return await this.requestRepo.save(request);
   }
 }

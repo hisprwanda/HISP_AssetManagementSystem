@@ -13,6 +13,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Loader2,
+  ShoppingCart,
+  ExternalLink,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -416,6 +418,66 @@ export const ViewRequestModal = ({
               <p className="text-sm font-bold text-slate-800 leading-relaxed italic">
                 "{request.ceo_remarks}"
               </p>
+            </div>
+          )}
+
+          {request.purchase_order && (
+            <div className="bg-slate-900 rounded-[2rem] p-8 text-white space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <ShoppingCart className="w-24 h-24" />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
+                    Official Purchase Order
+                  </h3>
+                  <span className="text-[10px] font-bold bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full border border-orange-500/30">
+                    {request.purchase_order.po_number}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      Issued To
+                    </p>
+                    <p className="text-xs font-bold text-white truncate">
+                      {request.purchase_order.vendor_details?.split('\n')[0]}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      Total Value
+                    </p>
+                    <p className="text-xs font-bold text-white">
+                      {request.purchase_order.grand_total?.toLocaleString()} RWF
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                        {request.purchase_order.is_digitally_signed
+                          ? 'Digitally Signed by Vendor'
+                          : 'Manually Signed Record'}
+                      </span>
+                    </div>
+                    {request.purchase_order.scanned_po_url && (
+                      <a
+                        href={`${api.defaults.baseURL}${request.purchase_order.scanned_po_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-widest"
+                      >
+                        <ExternalLink className="w-3 h-3" /> View Scanned PO
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
