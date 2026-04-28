@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import {
   Users,
   Search,
   Upload,
-  ArrowLeft,
   Shield,
   Building2,
   Mail,
@@ -61,7 +60,7 @@ interface User {
 }
 
 export const SystemTrail = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -80,12 +79,7 @@ export const SystemTrail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { setHeaderTitle } = useOutletContext<{
-    setHeaderTitle: (title: string) => void;
-  }>();
-
   useEffect(() => {
-    setHeaderTitle('System Audit & Provisioning');
     if (!window.XLSX) {
       const script = document.createElement('script');
       script.src =
@@ -100,8 +94,7 @@ export const SystemTrail = () => {
       script.async = true;
       document.body.appendChild(script);
     }
-    return () => setHeaderTitle('');
-  }, [setHeaderTitle]);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -473,12 +466,6 @@ export const SystemTrail = () => {
   return (
     <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
-        <button
-          onClick={() => navigate('/audit-trail')}
-          className="flex items-center gap-2 text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest mb-2 hover:translate-x-1 transition-transform"
-        >
-          <ArrowLeft className="w-3 h-3" /> Back to Audit Hub
-        </button>
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
             <div className="flex items-center gap-2 text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">

@@ -7,7 +7,6 @@ export const api = axios.create({
   },
 });
 
-// Request Interceptor: Attach JWT token to every request
 api.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('hisp_token');
@@ -19,16 +18,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response Interceptor: Catch 401 Unauthorized errors for Auto-Logout
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Clear session data
       sessionStorage.removeItem('hisp_token');
       sessionStorage.removeItem('hisp_user');
 
-      // Force redirect to login page
       window.location.href = '/login';
     }
 

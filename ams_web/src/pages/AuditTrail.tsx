@@ -5,7 +5,6 @@ import {
   ClipboardCheck,
   AlertTriangle,
   ShieldCheck,
-  Activity,
   ChevronRight,
   ShoppingCart,
   FileClock,
@@ -115,14 +114,7 @@ export const AuditTrail = () => {
       link: '/request-trail',
       type: 'requests',
     },
-    {
-      title: 'Staff Audit & Provisioning',
-      description:
-        'Full user registry with automated bulk import and CSV directory export.',
-      icon: Activity,
-      link: '/system-trail',
-      type: 'audit',
-    },
+
     {
       title: 'Asset Registry',
       description:

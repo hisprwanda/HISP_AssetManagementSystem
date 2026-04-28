@@ -128,7 +128,10 @@ export const EditUserModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[440px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]">
+      <DialogContent
+        hideClose
+        className="sm:max-w-[440px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]"
+      >
         <DialogHeader>
           <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
             <UserCog className="w-6 h-6 text-[#ff8000]" />

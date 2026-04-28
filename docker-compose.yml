@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://analytical-prince-driver-experiments.trycloudflare.com
+      - VITE_API_URL=https://exams-change-laser-classical.trycloudflare.com
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped

@@ -24,6 +24,7 @@ import { EditUserModal } from '../components/EditUserModal';
 import { ViewUserModal } from '../components/ViewUserModal';
 import { ViewDepartmentModal } from '../components/ViewDepartmentModal';
 import { Pagination } from '../components/Pagination';
+import { SystemTrail } from './SystemTrail';
 
 interface Department {
   id: string;
@@ -47,10 +48,16 @@ export const Directorate = () => {
     setHeaderTitle: (title: string) => void;
   }>();
 
+  const [activeTab, setActiveTab] = useState<'units' | 'users'>('units');
+
   useEffect(() => {
-    setHeaderTitle('Organisational Units');
+    if (activeTab === 'users') {
+      setHeaderTitle('System Audit & Provisioning');
+    } else {
+      setHeaderTitle('Organisational Units');
+    }
     return () => setHeaderTitle('');
-  }, [setHeaderTitle]);
+  }, [setHeaderTitle, activeTab]);
 
   const { isAdmin, isCEO } = useAuth();
   const queryClient = useQueryClient();
@@ -147,8 +154,30 @@ export const Directorate = () => {
     return (
       <div className="flex flex-col h-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit">
+            <button
+              onClick={() => setActiveTab('units')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'units'
+                  ? 'bg-white text-[#ff8000] shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Organisational Units
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'users'
+                  ? 'bg-white text-[#ff8000] shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Users
+            </button>
+          </div>
           <div className="flex-1" />
-          {isAdmin && (
+          {isAdmin && activeTab === 'units' && (
             <button
               onClick={() => setIsDeptModalOpen(true)}
               className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 text-sm rounded-xl font-bold shadow-md transform active:scale-95 transition-all flex items-center gap-2 group w-full sm:w-auto justify-center"
@@ -159,7 +188,9 @@ export const Directorate = () => {
           )}
         </div>
 
-        {loadingDepts ? (
+        {activeTab === 'users' ? (
+          <SystemTrail />
+        ) : loadingDepts ? (
           <div className="flex items-center justify-center p-12">
             <div className="w-8 h-8 border-4 border-[#ff8000]/30 border-t-[#ff8000] rounded-full animate-spin"></div>
           </div>
@@ -176,122 +207,153 @@ export const Directorate = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {departments?.map((dept) => (
-              <div
-                key={dept.id}
-                onClick={() => setSelectedDept(dept)}
-                className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-4 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(255,128,0,0.1)] hover:border-[#ff8000]/30 cursor-pointer transition-all group transform hover:-translate-y-1 flex flex-col h-full"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-sm">
-                    <Building2 className="w-5 h-5 text-[#ff8000] group-hover:text-white transition-colors" />
-                  </div>
-
-                  <div className="flex gap-1 transition-opacity">
-                    {(isAdmin || isCEO) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeptToView(dept);
-                        }}
-                        className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                        title="View Unit Details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    )}
-                    {isAdmin && (
-                      <>
-                        <button
-                          onClick={(e) => handleEditClick(e, dept)}
-                          className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
-                          title="Edit Organisation Unit"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteClick(e, dept)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete Organisation Unit"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <h3
-                  className="text-lg font-semibold text-slate-800 mb-0.5 truncate"
-                  title={dept.name}
-                >
-                  {dept.name}
-                </h3>
-                <p className="text-[11px] font-bold text-slate-400 mb-4 flex-1 uppercase tracking-wider">
-                  {dept.type}
-                </p>
-
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-semibold tracking-widest text-slate-400">
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex-1 flex flex-col">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Organisation Unit
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Type
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                       Status
-                    </span>
-                    <span
-                      className={`text-sm font-bold flex items-center gap-1 ${
-                        dept.status === 'Inactive' ||
-                        !dept.users ||
-                        dept.users.length === 0
-                          ? 'text-slate-400'
-                          : 'text-emerald-600'
-                      }`}
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Personnel
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/50">
+                  {departments?.map((dept) => (
+                    <tr
+                      key={dept.id}
+                      onClick={() => setSelectedDept(dept)}
+                      className="hover:bg-white/60 transition-colors group cursor-pointer"
                     >
-                      <div
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          dept.status === 'Inactive' ||
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center group-hover:bg-[#ff8000] transition-colors shadow-sm">
+                            <Building2 className="w-5 h-5 text-[#ff8000] group-hover:text-white transition-colors" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span
+                              className="font-bold text-slate-800"
+                              title={dept.name}
+                            >
+                              {dept.name}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          {dept.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-sm font-bold flex items-center gap-1 ${
+                            dept.status === 'Inactive' ||
+                            !dept.users ||
+                            dept.users.length === 0
+                              ? 'text-slate-400'
+                              : 'text-emerald-600'
+                          }`}
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              dept.status === 'Inactive' ||
+                              !dept.users ||
+                              dept.users.length === 0
+                                ? 'bg-slate-300'
+                                : 'bg-emerald-500 animate-pulse'
+                            }`}
+                          />{' '}
+                          {dept.status === 'Inactive' ||
                           !dept.users ||
                           dept.users.length === 0
-                            ? 'bg-slate-300'
-                            : 'bg-emerald-500 animate-pulse'
-                        }`}
-                      />{' '}
-                      {dept.status === 'Inactive' ||
-                      !dept.users ||
-                      dept.users.length === 0
-                        ? 'Inactive'
-                        : 'Active'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors">
-                    <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest">
-                      {dept.users?.length || 0} Personnel &rarr;
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+                            ? 'Inactive'
+                            : 'Active'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 group-hover:bg-white transition-colors w-fit">
+                          <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest">
+                            {dept.users?.length || 0} Personnel &rarr;
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1 transition-opacity">
+                          {(isAdmin || isCEO) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeptToView(dept);
+                              }}
+                              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title="View Unit Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <>
+                              <button
+                                onClick={(e) => handleEditClick(e, dept)}
+                                className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                                title="Edit Organisation Unit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteClick(e, dept)}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete Organisation Unit"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
-        <CreateDepartmentModal
-          isOpen={isDeptModalOpen}
-          onClose={() => setIsDeptModalOpen(false)}
-        />
+        {activeTab === 'units' && (
+          <>
+            <CreateDepartmentModal
+              isOpen={isDeptModalOpen}
+              onClose={() => setIsDeptModalOpen(false)}
+            />
 
-        <EditDepartmentModal
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setDeptToEdit(null);
-          }}
-          department={deptToEdit}
-        />
+            <EditDepartmentModal
+              isOpen={isEditModalOpen}
+              onClose={() => {
+                setIsEditModalOpen(false);
+                setDeptToEdit(null);
+              }}
+              department={deptToEdit}
+            />
 
-        <ViewDepartmentModal
-          isOpen={!!deptToView}
-          onClose={() => setDeptToView(null)}
-          department={deptToView}
-        />
+            <ViewDepartmentModal
+              isOpen={!!deptToView}
+              onClose={() => setDeptToView(null)}
+              department={deptToView}
+            />
+          </>
+        )}
 
         {deptToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">

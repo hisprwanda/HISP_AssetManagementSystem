@@ -43,7 +43,7 @@ export const CreateUserModal = ({
       full_name: string;
       email: string;
       phone_number: string;
-      password_hash: string;
+      password: string;
       role: string;
       department_id: string;
     }) => {
@@ -91,7 +91,7 @@ export const CreateUserModal = ({
       full_name: fullName,
       email,
       phone_number: phoneNumber,
-      password_hash: password,
+      password,
       role,
       department_id: department?.id || '',
     });
@@ -122,7 +122,10 @@ export const CreateUserModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[440px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]">
+      <DialogContent
+        hideClose
+        className="sm:max-w-[440px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem]"
+      >
         <DialogHeader>
           <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 shadow-inner">
             <UserPlus className="w-6 h-6 text-[#ff8000]" />

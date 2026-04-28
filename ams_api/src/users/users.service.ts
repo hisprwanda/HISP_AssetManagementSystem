@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ConflictException,
   OnApplicationBootstrap,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -85,6 +86,18 @@ export class UsersService implements OnApplicationBootstrap {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { department_id, password, ...userData } = createUserDto;
+
+    if (userData.role === 'HOD' && department_id) {
+      const existingHOD = await this.userRepo.findOne({
+        where: { role: 'HOD', department: { id: department_id } },
+        relations: ['department'],
+      });
+      if (existingHOD) {
+        throw new ConflictException(
+          `An HOD already exists in this department (${existingHOD.full_name}). Each department can only have one HOD.`,
+        );
+      }
+    }
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -260,6 +273,21 @@ export class UsersService implements OnApplicationBootstrap {
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     const { department_id, ...userData } = updateUserDto;
+
+    const targetDeptId = department_id ?? user.department?.id;
+    const targetRole = userData.role ?? user.role;
+
+    if (targetRole === 'HOD' && targetDeptId) {
+      const existingHOD = await this.userRepo.findOne({
+        where: { role: 'HOD', department: { id: targetDeptId } },
+        relations: ['department'],
+      });
+      if (existingHOD && existingHOD.id !== id) {
+        throw new ConflictException(
+          `An HOD already exists in this department (${existingHOD.full_name}). Each department can only have one HOD.`,
+        );
+      }
+    }
 
     if (department_id) {
       user.department = { id: department_id } as Department;
