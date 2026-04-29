@@ -164,6 +164,7 @@ export const AdminOverview = () => {
         ),
       pendingReturns: assets.filter((a) => a.status === 'RETURN_PENDING'),
       userAssets: assets.filter((a) => {
+        if (a.status === 'DISPOSED') return false;
         const isAssigned = a.assigned_to?.id === currentUser?.id;
         const hasActivePenalty = incidents?.some(
           (i) =>

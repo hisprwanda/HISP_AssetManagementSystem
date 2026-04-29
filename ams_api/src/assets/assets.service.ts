@@ -105,7 +105,9 @@ export class AssetsService {
       await queryRunner.commitTransaction();
       return savedAsset;
     } catch {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       throw new InternalServerErrorException(
         `Failed to create asset and initial assignment record`,
       );
@@ -127,7 +129,6 @@ export class AssetsService {
     try {
       for (const data of assetsData) {
         try {
-          // Manual Duplicate Check to avoid transaction poisoning
           if (data.serial_number) {
             const existingSerial = await queryRunner.manager.findOne(Asset, {
               where: { serial_number: data.serial_number },
@@ -212,7 +213,9 @@ export class AssetsService {
       }
       await queryRunner.commitTransaction();
     } catch (err) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       throw new InternalServerErrorException(
         `Bulk operation failed: ${err instanceof Error ? err.message : String(err)}`,
       );
@@ -371,7 +374,9 @@ export class AssetsService {
 
       return await this.findOne(savedAsset.id);
     } catch (err) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       console.error('[AssetsService] Update Error:', err);
       throw err;
     } finally {
@@ -509,7 +514,9 @@ export class AssetsService {
       await queryRunner.commitTransaction();
       return savedAsset;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       console.error('Disposal Transaction Failed:', error);
       throw error;
     } finally {
@@ -591,7 +598,6 @@ export class AssetsService {
 
       if (params.isDamaged) {
         asset.status = 'BROKEN';
-        // Create an incident
         const incident = queryRunner.manager.create(AssetIncident, {
           asset: { id: asset.id },
           reported_by: { id: previousAssigneeId },
@@ -605,8 +611,6 @@ export class AssetsService {
       } else {
         asset.status = 'IN_STOCK';
       }
-
-      // Close the active assignment
       const activeAssignment = asset.assignment_history?.find(
         (a) => a.returned_at === null,
       );
@@ -615,8 +619,6 @@ export class AssetsService {
         activeAssignment.condition_on_assign = `${activeAssignment.condition_on_assign || ''} [RETURNED: ${params.isDamaged ? 'DAMAGED' : 'GOOD'}]`;
         await queryRunner.manager.save(activeAssignment);
       }
-
-      // Clear the assignee
       asset.assigned_to = null;
       asset.assigned_to_user_id = null;
 
@@ -638,7 +640,9 @@ export class AssetsService {
 
       return savedAsset;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       throw error;
     } finally {
       await queryRunner.release();
@@ -660,8 +664,6 @@ export class AssetsService {
       const dep = this.calculateDepreciation(asset);
       asset.current_value = dep.current_value;
       asset.accumulated_depreciation = dep.accumulated_depreciation;
-
-      // Check for End-of-Life triggers
       const isDepreciated =
         asset.current_value <= (asset.disposal_value || 0) ||
         asset.current_value === 0;

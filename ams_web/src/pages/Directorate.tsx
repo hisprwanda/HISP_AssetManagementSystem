@@ -52,7 +52,7 @@ export const Directorate = () => {
 
   useEffect(() => {
     if (activeTab === 'users') {
-      setHeaderTitle('System Audit & Provisioning');
+      setHeaderTitle('System Users');
     } else {
       setHeaderTitle('Organisational Units');
     }
@@ -153,7 +153,7 @@ export const Directorate = () => {
   if (!selectedDept) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 mb-6">
           <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit">
             <button
               onClick={() => setActiveTab('units')}
@@ -176,7 +176,6 @@ export const Directorate = () => {
               Users
             </button>
           </div>
-          <div className="flex-1" />
           {isAdmin && activeTab === 'units' && (
             <button
               onClick={() => setIsDeptModalOpen(true)}

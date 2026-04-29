@@ -128,12 +128,6 @@ export const ViewUserModal = ({
             </div>
           </div>
         </div>
-
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
-            System Identifier: {user.id}
-          </p>
-        </div>
       </div>
     </>
   );

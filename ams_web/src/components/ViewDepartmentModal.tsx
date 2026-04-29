@@ -5,6 +5,7 @@ interface Department {
   name: string;
   type: string; // 'Directorate' or 'Country Portfolio'
   status: string; // 'Active' or 'Inactive'
+  users?: { id: string; full_name: string; role?: string }[];
 }
 
 interface ViewDepartmentModalProps {
@@ -22,6 +23,13 @@ export const ViewDepartmentModal = ({
 
   const workplace =
     department.type === 'Directorate' ? 'Kigali Headquarters' : department.name;
+
+  const displayStatus =
+    department.status === 'Inactive' ||
+    !department.users ||
+    department.users.length === 0
+      ? 'Inactive'
+      : 'Active';
 
   return (
     <>
@@ -49,12 +57,12 @@ export const ViewDepartmentModal = ({
             </div>
             <div
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
-                department.status === 'Inactive'
+                displayStatus === 'Inactive'
                   ? 'bg-slate-100 text-slate-400 border-slate-200'
                   : 'bg-orange-50 text-orange-950 border-orange-200'
               }`}
             >
-              <Activity className="w-3 h-3" /> {department.status}
+              <Activity className="w-3 h-3" /> {displayStatus}
             </div>
           </div>
         </div>
@@ -117,12 +125,6 @@ export const ViewDepartmentModal = ({
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
-            System ID: {department.id}
-          </p>
         </div>
       </div>
     </>

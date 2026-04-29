@@ -45,7 +45,7 @@ export const StaffOverview = () => {
     if (!assets) return null;
 
     const userAssets = assets.filter(
-      (a) => a.assigned_to?.id === currentUser?.id,
+      (a) => a.status !== 'DISPOSED' && a.assigned_to?.id === currentUser?.id,
     );
 
     return {

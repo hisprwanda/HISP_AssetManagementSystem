@@ -465,7 +465,7 @@ export const SystemTrail = () => {
 
   return (
     <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-end gap-3 mb-2">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex bg-white/60 backdrop-blur-md p-1 px-4 rounded-xl border border-white shadow-sm items-center gap-4">
             <div className="flex items-center gap-2 text-[9px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">

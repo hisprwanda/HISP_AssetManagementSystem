@@ -9,5 +9,8 @@
     "type-check": "npm run type-check --prefix ams_api && npm run type-check --prefix ams_web",
     "test": "npm run test --prefix ams_api",
     "dev": "docker-compose up --build"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   }
 }

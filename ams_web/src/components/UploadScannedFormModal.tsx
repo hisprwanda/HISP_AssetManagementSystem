@@ -114,7 +114,7 @@ export const UploadScannedFormModal = ({
       <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl z-[90] overflow-hidden animate-in zoom-in duration-300">
         <div className="p-8 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-[#ff8000]">
               <Upload className="w-6 h-6" />
             </div>
             <div>
@@ -135,7 +135,7 @@ export const UploadScannedFormModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-4 relative group hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+          <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-4 relative group hover:border-[#ff8000] hover:bg-orange-50/30 transition-all">
             <input
               type="file"
               accept=".pdf"
@@ -144,7 +144,7 @@ export const UploadScannedFormModal = ({
             />
             {file ? (
               <div className="flex flex-col items-center">
-                <FileText className="w-12 h-12 text-blue-500 mb-2" />
+                <FileText className="w-12 h-12 text-[#ff8000] mb-2" />
                 <span className="text-sm font-bold text-slate-700 truncate max-w-xs">
                   {file.name}
                 </span>
@@ -155,7 +155,7 @@ export const UploadScannedFormModal = ({
             ) : (
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                  <Upload className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
+                  <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#ff8000]" />
                 </div>
                 <p className="text-sm font-bold text-slate-500">
                   Click or drag PDF form here
@@ -167,17 +167,17 @@ export const UploadScannedFormModal = ({
             )}
           </div>
 
-          <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 space-y-2">
-            <div className="flex items-center gap-2 text-blue-700">
+          <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100 space-y-2">
+            <div className="flex items-center gap-2 text-[#ff8000]">
               <FileText className="w-4 h-4" />
               <span className="text-xs font-semibold uppercase tracking-widest">
                 Asset Target
               </span>
             </div>
-            <p className="text-sm font-bold text-blue-900">
+            <p className="text-sm font-bold text-orange-950">
               {assignment.asset?.name}
             </p>
-            <p className="text-[10px] font-bold text-blue-400">
+            <p className="text-[10px] font-bold text-[#ff8000]">
               Recipient: {assignment.user?.full_name}
             </p>
           </div>
@@ -194,7 +194,7 @@ export const UploadScannedFormModal = ({
           <button
             type="submit"
             disabled={!file || uploadMutation.isPending}
-            className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-3 transition-all active:scale-95"
+            className="w-full py-5 bg-[#ff8000] hover:bg-[#e49f37] disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95"
           >
             {uploadMutation.isPending ? (
               <>

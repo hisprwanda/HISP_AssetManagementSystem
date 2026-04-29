@@ -55,6 +55,12 @@ interface Category {
   name: string;
 }
 
+interface UserRecord {
+  id: string;
+  full_name: string;
+  department?: { name: string };
+}
+
 const getCategoryIcon = (categoryName?: string) => {
   const name = (categoryName || '').toLowerCase();
   if (name.includes('laptop') || name.includes('computer')) return Laptop;
@@ -138,6 +144,14 @@ export const AssetTrail = () => {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await api.get('/categories');
+      return response.data;
+    },
+  });
+
+  const { data: allUsers } = useQuery<UserRecord[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/users');
       return response.data;
     },
   });
@@ -323,19 +337,22 @@ export const AssetTrail = () => {
       return;
     }
 
-    const workbook = new (window.ExcelJS as any).Workbook(); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const workbook = new (window.ExcelJS as any).Workbook();
     const worksheet = workbook.addWorksheet('Asset Registry Template');
     const dataSheet = workbook.addWorksheet('Valid Data');
     dataSheet.state = 'hidden';
-
-    // 1. Setup Data Sheet
     const deptNames = allDepartments?.map((d) => d.name) ||
-      deptOptions || ['ICT', 'Admin and Finance', 'Office of the CEO'];
+      deptOptions || [
+        'Software Engineering',
+        'Admin and Finance',
+        'Office of the CEO',
+      ];
 
     const catNames = allCategories?.map((c) => c.name) ||
       categoryOptions || ['Laptops', 'Monitors', 'Furniture'];
 
-    const statusOptions = [
+    const statusValues = [
       'IN_STOCK',
       'ASSIGNED',
       'BROKEN',
@@ -346,38 +363,57 @@ export const AssetTrail = () => {
     deptNames.forEach((name, i) => {
       dataSheet.getCell(i + 1, 1).value = name;
     });
-
     catNames.forEach((name, i) => {
       dataSheet.getCell(i + 1, 2).value = name;
     });
-
-    statusOptions.forEach((status, i) => {
+    statusValues.forEach((status, i) => {
       dataSheet.getCell(i + 1, 3).value = status;
     });
+    const usersByDept: Record<string, string[]> = {};
+    if (allUsers) {
+      allUsers.forEach((u) => {
+        const dept = u.department?.name;
+        if (dept) {
+          if (!usersByDept[dept]) usersByDept[dept] = [];
+          usersByDept[dept].push(u.full_name);
+        }
+      });
+    }
+    deptNames.forEach((deptName) => {
+      if (!deptName) return;
+      const sheetName = deptName
+        .replace(new RegExp('[\\[\\]/:*?\\\\]', 'g'), '-')
+        .substring(0, 31);
+      const deptSheet = workbook.addWorksheet(sheetName);
+      deptSheet.state = 'veryHidden';
+      const users = usersByDept[deptName] || [];
+      users.forEach((userName, i) => {
+        deptSheet.getCell(i + 1, 1).value = userName;
+      });
+    });
 
-    // 2. Setup Template Sheet
     worksheet.columns = [
       { header: 'Tag ID', key: 'tag_id', width: 15 },
       { header: 'Asset Name', key: 'name', width: 25 },
       { header: 'Category', key: 'category', width: 20 },
       { header: 'Serial Number', key: 'serial', width: 20 },
       { header: 'Department', key: 'dept', width: 25 },
-      { header: 'Personnel', key: 'personnel', width: 20 },
+      { header: 'Personnel', key: 'personnel', width: 25 },
       { header: 'Location', key: 'location', width: 15 },
       { header: 'Status', key: 'status', width: 15 },
       { header: 'Purchase Cost', key: 'cost', width: 15 },
       { header: 'Current Value', key: 'value', width: 15 },
       { header: 'Purchase Date', key: 'date', width: 15 },
     ];
-
-    // Add example row
     worksheet.addRow({
       tag_id: 'TAG-001',
       name: 'MacBook Pro M2',
       category: catNames[0] || 'Laptops',
       serial: 'SN12345678',
-      dept: deptNames[0] || 'ICT',
-      personnel: 'Name of Staff',
+      dept: deptNames[0] || 'Software Engineering',
+      personnel:
+        allUsers?.find((u) => u.department?.name === deptNames[0])?.full_name ||
+        'Name of Staff',
       location: 'HQ',
       status: 'IN_STOCK',
       cost: 2500000,
@@ -385,9 +421,7 @@ export const AssetTrail = () => {
       date: '2024-01-15',
     });
 
-    // 3. Add Data Validations
     for (let i = 2; i <= 500; i++) {
-      // Category Dropdown (Column C)
       worksheet.getCell(`C${i}`).dataValidation = {
         type: 'list',
         allowBlank: true,
@@ -397,7 +431,6 @@ export const AssetTrail = () => {
         error: 'Please select an asset category from the dropdown.',
       };
 
-      // Department Dropdown (Column E)
       worksheet.getCell(`E${i}`).dataValidation = {
         type: 'list',
         allowBlank: true,
@@ -406,19 +439,22 @@ export const AssetTrail = () => {
         errorTitle: 'Invalid Department',
         error: 'Please select a valid organizational unit from the dropdown.',
       };
-
-      // Status Dropdown (Column H)
+      worksheet.getCell(`F${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`INDIRECT("'"&E${i}&"'!$A:$A")`],
+        showErrorMessage: false,
+      };
       worksheet.getCell(`H${i}`).dataValidation = {
         type: 'list',
         allowBlank: true,
-        formulae: [`'Valid Data'!$C$1:$C$${statusOptions.length}`],
+        formulae: [`'Valid Data'!$C$1:$C$${statusValues.length}`],
         showErrorMessage: true,
         errorTitle: 'Invalid Status',
         error: 'Please select a valid asset status from the dropdown.',
       };
     }
 
-    // 4. Styling
     const headerRow = worksheet.getRow(1);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
     headerRow.fill = {
@@ -429,7 +465,6 @@ export const AssetTrail = () => {
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
     headerRow.height = 25;
 
-    // 5. Save
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
