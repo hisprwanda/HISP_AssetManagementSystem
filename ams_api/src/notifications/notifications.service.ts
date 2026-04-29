@@ -452,6 +452,50 @@ export class NotificationsService {
     await this.notifRepo.save(notifications);
   }
 
+  async notifyPersonalRequest(params: {
+    requestId: string;
+    requestTitle: string;
+    requesterId: string;
+    requesterName: string;
+    requesterRole: string;
+  }): Promise<void> {
+    const {
+      requestId,
+      requestTitle,
+      requesterId,
+      requesterName,
+      requesterRole,
+    } = params;
+
+    const allUsers = await this.userRepo.find();
+    let recipient: User | undefined;
+
+    const roleUpper = requesterRole.toUpperCase();
+    if (roleUpper === 'FINANCE OFFICER') {
+      recipient = allUsers.find(
+        (u) => u.role.toUpperCase() === 'ADMIN AND FINANCE DIRECTOR',
+      );
+    } else if (roleUpper === 'ADMIN AND FINANCE DIRECTOR') {
+      recipient = allUsers.find(
+        (u) => u.role.toUpperCase() === 'FINANCE OFFICER',
+      );
+    }
+
+    if (!recipient || recipient.id === requesterId) return;
+
+    const notification = this.notifRepo.create({
+      recipient: { id: recipient.id } as User,
+      title: 'New Personal Asset Request',
+      message: `${requesterName} (${requesterRole}) has submitted a personal asset request for "${requestTitle}". Please review the details in the procurement portal.`,
+      type: 'INFO',
+      request_id: requestId,
+      request_title: requestTitle,
+      is_read: false,
+    });
+
+    await this.notifRepo.save(notification);
+  }
+
   async getForUser(userId: string): Promise<Notification[]> {
     return this.notifRepo.find({
       where: { recipient: { id: userId } },

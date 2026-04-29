@@ -60,6 +60,7 @@ export const CEOOverview = () => {
       const response = await api.get('/assets');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: requests } = useQuery<AssetRequest[]>({
@@ -68,6 +69,7 @@ export const CEOOverview = () => {
       const response = await api.get('/assets-requests');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: incidents } = useQuery<AssetIncident[]>({
@@ -77,6 +79,7 @@ export const CEOOverview = () => {
       return response.data;
     },
     enabled: isCEO,
+    refetchInterval: 3000,
   });
 
   const { data: users } = useQuery<User[]>({
@@ -86,6 +89,7 @@ export const CEOOverview = () => {
       return response.data;
     },
     enabled: isCEO,
+    refetchInterval: 3000,
   });
 
   const { data: allDepartments } = useQuery<Department[]>({
@@ -95,6 +99,7 @@ export const CEOOverview = () => {
       return response.data;
     },
     enabled: isCEO,
+    refetchInterval: 3000,
   });
 
   const stats = useMemo(() => {

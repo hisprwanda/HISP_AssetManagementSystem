@@ -16,7 +16,7 @@ export class AssetIncident {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Asset)
+  @ManyToOne(() => Asset, (asset) => asset.incidents, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 

@@ -50,6 +50,7 @@ export const RequestTrail = () => {
       const response = await api.get('/assets-requests');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const filteredRequests = useMemo(() => {

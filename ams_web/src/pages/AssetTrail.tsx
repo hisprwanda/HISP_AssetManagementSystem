@@ -130,6 +130,7 @@ export const AssetTrail = () => {
       const response = await api.get('/assets');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: allDepartments } = useQuery<Department[]>({
@@ -138,6 +139,7 @@ export const AssetTrail = () => {
       const response = await api.get('/departments');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: allCategories } = useQuery<Category[]>({
@@ -146,6 +148,7 @@ export const AssetTrail = () => {
       const response = await api.get('/categories');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: allUsers } = useQuery<UserRecord[]>({
@@ -154,6 +157,7 @@ export const AssetTrail = () => {
       const response = await api.get('/users');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const validAssets = useMemo(() => {

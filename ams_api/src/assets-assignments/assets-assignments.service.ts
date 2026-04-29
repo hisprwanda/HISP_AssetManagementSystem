@@ -104,7 +104,21 @@ export class AssetAssignmentsService {
       await this.assetRepo.save(assignment.asset);
     }
 
-    if (prepareDto.sendToUser) {
+    if (prepareDto.userSignatureName) {
+      assignment.user_signature_name = prepareDto.userSignatureName;
+      assignment.user_signed_at = new Date();
+      assignment.form_status = 'PENDING_ADMIN_REVIEW';
+      await this.assignmentRepo.save(assignment);
+
+      if (assignment.user && assignment.asset) {
+        await this.notificationsService.notifyAssignmentAction({
+          action: 'SIGNED_BY_USER',
+          assignmentId: assignment.id,
+          assetName: assignment.asset.name,
+          userId: assignment.user.id,
+        });
+      }
+    } else if (prepareDto.sendToUser) {
       assignment.form_status = 'PENDING_USER_SIGNATURE';
       await this.assignmentRepo.save(assignment);
 

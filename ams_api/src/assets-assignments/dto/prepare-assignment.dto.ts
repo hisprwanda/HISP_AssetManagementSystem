@@ -37,4 +37,9 @@ export class PrepareAssignmentDto {
   @IsBoolean()
   @IsOptional()
   sendToUser?: boolean;
+
+  @ApiPropertyOptional({ description: 'Digital signature name of the user' })
+  @IsString()
+  @IsOptional()
+  userSignatureName?: string;
 }

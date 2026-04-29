@@ -56,6 +56,7 @@ export const Incidents = () => {
       const response = await api.get('/asset-incidents');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const penaltyMutation = useMutation({

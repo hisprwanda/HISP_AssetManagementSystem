@@ -23,7 +23,13 @@ export const useAuth = () => {
     deptUpper.includes('ADMIN & FINANCE') ||
     deptUpper.includes('FINANCE');
 
-  const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
+  const isFinanceDirector = roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+  const isFinanceOfficer = roleUpper === 'FINANCE OFFICER';
+
+  const isHOD =
+    roleUpper.includes('HOD') ||
+    roleUpper.includes('HEAD OF') ||
+    isFinanceDirector;
 
   const isCEO =
     roleUpper === 'CEO' || (deptUpper.includes('OFFICE OF THE CEO') && isHOD);
@@ -36,6 +42,8 @@ export const useAuth = () => {
     ...context,
     isAdmin,
     isFinanceAdmin,
+    isFinanceDirector,
+    isFinanceOfficer,
     isHOD,
     isCEO,
     isStaff,

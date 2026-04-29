@@ -38,6 +38,7 @@ export const HODOverview = () => {
       const response = await api.get('/assets');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: incidents } = useQuery<AssetIncident[]>({
@@ -46,6 +47,7 @@ export const HODOverview = () => {
       const response = await api.get('/asset-incidents');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const stats = useMemo(() => {

@@ -27,7 +27,7 @@ export const AssetReceiptFormModal = ({
   onClose,
   assignment,
 }: AssetReceiptFormModalProps) => {
-  const { isAdmin, user: currentUser } = useAuth();
+  const { isAdmin, user: currentUser, isFinanceOfficer } = useAuth();
   const queryClient = useQueryClient();
   const [signatureName, setSignatureName] = useState('');
   const [adminSignatureName, setAdminSignatureName] = useState('');
@@ -91,16 +91,22 @@ export const AssetReceiptFormModal = ({
   const prepareMutation = useMutation({
     mutationFn: async (sendToUser: boolean) => {
       if (!assignment) return;
+      const payload: Record<string, unknown> = {
+        condition_on_assign: condition,
+        received_from_name: handoverName,
+        asset_serial_number: serial,
+        asset_tag_id: tagId,
+        user_phone_number: phoneNumber,
+        sendToUser,
+      };
+
+      if (isFinanceOfficer && isRecipient && signatureName) {
+        payload.userSignatureName = signatureName;
+      }
+
       return await api.patch(
         `/asset-assignments/${assignment.id}/prepare-admin`,
-        {
-          condition_on_assign: condition,
-          received_from_name: handoverName,
-          asset_serial_number: serial,
-          asset_tag_id: tagId,
-          user_phone_number: phoneNumber,
-          sendToUser,
-        },
+        payload,
       );
     },
     onSuccess: () => {
@@ -163,8 +169,8 @@ export const AssetReceiptFormModal = ({
     window.print();
   };
 
-  const canEdit = isAdmin && isPreparing;
   const isRecipient = currentUser?.id === assignment.user?.id;
+  const canEdit = isAdmin && isPreparing && (!isRecipient || isFinanceOfficer);
 
   if (showSuccess) {
     return (
@@ -632,6 +638,28 @@ export const AssetReceiptFormModal = ({
 
         {isAdmin && canEdit && (
           <div className="p-8 border-t border-slate-100 bg-white flex flex-col gap-6 shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-20">
+            {isFinanceOfficer && isRecipient && (
+              <div className="space-y-3 mb-2">
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Signature className="w-4 h-4 text-orange-500" /> Confirm Full
+                  Name for Digital Signature
+                </label>
+                <input
+                  type="text"
+                  value={signatureName}
+                  onChange={(e) => {
+                    setSignatureName(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="Enter your full name"
+                  className={`w-full px-6 py-4 bg-slate-50 border ${error ? 'border-rose-300 focus:border-rose-500' : 'border-slate-200 focus:border-orange-500'} rounded-2xl outline-none focus:ring-4 text-lg font-['Dancing_Script',_cursive] transition-all placeholder:font-sans placeholder:text-sm`}
+                />
+                <p className="text-[10px] font-bold text-slate-400 italic">
+                  Since you are the recipient, you can sign now and forward it
+                  to the Director for final approval.
+                </p>
+              </div>
+            )}
             <div className="flex gap-4">
               <button
                 onClick={() => prepareMutation.mutate(false)}
@@ -642,22 +670,28 @@ export const AssetReceiptFormModal = ({
               </button>
               <button
                 onClick={() => prepareMutation.mutate(true)}
-                disabled={prepareMutation.isPending}
-                className="flex-[2] py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95"
+                disabled={
+                  prepareMutation.isPending ||
+                  (isFinanceOfficer && isRecipient && !signatureName)
+                }
+                className="flex-[2] py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
               >
                 {prepareMutation.isPending ? (
                   <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    Ready & Send to Recipient{' '}
+                    {isFinanceOfficer && isRecipient
+                      ? 'Sign & Forward to Director'
+                      : 'Ready & Send to Recipient'}{' '}
                     <CheckCircle2 className="w-5 h-5" />
                   </>
                 )}
               </button>
             </div>
             <p className="text-[10px] font-bold text-slate-400 text-center italic">
-              "Ready & Send" will move the form to the Staff member's portal for
-              their digital signature.
+              {isFinanceOfficer && isRecipient
+                ? 'This will bypass the recipient signature step and move the form directly to the Director.'
+                : '"Ready & Send" will move the form to the Staff member\'s portal for their digital signature.'}
             </p>
           </div>
         )}

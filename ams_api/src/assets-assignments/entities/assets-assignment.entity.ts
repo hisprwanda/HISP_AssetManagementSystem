@@ -15,7 +15,9 @@ export class AssetAssignment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.assignment_history)
+  @ManyToOne(() => Asset, (asset) => asset.assignment_history, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 

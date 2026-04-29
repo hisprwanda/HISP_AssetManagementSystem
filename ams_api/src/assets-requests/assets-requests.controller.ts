@@ -15,6 +15,7 @@ import { CreateBulkRequestDto } from './dto/create-bulk-request.dto';
 import { ReviewBulkRequestDto } from './dto/review-bulk-request.dto';
 import { FormalizeBulkRequestDto } from './dto/formalize-bulk-request.dto';
 import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
+import { DeployAssetRequestDto } from './dto/deploy-asset-request.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -110,6 +111,12 @@ export class AssetRequestsController {
 
     const fileUrl = `/uploads/${file.filename}`;
     return this.assetRequestsService.uploadPoScanned(id, fileUrl);
+  }
+
+  @Patch(':id/deploy')
+  @ApiOperation({ summary: 'Automate asset assignment and fulfill request' })
+  deploy(@Param('id') id: string, @Body() deployDto: DeployAssetRequestDto) {
+    return this.assetRequestsService.deploy(id, deployDto);
   }
 
   @Patch(':id')

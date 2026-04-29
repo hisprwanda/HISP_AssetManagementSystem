@@ -39,7 +39,12 @@ import { AssetAssignment as AssetAssignmentType } from '../types/assets';
 
 export const AdminOverview = () => {
   const navigate = useNavigate();
-  const { isAdmin, user: currentUser } = useAuth();
+  const {
+    isAdmin,
+    user: currentUser,
+    isFinanceDirector,
+    isFinanceOfficer,
+  } = useAuth();
   const [requestsPage, setRequestsPage] = useState(1);
   const [inventoryPage, setInventoryPage] = useState(1);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
@@ -70,6 +75,7 @@ export const AdminOverview = () => {
       const response = await api.get('/assets');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: requests } = useQuery<AssetRequest[]>({
@@ -78,6 +84,7 @@ export const AdminOverview = () => {
       const response = await api.get('/assets-requests');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const { data: users } = useQuery<User[]>({
@@ -87,6 +94,7 @@ export const AdminOverview = () => {
       return response.data;
     },
     enabled: isAdmin,
+    refetchInterval: 3000,
   });
 
   const { data: incidents } = useQuery<AssetIncidentType[]>({
@@ -95,6 +103,7 @@ export const AdminOverview = () => {
       const response = await api.get('/asset-incidents');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   const stats = useMemo(() => {
@@ -212,16 +221,27 @@ export const AdminOverview = () => {
         <div>
           <div className="flex items-center gap-3 mb-2 px-1">
             <div className="px-2 py-0.5 bg-orange-50 rounded-md border border-orange-100 text-[8px] font-semibold uppercase tracking-widest text-[#ff8000] flex items-center gap-1.5 shadow-sm">
-              <ShieldCheck className="w-3 h-3 text-[#ff8000]" /> Administrative
-              Session Secure
+              <ShieldCheck className="w-3 h-3 text-[#ff8000]" />{' '}
+              {isFinanceDirector
+                ? "Director's Portal"
+                : isFinanceOfficer
+                  ? 'Finance Operations'
+                  : 'Administrative Session'}
             </div>
           </div>
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none">
-            System Intelligence
+            {isFinanceDirector
+              ? 'Financial Oversight'
+              : isFinanceOfficer
+                ? 'Operational Hub'
+                : 'System Intelligence'}
           </h1>
           <p className="text-slate-500 font-medium mt-3 text-sm max-w-xl leading-relaxed">
-            Organization-wide asset lifecycle monitoring and procurement
-            pipeline management for HISP-Rwanda.
+            {isFinanceDirector
+              ? 'Executive monitoring of organizational assets and strategic procurement pipelines.'
+              : isFinanceOfficer
+                ? 'Managing daily asset transactions, procurement workflows, and inventory audits.'
+                : 'Organization-wide asset lifecycle monitoring and procurement pipeline management.'}
           </p>
         </div>
       </div>
@@ -541,7 +561,11 @@ export const AdminOverview = () => {
             <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40 mb-6">
               <h3 className="text-[11px] font-semibold text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
                 <div className="w-1.5 h-4 bg-[#ff8000] rounded-full shadow-[0_0_12px_rgba(255,128,0,0.3)]" />
-                My Asset Inventory
+                {isFinanceDirector
+                  ? "Director's Personal Inventory"
+                  : isFinanceOfficer
+                    ? 'My Assigned Equipment'
+                    : 'My Asset Inventory'}
               </h3>
             </div>
             <div className="overflow-x-auto">

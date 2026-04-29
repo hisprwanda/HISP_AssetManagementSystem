@@ -4,14 +4,17 @@ import { AssetRequest } from './entities/assets-request.entity';
 import { AssetRequestsController } from './assets-requests.controller';
 import { AssetRequestsService } from './assets-requests.service';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AssetAssignmentsModule } from '../assets-assignments/assets-assignments.module';
 import { User } from '../users/entities/user.entity';
 
 import { RequestableItem } from '../requestable-items/entities/requestable-item.entity';
+import { Asset } from '../assets/entities/asset.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AssetRequest, User, RequestableItem]),
+    TypeOrmModule.forFeature([AssetRequest, User, RequestableItem, Asset]),
     NotificationsModule,
+    AssetAssignmentsModule,
   ],
   controllers: [AssetRequestsController],
   providers: [AssetRequestsService],

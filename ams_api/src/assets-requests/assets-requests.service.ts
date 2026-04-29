@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssetRequest } from './entities/assets-request.entity';
@@ -12,6 +16,10 @@ import { FormalizeBulkRequestDto } from './dto/formalize-bulk-request.dto';
 import { UpdateAssetRequestDto } from './dto/update-assets-request.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestableItem } from '../requestable-items/entities/requestable-item.entity';
+import { AssetAssignmentsService } from '../assets-assignments/assets-assignments.service';
+import { DeployAssetRequestDto } from './dto/deploy-asset-request.dto';
+import { Asset } from '../assets/entities/asset.entity';
+import { Category } from '../categories/entities/category.entity';
 import { In } from 'typeorm';
 
 @Injectable()
@@ -23,7 +31,10 @@ export class AssetRequestsService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(RequestableItem)
     private readonly itemRepo: Repository<RequestableItem>,
+    @InjectRepository(Asset)
+    private readonly assetRepo: Repository<Asset>,
     private readonly notificationsService: NotificationsService,
+    private readonly assignmentsService: AssetAssignmentsService,
   ) {}
 
   async create(
@@ -45,6 +56,30 @@ export class AssetRequestsService {
     });
 
     const saved = await this.requestRepo.save(request);
+    const requester = await this.userRepo.findOne({ where: { id: userId } });
+
+    if (requester) {
+      const roleUpper = requester.role.toUpperCase();
+      if (
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+      ) {
+        this.notificationsService
+          .notifyPersonalRequest({
+            requestId: saved.id,
+            requestTitle: saved.title,
+            requesterId: requester.id,
+            requesterName: requester.full_name,
+            requesterRole: requester.role,
+          })
+          .catch((err) =>
+            console.error(
+              '[NotificationsService] Failed to send personal request notification:',
+              err,
+            ),
+          );
+      }
+    }
 
     if (dto.logistics?.contact_phone) {
       await this.userRepo.update(userId, {
@@ -222,7 +257,32 @@ export class AssetRequestsService {
       requests.push(request);
     }
 
-    return await this.requestRepo.save(requests);
+    const saved = await this.requestRepo.save(requests);
+
+    if (user) {
+      const roleUpper = user.role.toUpperCase();
+      if (
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+      ) {
+        this.notificationsService
+          .notifyPersonalRequest({
+            requestId: saved[0]?.id,
+            requestTitle: `Batch Request: ${saved.length} items`,
+            requesterId: user.id,
+            requesterName: user.full_name,
+            requesterRole: user.role,
+          })
+          .catch((err) =>
+            console.error(
+              '[NotificationsService] Failed to send personal batch request notification:',
+              err,
+            ),
+          );
+      }
+    }
+
+    return saved;
   }
 
   async reviewBulkByHOD(
@@ -282,7 +342,7 @@ export class AssetRequestsService {
         ];
         req.financials = {
           subtotal: itemUpdate.quantity * itemUpdate.unit_price,
-          transport_fees: dto.transport_fees / requests.length, // Distribute fees evenly
+          transport_fees: dto.transport_fees / requests.length,
           grand_total:
             itemUpdate.quantity * itemUpdate.unit_price +
             dto.transport_fees / requests.length,
@@ -304,7 +364,77 @@ export class AssetRequestsService {
       request.purchase_order = {} as PurchaseOrderData;
     }
     request.purchase_order.scanned_po_url = fileUrl;
-    request.status = 'ORDERED'; // Ensure it's marked as ordered if a PO is uploaded
+    request.status = 'ORDERED';
     return await this.requestRepo.save(request);
+  }
+  async deploy(id: string, dto: DeployAssetRequestDto) {
+    const request = await this.findOne(id);
+    if (!request.requested_by) {
+      throw new BadRequestException('Request does not have a valid requester.');
+    }
+
+    const finalAssetIds: string[] = [...(dto.asset_ids || [])];
+
+    if (dto.new_assets && dto.new_assets.length > 0) {
+      for (const newAsset of dto.new_assets) {
+        const matchingItem = (
+          (request.items as Array<{
+            name: string;
+            estimated_unit_cost?: number;
+            financials?: { unit_cost: number };
+          }>) || []
+        ).find((i) => i.name === newAsset.name);
+
+        const cost: number =
+          Number(matchingItem?.financials?.unit_cost) ||
+          Number(matchingItem?.estimated_unit_cost) ||
+          0;
+
+        const purchaseDate = dto.purchase_date
+          ? new Date(dto.purchase_date)
+          : request.purchase_order?.order_date
+            ? new Date(request.purchase_order.order_date)
+            : new Date();
+
+        console.log(
+          `[Deploy] Creating asset ${newAsset.name} with cost ${cost} and date ${purchaseDate.toISOString()}`,
+        );
+
+        const asset = this.assetRepo.create({
+          name: newAsset.name,
+          serial_number: newAsset.serial_number,
+          tag_id: newAsset.tag_id,
+          status: 'IN_STOCK',
+          category: { id: newAsset.category_id } as unknown as Category,
+          department: request.department,
+          purchase_cost: cost,
+          purchase_date: purchaseDate,
+          current_value: cost,
+        });
+        const savedAsset = await this.assetRepo.save(asset);
+        finalAssetIds.push(savedAsset.id);
+      }
+    }
+
+    if (finalAssetIds.length === 0) {
+      throw new BadRequestException('No assets provided for deployment.');
+    }
+
+    const assignments = await this.assignmentsService.prepareBulkByAdmin({
+      asset_ids: finalAssetIds,
+      user_id: request.requested_by.id,
+      condition_notes:
+        dto.condition_notes || `Deployed for request: ${request.title}`,
+      received_from_name: dto.received_from_name || 'HISP Admin',
+    });
+
+    request.status = 'FULFILLED';
+    await this.requestRepo.save(request);
+
+    return {
+      message: 'Deployment initiated successfully',
+      assignments_count: assignments.length,
+      form_number: assignments[0]?.form_number,
+    };
   }
 }

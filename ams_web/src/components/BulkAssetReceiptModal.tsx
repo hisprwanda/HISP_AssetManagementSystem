@@ -16,6 +16,7 @@ interface BulkAssetReceiptModalProps {
   onClose: () => void;
   selectedAssetIds?: string[];
   formNumber?: string;
+  preSelectedUserId?: string;
   onSuccess: () => void;
 }
 
@@ -24,15 +25,22 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
   onClose,
   selectedAssetIds = [],
   formNumber,
+  preSelectedUserId,
   onSuccess,
 }) => {
   const queryClient = useQueryClient();
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(preSelectedUserId || '');
   const [receivedFromName, setReceivedFromName] = useState('');
   const [conditionNotes, setConditionNotes] = useState('');
   const [signatureName, setSignatureName] = useState('');
   const [adminSignature, setAdminSignature] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  React.useEffect(() => {
+    if (preSelectedUserId) {
+      setUserId(preSelectedUserId);
+    }
+  }, [preSelectedUserId]);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],

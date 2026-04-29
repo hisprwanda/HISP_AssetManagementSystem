@@ -12,6 +12,7 @@ import { Category } from 'src/categories/entities/category.entity';
 import { Department } from 'src/departments/entities/department.entity';
 import { User } from 'src/users/entities/user.entity';
 import { AssetAssignment } from 'src/assets-assignments/entities/assets-assignment.entity';
+import { AssetIncident } from 'src/asset-incidents/entities/asset-incident.entity';
 
 @Entity('assets')
 export class Asset {
@@ -98,6 +99,9 @@ export class Asset {
 
   @OneToMany(() => AssetAssignment, (assignment) => assignment.asset)
   assignment_history: AssetAssignment[];
+
+  @OneToMany(() => AssetIncident, (incident) => incident.asset)
+  incidents: AssetIncident[];
 
   @CreateDateColumn()
   created_at: Date;

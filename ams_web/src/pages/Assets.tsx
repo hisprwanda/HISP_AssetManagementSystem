@@ -26,6 +26,9 @@ import {
   Upload,
   ChevronRight,
   ChevronLeft,
+  ClipboardCheck,
+  PackagePlus,
+  ShoppingCart,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -41,7 +44,6 @@ import { UploadScannedFormModal } from '../components/UploadScannedFormModal';
 import { Pagination } from '../components/Pagination';
 import { BulkRequestModal } from '../components/BulkRequestModal';
 import { BulkAssetReceiptModal } from '../components/BulkAssetReceiptModal';
-import { ShoppingCart, PackagePlus } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 
 import {
@@ -92,6 +94,8 @@ export const Assets = () => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryIdParam = searchParams.get('categoryId');
+  const deployForUserId = searchParams.get('deployForUser');
+  const requestTitle = searchParams.get('requestTitle');
 
   useEffect(() => {
     setHeaderTitle('Asset Masterlist');
@@ -563,6 +567,43 @@ export const Assets = () => {
         </div>
       </div>
 
+      {deployForUserId && (
+        <div className="mb-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+              <PackagePlus className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">
+                Active Deployment Mode
+              </p>
+              <p className="text-sm font-bold text-slate-800">
+                Fulfilling:{' '}
+                <span className="text-indigo-600">{requestTitle}</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-[10px] font-semibold text-slate-400 max-w-[200px] text-right leading-tight italic">
+              Select available items from the list below and use "Initiate Bulk
+              Handover".
+            </p>
+            <button
+              onClick={() => {
+                const params = new URLSearchParams(searchParams);
+                params.delete('deployForUser');
+                params.delete('requestTitle');
+                window.history.replaceState(null, '', `?${params.toString()}`);
+                window.location.reload(); // Quickest way to clear state
+              }}
+              className="p-2 hover:bg-indigo-100 text-indigo-400 rounded-lg transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white/60 backdrop-blur-md border border-white p-1.5 rounded-xl shadow-sm mb-3 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -582,6 +623,15 @@ export const Assets = () => {
             </button>
           )}
         </div>
+        {isAdmin && selectedAssetIds.length > 0 && (
+          <button
+            onClick={() => setIsBulkReceiptModalOpen(true)}
+            className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-orange-100 transition-all animate-in zoom-in"
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Initiate Bulk Handover ({selectedAssetIds.length})
+          </button>
+        )}
       </div>
 
       <div className="flex gap-4 flex-1 min-h-0 relative">
@@ -1085,13 +1135,13 @@ export const Assets = () => {
       {/* Hardware Cart Bar (Admin) */}
       {isAdmin && selectedAssetIds.length > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
-          <div className="bg-indigo-950 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">
+          <div className="bg-orange-950 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-10 h-10 rounded-full bg-[#ff8000] flex items-center justify-center shadow-lg shadow-orange-500/20">
                 <PackagePlus className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest leading-none mb-1">
+                <p className="text-[10px] font-bold text-orange-300 uppercase tracking-widest leading-none mb-1">
                   Hardware Handover Cart
                 </p>
                 <p className="text-sm font-bold leading-none">
@@ -1105,13 +1155,13 @@ export const Assets = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSelectedAssetIds([])}
-                className="text-xs font-bold text-indigo-300 hover:text-white transition-colors"
+                className="text-xs font-bold text-orange-300 hover:text-white transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={() => setIsBulkReceiptModalOpen(true)}
-                className="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
+                className="bg-[#ff8000] hover:bg-[#e49f37] text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-orange-500/20 transition-all active:scale-95"
               >
                 Assign Selected Assets
               </button>
@@ -1169,6 +1219,7 @@ export const Assets = () => {
         isOpen={isBulkReceiptModalOpen}
         onClose={() => setIsBulkReceiptModalOpen(false)}
         selectedAssetIds={selectedAssetIds}
+        preSelectedUserId={deployForUserId || undefined}
         onSuccess={() => {
           setSelectedAssetIds([]);
           setIsBulkReceiptModalOpen(false);

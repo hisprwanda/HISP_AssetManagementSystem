@@ -36,7 +36,9 @@ export const Profile = () => {
 
   const myAssets = useMemo(() => {
     if (!assets) return [];
-    return assets.filter((a) => a.assigned_to?.id === user?.id);
+    return assets.filter(
+      (a) => a.assigned_to?.id === user?.id && a.status !== 'DISPOSED',
+    );
   }, [assets, user]);
 
   if (!user) return null;

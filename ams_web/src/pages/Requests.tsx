@@ -19,6 +19,7 @@ import {
   UserCheck,
   FilePlus,
   PackageCheck,
+  PackagePlus,
   Filter,
 } from 'lucide-react';
 import { api } from '../lib/api';
@@ -38,9 +39,17 @@ import { Pagination } from '../components/Pagination';
 import { HODBulkReviewModal } from '../components/HODBulkReviewModal';
 import { FormalizeBulkRequestModal } from '../components/FormalizeBulkRequestModal';
 import { UploadSignedPOModal } from '../components/UploadSignedPOModal';
+import { DeployRequestAssetsModal } from '../components/DeployRequestAssetsModal';
 
 export const Requests = () => {
-  const { user: currentUser, isAdmin, isHOD, isStaff, isCEO } = useAuth();
+  const {
+    user: currentUser,
+    isAdmin,
+    isHOD,
+    isStaff,
+    isCEO,
+    isFinanceDirector,
+  } = useAuth();
   const isRequesterOnly = isStaff && !isAdmin && !isHOD;
   const queryClient = useQueryClient();
   const { openRequest, setHeaderTitle } = useOutletContext<{
@@ -88,6 +97,9 @@ export const Requests = () => {
   const [isUploadPOModalOpen, setIsUploadPOModalOpen] = useState(false);
   const [requestForUploadPO, setRequestForUploadPO] =
     useState<AssetRequest | null>(null);
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [requestForDeployment, setRequestForDeployment] =
+    useState<AssetRequest | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -97,6 +109,7 @@ export const Requests = () => {
       const response = await api.get('/assets-requests');
       return response.data;
     },
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
@@ -149,6 +162,12 @@ export const Requests = () => {
 
         // 2. Admin Privilege: See everything formalized (passed HOD)
         if (isAdmin) {
+          if (
+            isFinanceDirector &&
+            r.department?.id === currentUser?.department?.id
+          ) {
+            return true;
+          }
           return r.status !== 'PENDING';
         }
 
@@ -161,7 +180,15 @@ export const Requests = () => {
       });
     }
     return filtered;
-  }, [requests, isRequesterOnly, isHOD, isAdmin, isCEO, currentUser]);
+  }, [
+    requests,
+    isRequesterOnly,
+    isHOD,
+    isAdmin,
+    isCEO,
+    isFinanceDirector,
+    currentUser,
+  ]);
 
   const filteredRequests = useMemo(() => {
     let filtered = baseRequests;
@@ -790,6 +817,18 @@ export const Requests = () => {
                             )}
                           </>
                         )}
+                        {isAdmin && req.status === 'FULFILLED' && (
+                          <button
+                            onClick={() => {
+                              setRequestForDeployment(req);
+                              setIsDeployModalOpen(true);
+                            }}
+                            className="p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            title="Deploy Hardware (Automated)"
+                          >
+                            <PackagePlus className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -918,6 +957,27 @@ export const Requests = () => {
           requests={selectedBatch.requests}
         />
       )}
+
+      <UploadSignedPOModal
+        isOpen={isUploadPOModalOpen}
+        onClose={() => {
+          setIsUploadPOModalOpen(false);
+          setRequestForUploadPO(null);
+        }}
+        request={requestForUploadPO}
+      />
+
+      <DeployRequestAssetsModal
+        isOpen={isDeployModalOpen}
+        onClose={() => {
+          setIsDeployModalOpen(false);
+          setRequestForDeployment(null);
+        }}
+        request={requestForDeployment}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['assets-requests'] });
+        }}
+      />
     </div>
   );
 };
