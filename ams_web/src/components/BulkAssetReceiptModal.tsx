@@ -67,6 +67,14 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
     ? bulkAssignments?.map((a) => a.asset) || []
     : allAssets?.filter((a) => selectedAssetIds.includes(a.id)) || [];
 
+  const admins =
+    users?.filter(
+      (u) =>
+        u.role === 'Admin and Finance Director' ||
+        u.role === 'System Admin' ||
+        u.role?.toLowerCase() === 'finance officer',
+    ) || [];
+
   const prepareMutation = useMutation({
     mutationFn: async () => {
       return await api.post('/asset-assignments/bulk/prepare', {
@@ -153,7 +161,7 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 ${isSignatureView ? 'bg-orange-600' : 'bg-indigo-600'}`}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200 ${isSignatureView ? 'bg-orange-600' : 'bg-[#ff8000]'}`}
                 >
                   {isSignatureView ? (
                     <PenTool className="w-6 h-6 text-white" />
@@ -194,7 +202,7 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                     <select
                       value={userId}
                       onChange={(e) => setUserId(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
                     >
                       <option value="">Select recipient...</option>
                       {users?.map((u) => (
@@ -208,13 +216,18 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">
                       Handed Over By
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={receivedFromName}
                       onChange={(e) => setReceivedFromName(e.target.value)}
-                      placeholder="Admin Name..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                    />
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                    >
+                      <option value="">Select admin...</option>
+                      {admins.map((admin) => (
+                        <option key={admin.id} value={admin.full_name}>
+                          {admin.full_name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="col-span-2">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">
@@ -224,7 +237,7 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                       value={conditionNotes}
                       onChange={(e) => setConditionNotes(e.target.value)}
                       placeholder="Shared notes for all items in this cart..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[80px] resize-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all min-h-[80px] resize-none"
                     />
                   </div>
                 </div>
@@ -312,8 +325,8 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
               )}
 
               {isVerificationView && (
-                <div className="bg-indigo-50/50 rounded-3xl p-6 border border-indigo-100">
-                  <label className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3 block flex items-center gap-2">
+                <div className="bg-orange-50/50 rounded-3xl p-6 border border-orange-100">
+                  <label className="text-[10px] font-bold text-[#ff8000] uppercase tracking-widest mb-3 block flex items-center gap-2">
                     <ShieldCheck className="w-3 h-3" /> Admin Verification
                     Signature
                   </label>
@@ -322,7 +335,7 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                     value={adminSignature}
                     onChange={(e) => setAdminSignature(e.target.value)}
                     placeholder="Admin signature..."
-                    className="w-full bg-white border border-indigo-200 rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full bg-white border border-orange-200 rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
                   />
                 </div>
               )}
@@ -342,7 +355,7 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                   disabled={
                     prepareMutation.isPending || !userId || !receivedFromName
                   }
-                  className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-[2] bg-[#ff8000] hover:bg-orange-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {prepareMutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -12,6 +12,7 @@ import {
   Activity,
   Clock,
   FileText,
+  ClipboardCheck,
   Plus,
   RotateCcw,
   CheckCircle2,
@@ -35,6 +36,7 @@ import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { DamageReportModal } from '../components/DamageReportModal';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
+
 import { AssetAssignment as AssetAssignmentType } from '../types/assets';
 
 export const AdminOverview = () => {
@@ -55,6 +57,7 @@ export const AdminOverview = () => {
     useState<AssetAssignmentType | null>(null);
   const [incidentToSettle, setIncidentToSettle] =
     useState<AssetIncidentType | null>(null);
+
   const itemsPerPage = 10;
 
   const queryClient = useQueryClient();
@@ -159,11 +162,32 @@ export const AdminOverview = () => {
       totalUsers: users?.length || 0,
       totalDepreciation,
       topCategories,
-      pendingFormsCount: assets.filter((a) =>
-        a.assignment_history?.some(
-          (h) => h.form_status === 'PENDING_ADMIN_REVIEW',
+      pendingFormsCount: Object.values(
+        assets.reduce(
+          (acc, asset) => {
+            if (asset.status !== 'IN_STOCK') return acc;
+            const pendingAssignment = asset.assignment_history?.find(
+              (h) =>
+                h.form_status === 'PENDING_ADMIN_REVIEW' &&
+                h.received_from_name === currentUser?.full_name,
+            );
+            if (pendingAssignment && pendingAssignment.form_number) {
+              acc[pendingAssignment.form_number] = true;
+            }
+            return acc;
+          },
+          {} as Record<string, boolean>,
         ),
       ).length,
+      assetsRequiringSignature: assets.filter(
+        (a) =>
+          a.status === 'IN_STOCK' &&
+          a.assignment_history?.some(
+            (h) =>
+              h.form_status === 'PENDING_ADMIN_REVIEW' &&
+              h.received_from_name === currentUser?.full_name,
+          ),
+      ),
       recentRequests: [...requests]
         .filter((r) => r.status !== 'PENDING')
         .sort(
@@ -390,6 +414,44 @@ export const AdminOverview = () => {
             </div>
           )}
 
+          {stats.assetsRequiringSignature.length > 0 && (
+            <div className="space-y-4 mb-6">
+              {stats.assetsRequiringSignature.map((asset) => (
+                <div
+                  key={asset.id}
+                  onClick={() => {
+                    const catId = asset.category?.id;
+                    const url = catId
+                      ? `/assets?categoryId=${catId}`
+                      : `/assets`;
+                    navigate(url);
+                  }}
+                  className="bg-orange-50/80 border border-orange-100 rounded-xl p-4 flex items-center justify-between hover:border-[#ff8000] hover:bg-orange-50 transition-colors cursor-pointer group shadow-sm animate-in fade-in slide-in-from-top-2"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-orange-200 shadow-sm shrink-0 group-hover:scale-110 transition-transform">
+                      <ClipboardCheck className="w-5 h-5 text-[#ff8000]" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900 tracking-tight leading-tight">
+                        Signature Required: {asset.name}
+                      </h3>
+                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                        {asset.tag_id || asset.serial_number} • Click to Verify
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-[#ff8000] uppercase tracking-widest bg-white px-2 py-1 rounded-md border border-orange-200 shadow-sm hidden sm:block">
+                      Final Step
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#ff8000] group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {stats.pendingReturns.length > 0 && (
             <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm mb-6">
               <div className="flex items-center justify-between mb-6">
@@ -592,7 +654,11 @@ export const AdminOverview = () => {
                 <tbody className="divide-y divide-slate-100/50">
                   {stats.userAssets.length > 0 ? (
                     paginatedUserAssets.map((asset) => (
-                      <tr key={asset.id} className="group hover:bg-white/60">
+                      <tr
+                        key={asset.id}
+                        id={asset.id}
+                        className="group hover:bg-white/60"
+                      >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">

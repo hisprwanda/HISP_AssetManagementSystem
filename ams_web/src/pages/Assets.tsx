@@ -217,23 +217,24 @@ export const Assets = () => {
 
     let filtered = assets.filter((a) => a.status !== 'DISPOSED');
 
-    if (isStaff) {
-      filtered = filtered.filter((a) => a.assigned_to?.id === currentUser?.id);
-    } else if (isHOD) {
-      filtered = filtered.filter(
-        (a) => a.department?.id === currentUser?.department?.id,
-      );
+    if (!isAdmin && !isCEO) {
+      if (isStaff) {
+        filtered = filtered.filter(
+          (a) => a.assigned_to?.id === currentUser?.id,
+        );
+      } else if (isHOD) {
+        filtered = filtered.filter(
+          (a) => a.department?.id === currentUser?.department?.id,
+        );
+      }
     }
 
     if (selectedCategory) {
       filtered = filtered.filter((a) => a.category?.id === selectedCategory.id);
     }
 
-    // Note: Global and local search are now handled by the backend via debouncedSearch
-
     return filtered;
-    return filtered;
-  }, [assets, selectedCategory, isStaff, isHOD, currentUser]);
+  }, [assets, selectedCategory, isStaff, isHOD, isCEO, isAdmin, currentUser]);
 
   const paginatedAssets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -594,7 +595,7 @@ export const Assets = () => {
                 params.delete('deployForUser');
                 params.delete('requestTitle');
                 window.history.replaceState(null, '', `?${params.toString()}`);
-                window.location.reload(); // Quickest way to clear state
+                window.location.reload();
               }}
               className="p-2 hover:bg-indigo-100 text-indigo-400 rounded-lg transition-all"
             >
@@ -991,7 +992,7 @@ export const Assets = () => {
           </div>
         </div>
 
-        {selectedCategory && (
+        {isAdmin && selectedCategory && (
           <div
             className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${
               isRequestableSidebarOpen
@@ -1132,7 +1133,6 @@ export const Assets = () => {
         )}
       </div>
 
-      {/* Hardware Cart Bar (Admin) */}
       {isAdmin && selectedAssetIds.length > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
           <div className="bg-orange-950 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">
@@ -1170,7 +1170,6 @@ export const Assets = () => {
         </div>
       )}
 
-      {/* Floating Request Cart Bar */}
       {cartItems.length > 0 && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
           <div className="bg-slate-900 text-white rounded-full px-6 py-4 shadow-2xl flex items-center gap-8 border border-white/10 backdrop-blur-xl">

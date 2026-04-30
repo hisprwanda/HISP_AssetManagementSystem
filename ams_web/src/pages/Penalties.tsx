@@ -19,7 +19,7 @@ import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { Pagination } from '../components/Pagination';
 
 export const Penalties = () => {
-  const { isFinanceAdmin, isAdmin } = useAuth();
+  const { isFinanceAdmin, isAdmin, isCEO } = useAuth();
   const navigate = useNavigate();
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -161,7 +161,7 @@ export const Penalties = () => {
     document.body.removeChild(link);
   };
 
-  if (!isAdmin && !isFinanceAdmin) {
+  if (!isAdmin && !isFinanceAdmin && !isCEO) {
     return (
       <div className="flex flex-col h-[70vh] items-center justify-center text-center">
         <div className="w-20 h-20 bg-orange-50 rounded-[2rem] flex items-center justify-center mb-6 border border-orange-100">

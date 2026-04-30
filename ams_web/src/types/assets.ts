@@ -115,7 +115,8 @@ export interface AssetRequest {
     | 'CEO_APPROVED'
     | 'ORDERED'
     | 'REJECTED'
-    | 'FULFILLED';
+    | 'FULFILLED'
+    | 'DEPLOYED';
   ceo_remarks?: string;
   purchase_order?: POData;
   requested_by?: User;

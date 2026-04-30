@@ -428,7 +428,7 @@ export class AssetRequestsService {
       received_from_name: dto.received_from_name || 'HISP Admin',
     });
 
-    request.status = 'FULFILLED';
+    request.status = 'DEPLOYED';
     await this.requestRepo.save(request);
 
     return {

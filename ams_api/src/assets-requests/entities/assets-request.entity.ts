@@ -58,6 +58,7 @@ export class AssetRequest {
       'ORDERED',
       'REJECTED',
       'FULFILLED',
+      'DEPLOYED',
     ],
     default: 'PENDING',
   })

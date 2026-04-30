@@ -16,6 +16,7 @@ import { Asset } from '@/types/assets';
 import { api } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { RotateCcw } from 'lucide-react';
 import { ConfirmActionModal } from './ConfirmActionModal';
 
@@ -34,6 +35,35 @@ export const ViewAssetModal = ({
   const [asset, setAsset] = useState<Asset | null>(initialAsset);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReturnConfirmOpen, setIsReturnConfirmOpen] = useState(false);
+  const [adminSignature, setAdminSignature] = useState('');
+  const queryClient = useQueryClient();
+
+  const verifyMutation = useMutation({
+    mutationFn: async (approve: boolean) => {
+      const pendingAssignment = asset?.assignment_history?.find(
+        (h) => h.form_status === 'PENDING_ADMIN_REVIEW',
+      );
+      if (!pendingAssignment?.form_number) throw new Error('No pending form');
+      return await api.patch(
+        `/asset-assignments/bulk/${pendingAssignment.form_number}/verify`,
+        {
+          approve,
+          adminSignatureName: adminSignature,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ['asset-assignments'] });
+      toast.success('Asset handover verified and finalized.');
+      onClose();
+      setAdminSignature('');
+    },
+    onError: (err: unknown) => {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      toast.error(axiosError.response?.data?.message || 'Failed to verify');
+    },
+  });
 
   // Sync state when initialAsset changes
   if (initialAsset?.id !== asset?.id) {
@@ -296,6 +326,45 @@ export const ViewAssetModal = ({
               </p>
             </div>
           )}
+
+          {asset.status === 'IN_STOCK' &&
+            isAdmin &&
+            asset.assignment_history?.some(
+              (h) =>
+                h.form_status === 'PENDING_ADMIN_REVIEW' &&
+                h.received_from_name === user?.full_name,
+            ) && (
+              <div className="bg-orange-50/50 rounded-3xl p-6 border border-orange-100 mt-4">
+                <label className="text-[10px] font-bold text-[#ff8000] uppercase tracking-widest mb-3 block flex items-center gap-2">
+                  <ShieldCheck className="w-3 h-3" /> Finalize Handover
+                </label>
+                <input
+                  type="text"
+                  value={adminSignature}
+                  onChange={(e) => setAdminSignature(e.target.value)}
+                  placeholder="Admin signature..."
+                  className="w-full bg-white border border-orange-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all mb-4"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => verifyMutation.mutate(false)}
+                    disabled={verifyMutation.isPending}
+                    className="flex-1 py-3 rounded-2xl font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all text-xs uppercase tracking-widest"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => verifyMutation.mutate(true)}
+                    disabled={verifyMutation.isPending || !adminSignature}
+                    className="flex-[2] bg-[#ff8000] hover:bg-[#e49f37] text-white py-3 rounded-2xl font-bold shadow-lg shadow-orange-100 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-xs uppercase tracking-widest"
+                  >
+                    {verifyMutation.isPending
+                      ? 'Processing...'
+                      : 'Verify & Sign'}
+                  </button>
+                </div>
+              </div>
+            )}
 
           {asset.status === 'ASSIGNED' &&
             user &&

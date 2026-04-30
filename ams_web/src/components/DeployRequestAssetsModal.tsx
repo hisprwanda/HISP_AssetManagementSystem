@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  X,
   PackagePlus,
   CheckCircle2,
   Box,
@@ -10,7 +9,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { api } from '../lib/api';
-import { AssetRequest, Asset, Category } from '../types/assets';
+import { AssetRequest, Category } from '../types/assets';
 
 interface DeployRequestAssetsModalProps {
   isOpen: boolean;
@@ -23,9 +22,7 @@ export const DeployRequestAssetsModal: React.FC<
   DeployRequestAssetsModalProps
 > = ({ isOpen, onClose, request, onSuccess }) => {
   const queryClient = useQueryClient();
-  const [selectedAssetIds, setSelectedAssetIds] = useState<
-    Record<string, string>
-  >({});
+
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<
     Record<string, string>
   >({});
@@ -36,6 +33,7 @@ export const DeployRequestAssetsModal: React.FC<
   const [purchaseDate, setPurchaseDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+  const [warrantyExpiry, setWarrantyExpiry] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
   const flatItems = useMemo(() => {
@@ -49,15 +47,6 @@ export const DeployRequestAssetsModal: React.FC<
     );
   }, [request]);
 
-  const { data: allAssets } = useQuery<Asset[]>({
-    queryKey: ['assets', 'in-stock'],
-    queryFn: async () => {
-      const response = await api.get('/assets');
-      return response.data.filter((a: Asset) => a.status === 'IN_STOCK');
-    },
-    enabled: isOpen,
-  });
-
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -70,15 +59,10 @@ export const DeployRequestAssetsModal: React.FC<
   const deployMutation = useMutation({
     mutationFn: async () => {
       console.log('[DeployModal] Initiating deployment...');
-      const assetIds = Object.values(selectedAssetIds).filter(Boolean);
 
       // Collect new assets to create
       const newAssets = flatItems
-        .filter(
-          (item) =>
-            !selectedAssetIds[item.uniqueId] &&
-            (assetSNs[item.uniqueId] || assetTags[item.uniqueId]),
-        )
+        .filter((item) => assetSNs[item.uniqueId] || assetTags[item.uniqueId])
         .map((item) => {
           const categoryId = selectedCategoryIds[item.uniqueId];
           if (!categoryId) {
@@ -95,7 +79,6 @@ export const DeployRequestAssetsModal: React.FC<
         });
 
       console.log('[DeployModal] Payload:', {
-        assetIds,
         newAssets,
         receivedFromName,
       });
@@ -103,11 +86,12 @@ export const DeployRequestAssetsModal: React.FC<
       const response = await api.patch(
         `/assets-requests/${request?.id}/deploy`,
         {
-          asset_ids: assetIds,
+          asset_ids: [],
           new_assets: newAssets,
           received_from_name: receivedFromName,
           condition_notes: conditionNotes,
           purchase_date: purchaseDate,
+          warranty_expiry_date: warrantyExpiry || undefined,
         },
       );
 
@@ -139,18 +123,6 @@ export const DeployRequestAssetsModal: React.FC<
       ...prev,
       [itemUniqueId]: categoryId,
     }));
-    // Reset asset when category changes
-    setSelectedAssetIds((prev) => ({
-      ...prev,
-      [itemUniqueId]: '',
-    }));
-  };
-
-  const handleAssetSelect = (itemIndex: string, assetId: string) => {
-    setSelectedAssetIds((prev) => ({
-      ...prev,
-      [itemIndex]: assetId,
-    }));
   };
 
   const isFormValid = useMemo(() => {
@@ -161,11 +133,10 @@ export const DeployRequestAssetsModal: React.FC<
     );
 
     const matchedItems = flatItems.filter((item) => {
-      const hasExisting = !!selectedAssetIds[item.uniqueId];
-      const hasNew =
+      return (
         !!selectedCategoryIds[item.uniqueId] &&
-        (!!assetSNs[item.uniqueId] || !!assetTags[item.uniqueId]);
-      return hasExisting || hasNew;
+        (!!assetSNs[item.uniqueId] || !!assetTags[item.uniqueId])
+      );
     });
 
     const isValid =
@@ -183,7 +154,6 @@ export const DeployRequestAssetsModal: React.FC<
   }, [
     request,
     flatItems,
-    selectedAssetIds,
     selectedCategoryIds,
     assetSNs,
     assetTags,
@@ -231,12 +201,6 @@ export const DeployRequestAssetsModal: React.FC<
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-3 hover:bg-white rounded-2xl transition-all text-slate-400 hover:text-slate-600 shadow-sm border border-transparent hover:border-slate-100"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
@@ -282,16 +246,29 @@ export const DeployRequestAssetsModal: React.FC<
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all h-20 resize-none"
                     />
                   </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
-                      Global Purchase Date
-                    </label>
-                    <input
-                      type="date"
-                      value={purchaseDate}
-                      onChange={(e) => setPurchaseDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
+                        Global Purchase Date
+                      </label>
+                      <input
+                        type="date"
+                        value={purchaseDate}
+                        onChange={(e) => setPurchaseDate(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
+                        Warranty Expiry Date
+                      </label>
+                      <input
+                        type="date"
+                        value={warrantyExpiry}
+                        onChange={(e) => setWarrantyExpiry(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -305,10 +282,9 @@ export const DeployRequestAssetsModal: React.FC<
                     {
                       flatItems.filter(
                         (item) =>
-                          !!selectedAssetIds[item.uniqueId] ||
-                          (!!selectedCategoryIds[item.uniqueId] &&
-                            (!!assetSNs[item.uniqueId] ||
-                              !!assetTags[item.uniqueId])),
+                          !!selectedCategoryIds[item.uniqueId] &&
+                          (!!assetSNs[item.uniqueId] ||
+                            !!assetTags[item.uniqueId]),
                       ).length
                     }{' '}
                     / {flatItems.length} Matched
@@ -346,7 +322,7 @@ export const DeployRequestAssetsModal: React.FC<
                                 e.target.value,
                               )
                             }
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all appearance-none cursor-pointer"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all appearance-none cursor-pointer"
                           >
                             <option value="">Select Category...</option>
                             {categories?.map((cat) => (
@@ -355,87 +331,49 @@ export const DeployRequestAssetsModal: React.FC<
                               </option>
                             ))}
                           </select>
-
-                          <select
-                            value={selectedAssetIds[item.uniqueId] || ''}
-                            onChange={(e) =>
-                              handleAssetSelect(item.uniqueId, e.target.value)
-                            }
-                            disabled={
-                              !selectedCategoryIds[item.uniqueId] ||
-                              !!assetSNs[item.uniqueId] ||
-                              !!assetTags[item.uniqueId]
-                            }
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
-                          >
-                            <option value="">Pick from Stock...</option>
-                            {allAssets
-                              ?.filter(
-                                (a) =>
-                                  a.category?.id ===
-                                  selectedCategoryIds[item.uniqueId],
-                              )
-                              .filter(
-                                (a) =>
-                                  !Object.entries(selectedAssetIds).some(
-                                    ([key, val]) =>
-                                      key !== item.uniqueId && val === a.id,
-                                  ),
-                              )
-                              .map((asset) => (
-                                <option key={asset.id} value={asset.id}>
-                                  {asset.tag_id ? `[${asset.tag_id}] ` : ''}
-                                  {asset.name} - S/N: {asset.serial_number}
-                                </option>
-                              ))}
-                          </select>
                         </div>
 
-                        {selectedCategoryIds[item.uniqueId] &&
-                          !selectedAssetIds[item.uniqueId] && (
-                            <div className="flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                              <div className="flex-1 relative">
-                                <input
-                                  type="text"
-                                  value={assetSNs[item.uniqueId] || ''}
-                                  onChange={(e) =>
-                                    setAssetSNs((prev) => ({
-                                      ...prev,
-                                      [item.uniqueId]: e.target.value,
-                                    }))
-                                  }
-                                  placeholder="Write Serial Number..."
-                                  className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                                />
-                              </div>
-                              <div className="flex-1 relative">
-                                <input
-                                  type="text"
-                                  value={assetTags[item.uniqueId] || ''}
-                                  onChange={(e) =>
-                                    setAssetTags((prev) => ({
-                                      ...prev,
-                                      [item.uniqueId]: e.target.value,
-                                    }))
-                                  }
-                                  placeholder="Write Tag Number..."
-                                  className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                                />
-                              </div>
+                        {selectedCategoryIds[item.uniqueId] && (
+                          <div className="flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex-1 relative">
+                              <input
+                                type="text"
+                                value={assetSNs[item.uniqueId] || ''}
+                                onChange={(e) =>
+                                  setAssetSNs((prev) => ({
+                                    ...prev,
+                                    [item.uniqueId]: e.target.value,
+                                  }))
+                                }
+                                placeholder="Write Serial Number..."
+                                className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                              />
                             </div>
-                          )}
+                            <div className="flex-1 relative">
+                              <input
+                                type="text"
+                                value={assetTags[item.uniqueId] || ''}
+                                onChange={(e) =>
+                                  setAssetTags((prev) => ({
+                                    ...prev,
+                                    [item.uniqueId]: e.target.value,
+                                  }))
+                                }
+                                placeholder="Write Tag Number..."
+                                className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {(selectedAssetIds[item.uniqueId] ||
-                        assetSNs[item.uniqueId] ||
+                      {(assetSNs[item.uniqueId] ||
                         assetTags[item.uniqueId]) && (
                         <div className="flex flex-col gap-1 w-32 items-end">
                           <div className="flex items-center gap-1.5 text-emerald-500">
                             <CheckCircle2 className="w-4 h-4" />
                             <span className="text-[10px] font-bold uppercase">
-                              {selectedAssetIds[item.uniqueId]
-                                ? 'Linked'
-                                : 'Ready'}
+                              Ready
                             </span>
                           </div>
                         </div>

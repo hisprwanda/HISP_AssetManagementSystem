@@ -63,10 +63,7 @@ export const ReportAssetIncidentModal = ({
     const isIndividual = !a.is_shared;
     const isReportable = a.status === 'ASSIGNED' || a.status === 'IN_STOCK';
 
-    if (isHOD || isAdmin) {
-      return isIndividual && isReportable;
-    }
-    return isMine && isIndividual && a.status === 'ASSIGNED';
+    return isMine && isIndividual && isReportable;
   });
 
   const sharedAssets = departmentAssets.filter((a) => {

@@ -154,28 +154,30 @@ export const Directorate = () => {
     return (
       <div className="flex flex-col h-full">
         <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 mb-6">
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit">
-            <button
-              onClick={() => setActiveTab('units')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'units'
-                  ? 'bg-white text-[#ff8000] shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              Organisational Units
-            </button>
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'users'
-                  ? 'bg-white text-[#ff8000] shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              Users
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit">
+              <button
+                onClick={() => setActiveTab('units')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'units'
+                    ? 'bg-white text-[#ff8000] shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Organisational Units
+              </button>
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'users'
+                    ? 'bg-white text-[#ff8000] shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Users
+              </button>
+            </div>
+          )}
           {isAdmin && activeTab === 'units' && (
             <button
               onClick={() => setIsDeptModalOpen(true)}

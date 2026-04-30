@@ -11,6 +11,8 @@ import {
   Printer,
   Trash2,
   History,
+  Camera,
+  Download,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetIncident } from '../types/assets';
@@ -18,6 +20,13 @@ import { ViewIncidentModal } from '../components/ViewIncidentModal';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { useAuth } from '../hooks/useAuth';
 import { Pagination } from '../components/Pagination';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../components/ui/dialog';
 
 export const IncidentTrail = () => {
   const navigate = useNavigate();
@@ -29,6 +38,7 @@ export const IncidentTrail = () => {
   const [incidentToView, setIncidentToView] = useState<AssetIncident | null>(
     null,
   );
+  const [photoToView, setPhotoToView] = useState<string | null>(null);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const { isAdmin, isFinanceAdmin, isCEO } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
@@ -311,6 +321,19 @@ export const IncidentTrail = () => {
             </div>
           </div>
 
+          ${
+            inc.evidence_url
+              ? `
+          <div class="section">
+            <div class="section-title">Photographic Evidence</div>
+            <div class="box" style="text-align: center; padding: 10px;">
+              <img src="${inc.evidence_url}" style="max-width: 100%; max-height: 400px; border-radius: 8px;" />
+            </div>
+          </div>
+          `
+              : ''
+          }
+
           <div class="section">
             <div class="section-title">Investigation Outcome</div>
             <div class="outcome-box">
@@ -541,43 +564,69 @@ export const IncidentTrail = () => {
                       <div className="flex flex-col gap-2">
                         <span
                           className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
-                            inc.investigation_status === 'ACCEPTED'
+                            ((inc.status as string) ||
+                              inc.investigation_status) === 'ACCEPTED'
                               ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                              : inc.investigation_status === 'DENIED'
+                              : ((inc.status as string) ||
+                                    inc.investigation_status) === 'DENIED' ||
+                                  inc.status === 'REJECTED_LIABILITY'
                                 ? 'bg-rose-50 text-rose-600 border-rose-100'
                                 : 'bg-amber-50 text-amber-600 border-amber-100'
                           }`}
                         >
-                          {inc.investigation_status}
+                          {inc.status?.replace(/_/g, ' ') ||
+                            inc.investigation_status ||
+                            'INVESTIGATING'}
                         </span>
-                        {inc.investigation_remarks && (
+                        {(inc.investigation_remarks ||
+                          inc.resolution_notes) && (
                           <p
                             className="text-[9px] font-semibold text-slate-400 uppercase truncate max-w-[120px]"
-                            title={inc.investigation_remarks}
+                            title={
+                              inc.investigation_remarks || inc.resolution_notes
+                            }
                           >
-                            Outcome: {inc.investigation_remarks}
+                            Outcome:{' '}
+                            {inc.investigation_remarks || inc.resolution_notes}
                           </p>
                         )}
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      {inc.investigation_status === 'DENIED' &&
+                      {((inc.status as string) === 'REJECTED_LIABILITY' ||
+                        inc.investigation_status === 'DENIED') &&
                       (inc.penalty_amount || 0) > 0 ? (
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
-                            inc.penalty_resolved_at
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                              : 'bg-rose-50 text-rose-600 border-rose-100'
-                          }`}
-                        >
-                          {inc.penalty_resolved_at ? 'Resolved' : 'Unresolved'}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span
+                            className={`inline-flex self-start px-2 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
+                              inc.penalty_resolved_at
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                : 'bg-rose-50 text-rose-600 border-rose-100'
+                            }`}
+                          >
+                            {inc.penalty_resolved_at
+                              ? 'Resolved'
+                              : 'Unresolved'}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-700">
+                            {Number(inc.penalty_amount).toLocaleString()} RWF
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {inc.evidence_url && (
+                          <button
+                            onClick={() => setPhotoToView(inc.evidence_url!)}
+                            className="p-2 text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
+                            title="View Photo Evidence"
+                          >
+                            <Camera className="w-4.5 h-4.5" />
+                          </button>
+                        )}
                         <button
                           onClick={() => setIncidentToView(inc)}
                           className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
@@ -625,6 +674,42 @@ export const IncidentTrail = () => {
         onClose={() => setIncidentToView(null)}
         incident={incidentToView}
       />
+
+      <Dialog open={!!photoToView} onOpenChange={() => setPhotoToView(null)}>
+        <DialogContent className="sm:max-w-[700px] bg-white border-white/20 shadow-2xl rounded-[2rem] p-0 overflow-hidden">
+          <DialogHeader className="px-8 pt-8 pb-4 border-b border-slate-50 flex flex-row items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold text-slate-800 tracking-tight">
+                Photo Evidence Viewer
+              </DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">
+                Official Incident Photographic Proof
+              </DialogDescription>
+            </div>
+            <button
+              onClick={() => {
+                if (!photoToView) return;
+                const link = document.createElement('a');
+                link.href = photoToView;
+                link.download = `evidence_${new Date().getTime()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="flex items-center gap-2 bg-[#ff8000] hover:bg-[#e49f37] text-white px-5 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg transition-all active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5" /> Download Photo
+            </button>
+          </DialogHeader>
+          <div className="p-8 bg-slate-50 flex items-center justify-center min-h-[400px]">
+            <img
+              src={photoToView || ''}
+              alt="Evidence"
+              className="max-w-full max-h-[60vh] rounded-2xl shadow-2xl border-4 border-white"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmActionModal
         isOpen={showExportConfirm}

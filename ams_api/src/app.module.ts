@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RequestableItemsModule } from './requestable-items/requestable-items.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule,
     NotificationsModule,
     RequestableItemsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

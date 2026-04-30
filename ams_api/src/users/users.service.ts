@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Department } from 'src/departments/entities/department.entity';
 import { Asset } from 'src/assets/entities/asset.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService implements OnApplicationBootstrap {
@@ -19,6 +20,7 @@ export class UsersService implements OnApplicationBootstrap {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly mailService: MailService,
   ) {
     console.log('[UsersService] Service Instantiated');
   }
@@ -110,16 +112,11 @@ export class UsersService implements OnApplicationBootstrap {
       status: UserStatus.INACTIVE,
     });
     const savedUser = await this.userRepo.save(user);
+    const subject = `Welcome to HISP Asset Management System`;
+    const text = `Hello ${savedUser.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
+    const html = `<p>Hello ${savedUser.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
 
-    console.log(`\n--- WELCOME EMAIL MOCK ---`);
-    console.log(`To: ${savedUser.email}`);
-    console.log(`Subject: Welcome to HISP Asset Management System`);
-    console.log(
-      `Your account has been created. Please log in using the temporary password below:`,
-    );
-    console.log(`Temporary Password: ${password}`);
-    console.log(`Login Link: http://localhost:5173/login`);
-    console.log(`--------------------------\n`);
+    await this.mailService.sendMail(savedUser.email, subject, text, html);
 
     return savedUser;
   }
@@ -192,15 +189,12 @@ export class UsersService implements OnApplicationBootstrap {
 
         await this.userRepo.save(newUser);
 
-        console.log(`\n--- BULK WELCOME EMAIL MOCK ---`);
-        console.log(`To: ${email}`);
-        console.log(`Subject: Welcome to HISP Asset Management System`);
-        console.log(
-          `Your account has been created via bulk upload. Please log in using the temporary password below:`,
-        );
-        console.log(`Temporary Password: ${rawPassword}`);
-        console.log(`Login Link: http://localhost:5173/login`);
-        console.log(`-------------------------------\n`);
+        // Send Real Email instead of mock
+        const subject = `Welcome to HISP Asset Management System`;
+        const text = `Hello ${full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${rawPassword}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
+        const html = `<p>Hello ${full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${rawPassword}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+
+        await this.mailService.sendMail(email, subject, text, html);
 
         results.success++;
       } catch (err: unknown) {
@@ -305,8 +299,6 @@ export class UsersService implements OnApplicationBootstrap {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
-
-    // Reset any assigned assets to 'IN_STOCK' before removing the user
     const assetRepo = this.dataSource.getRepository(Asset);
     await assetRepo.update(
       { assigned_to: { id } },

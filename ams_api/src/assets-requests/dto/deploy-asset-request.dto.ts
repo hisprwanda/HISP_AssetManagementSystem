@@ -41,6 +41,10 @@ export class DeployAssetRequestDto {
   @IsString()
   purchase_date?: string;
 
+  @IsOptional()
+  @IsString()
+  warranty_expiry_date?: string;
+
   @ApiProperty({ description: 'Name of the admin performing the handover' })
   @IsString()
   @IsOptional()

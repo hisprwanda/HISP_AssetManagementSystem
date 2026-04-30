@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Banknote,
   Hammer,
+  Camera,
+  Download,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
@@ -21,6 +23,13 @@ import { useAuth } from '../hooks/useAuth';
 import { AssetIncident } from '../types/assets';
 import { ConfirmActionModal } from '../components/ConfirmActionModal';
 import { Pagination } from '../components/Pagination';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../components/ui/dialog';
 
 export const Incidents = () => {
   const queryClient = useQueryClient();
@@ -35,6 +44,7 @@ export const Incidents = () => {
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [incidentToSettle, setIncidentToSettle] =
     useState<AssetIncident | null>(null);
+  const [photoToView, setPhotoToView] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -80,15 +90,8 @@ export const Incidents = () => {
       );
     }
 
-    if (isCEO && !isAdmin && !isFinanceAdmin) {
-      result = result.filter(
-        (i) =>
-          (i.status || i.investigation_status) === 'CEO_REVIEW' ||
-          i.status?.startsWith('RESOLVED') ||
-          i.investigation_status === 'ACCEPTED' ||
-          i.status === 'REJECTED_LIABILITY' ||
-          i.investigation_status === 'DENIED',
-      );
+    if (isCEO) {
+      // CEO sees everything
     }
 
     if (filterType !== 'ALL') {
@@ -145,15 +148,8 @@ export const Incidents = () => {
       );
     }
 
-    if (isCEO && !isAdmin && !isFinanceAdmin) {
-      filtered = incidents.filter(
-        (i) =>
-          (i.status || i.investigation_status) === 'CEO_REVIEW' ||
-          i.status?.startsWith('RESOLVED') ||
-          i.investigation_status === 'ACCEPTED' ||
-          i.status === 'REJECTED_LIABILITY' ||
-          i.investigation_status === 'DENIED',
-      );
+    if (isCEO) {
+      // CEO sees everything
     }
 
     return {
@@ -441,6 +437,15 @@ export const Incidents = () => {
                                 <Hammer className="w-4 h-4" />
                               </button>
                             )}
+                          {inc.evidence_url && (
+                            <button
+                              onClick={() => setPhotoToView(inc.evidence_url!)}
+                              className="p-2 text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all shadow-sm transform active:scale-90"
+                              title="View Photo Evidence"
+                            >
+                              <Camera className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => setIncidentToView(inc)}
                             className="p-2 bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 rounded-lg transition-all shadow-sm transform active:scale-90"
@@ -495,6 +500,42 @@ export const Incidents = () => {
           onClose={() => setIncidentToView(null)}
           incident={incidentToView}
         />
+
+        <Dialog open={!!photoToView} onOpenChange={() => setPhotoToView(null)}>
+          <DialogContent className="sm:max-w-[700px] bg-white border-white/20 shadow-2xl rounded-[2rem] p-0 overflow-hidden">
+            <DialogHeader className="px-8 pt-8 pb-4 border-b border-slate-50 flex flex-row items-center justify-between">
+              <div>
+                <DialogTitle className="text-xl font-semibold text-slate-800 tracking-tight">
+                  Photo Evidence Viewer
+                </DialogTitle>
+                <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">
+                  Official Incident Photographic Proof
+                </DialogDescription>
+              </div>
+              <button
+                onClick={() => {
+                  if (!photoToView) return;
+                  const link = document.createElement('a');
+                  link.href = photoToView;
+                  link.download = `evidence_${new Date().getTime()}.png`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="flex items-center gap-2 bg-[#ff8000] hover:bg-[#e49f37] text-white px-5 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg transition-all active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5" /> Download Photo
+              </button>
+            </DialogHeader>
+            <div className="p-8 bg-slate-50 flex items-center justify-center min-h-[400px]">
+              <img
+                src={photoToView || ''}
+                alt="Evidence"
+                className="max-w-full max-h-[60vh] rounded-2xl shadow-2xl border-4 border-white"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <ConfirmActionModal
           isOpen={!!incidentToSettle}

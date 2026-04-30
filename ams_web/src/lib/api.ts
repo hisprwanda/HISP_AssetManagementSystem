@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios';
 export const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    'https://remains-electron-reload-cement.trycloudflare.com',
+    'https://missouri-thompson-races-links.trycloudflare.com',
   headers: {
     'Content-Type': 'application/json',
   },

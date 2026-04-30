@@ -19,8 +19,8 @@ import {
   UserCheck,
   FilePlus,
   PackageCheck,
-  PackagePlus,
   Filter,
+  Zap,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -148,16 +148,9 @@ export const Requests = () => {
       filtered = filtered.filter((r) => r.requested_by?.id === currentUser?.id);
     } else {
       filtered = filtered.filter((r) => {
-        // 1. CEO Privilege: See global review pipeline + own department if HOD
+        // 1. CEO Privilege: Full executive overview
         if (isCEO) {
-          const isCeoPipeline = [
-            'CEO_REVIEW',
-            'CEO_APPROVED',
-            'REJECTED',
-            'FULFILLED',
-          ].includes(r.status);
-          const isFromMyDept = r.department?.id === currentUser?.department?.id;
-          return isCeoPipeline || (isHOD && isFromMyDept);
+          return true;
         }
 
         // 2. Admin Privilege: See everything formalized (passed HOD)
@@ -166,6 +159,10 @@ export const Requests = () => {
             isFinanceDirector &&
             r.department?.id === currentUser?.department?.id
           ) {
+            return true;
+          }
+          // The CEO doesn't formalize requests, so Admins handle pending requests from the CEO's office
+          if (r.department?.name === 'Office of the CEO') {
             return true;
           }
           return r.status !== 'PENDING';
@@ -286,7 +283,9 @@ export const Requests = () => {
         return sum + val;
       }, 0) || 0;
   const fulfilledCount =
-    baseRequests.filter((r) => r.status === 'FULFILLED').length || 0;
+    baseRequests.filter(
+      (r) => r.status === 'FULFILLED' || r.status === 'DEPLOYED',
+    ).length || 0;
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -305,6 +304,8 @@ export const Requests = () => {
         return 'bg-slate-100 text-slate-800 border-slate-200';
       case 'FULFILLED':
         return 'bg-slate-50 text-slate-400 border-slate-200 italic';
+      case 'DEPLOYED':
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100 font-bold';
       case 'REJECTED':
         return 'bg-orange-50 text-orange-600 border-orange-100 line-through';
       default:
@@ -497,6 +498,7 @@ export const Requests = () => {
               'CEO_REVIEW',
               'CEO_APPROVED',
               'FULFILLED',
+              'DEPLOYED',
               'REJECTED',
             ].map((status) => (
               <button
@@ -635,35 +637,40 @@ export const Requests = () => {
 
                     <td className="px-4 py-2.5 text-right">
                       <div className="flex justify-end gap-1 transition-opacity">
-                        {isHOD && req.status === 'PENDING' && (
-                          <button
-                            onClick={() => {
-                              const r = req as RequestUI;
-                              if (r.isBatch) {
-                                setSelectedBatch({
-                                  batchNumber: r.batch_number!,
-                                  requests: r.batchItems!,
-                                });
-                                setIsBulkReviewOpen(true);
-                              } else {
-                                handleFormalize(req);
+                        {((isHOD && !isCEO) ||
+                          (isAdmin &&
+                            req.department?.name === 'Office of the CEO')) &&
+                          req.status === 'PENDING' && (
+                            <button
+                              onClick={() => {
+                                const r = req as RequestUI;
+                                if (r.isBatch) {
+                                  setSelectedBatch({
+                                    batchNumber: r.batch_number!,
+                                    requests: r.batchItems!,
+                                  });
+                                  setIsBulkReviewOpen(true);
+                                } else {
+                                  handleFormalize(req);
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title={
+                                (req as RequestUI).isBatch
+                                  ? 'Review Batch'
+                                  : 'Process Request'
                               }
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            title={
-                              (req as RequestUI).isBatch
-                                ? 'Review Batch'
-                                : 'Process Request'
-                            }
-                          >
-                            {(req as RequestUI).isBatch ? (
-                              <CheckCircle2 className="w-4 h-4" />
-                            ) : (
-                              <Settings2 className="w-4 h-4" />
-                            )}
-                          </button>
-                        )}
-                        {isHOD &&
+                            >
+                              {(req as RequestUI).isBatch ? (
+                                <CheckCircle2 className="w-4 h-4" />
+                              ) : (
+                                <Settings2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          )}
+                        {((isHOD && !isCEO) ||
+                          (isAdmin &&
+                            req.department?.name === 'Office of the CEO')) &&
                           req.status === 'PENDING_FORMALIZATION' &&
                           (req as RequestUI).isBatch && (
                             <button
@@ -790,16 +797,18 @@ export const Requests = () => {
                         )}
                         {isAdmin && req.status === 'ORDERED' && (
                           <>
-                            <button
-                              onClick={() => {
-                                setRequestForUploadPO(req);
-                                setIsUploadPOModalOpen(true);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
-                              title="Upload Scanned PO"
-                            >
-                              <FileUp className="w-4 h-4" />
-                            </button>
+                            {!req.purchase_order?.is_digitally_signed && (
+                              <button
+                                onClick={() => {
+                                  setRequestForUploadPO(req);
+                                  setIsUploadPOModalOpen(true);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                                title="Upload Scanned PO"
+                              >
+                                <FileUp className="w-4 h-4" />
+                              </button>
+                            )}
                             {(req.purchase_order?.scanned_po_url ||
                               req.purchase_order?.is_digitally_signed) && (
                               <button
@@ -823,10 +832,10 @@ export const Requests = () => {
                               setRequestForDeployment(req);
                               setIsDeployModalOpen(true);
                             }}
-                            className="p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                            title="Deploy Hardware (Automated)"
+                            className="p-1.5 text-[#ff8000] hover:text-[#e49f37] hover:bg-orange-50 rounded-lg transition-colors"
+                            title="Assign Asset (Automated)"
                           >
-                            <PackagePlus className="w-4 h-4" />
+                            <Zap className="w-4 h-4" />
                           </button>
                         )}
                       </div>
