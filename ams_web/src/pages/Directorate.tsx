@@ -41,6 +41,8 @@ interface User {
   phone_number?: string;
   role: string;
   departmentId: string;
+  is_invitation_sent?: boolean;
+  status?: string;
 }
 
 export const Directorate = () => {
@@ -136,6 +138,19 @@ export const Directorate = () => {
       queryClient.invalidateQueries({ queryKey: ['users', selectedDept?.id] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setUserToDelete(null);
+    },
+  });
+
+  const sendInvitationMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await api.post(`/users/${userId}/send-invitation`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', selectedDept?.id] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (error: Error) => {
+      alert(`Failed to send invitation: ${error.message}`);
     },
   });
 
@@ -564,7 +579,11 @@ export const Directorate = () => {
                             : 'bg-slate-50 text-slate-500 border-slate-100'
                       }`}
                     >
-                      <Shield className="w-3 h-3" /> {user.role}
+                      <Shield className="w-3 h-3" />{' '}
+                      {user.role === 'HOD' &&
+                      selectedDept.name === 'Office of the CEO'
+                        ? 'CEO'
+                        : user.role}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -580,6 +599,19 @@ export const Directorate = () => {
                       )}
                       {isAdmin && (
                         <>
+                          {!user.is_invitation_sent &&
+                            user.status !== 'ACTIVE' && (
+                              <button
+                                onClick={() =>
+                                  sendInvitationMutation.mutate(user.id)
+                                }
+                                disabled={sendInvitationMutation.isPending}
+                                className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                                title="Send Invitation Email"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </button>
+                            )}
                           <button
                             onClick={() => {
                               setUserToEdit(user);

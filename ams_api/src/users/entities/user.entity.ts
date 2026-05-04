@@ -62,4 +62,10 @@ export class User {
     default: UserStatus.INACTIVE,
   })
   status: UserStatus;
+
+  @Column({ default: false })
+  is_invitation_sent: boolean;
+
+  @Column({ default: true })
+  is_temporary_password: boolean;
 }

@@ -13,12 +13,9 @@ export function useRoleAccess() {
     const dept = user.department?.name;
     const role = user.role;
 
-    if (
-      dept === 'Admin and Finance' &&
-      (role === 'Admin and Finance Director' || role === 'Finance Officer')
-    ) {
+    if (role === 'Admin and Finance Director' || role === 'Finance Officer') {
       portal = 'ADMIN';
-    } else if (dept === 'Admin and Finance' && role === 'Operations Officer') {
+    } else if (role === 'Operations Officer') {
       portal = 'STAFF';
     } else if (dept === 'Office of the CEO' && role === 'HOD') {
       portal = 'CEO';

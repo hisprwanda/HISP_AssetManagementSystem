@@ -6,14 +6,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 
-/**
- * HISP Asset Management System - Main Entry Point
- * Synchronized terminology transition: disposal_rate
- */
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  // Enable static file serving for uploads
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });

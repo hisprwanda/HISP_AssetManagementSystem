@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { AssetAssignment } from '../types/assets';
 import { api } from '../lib/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 
 interface AssetReceiptFormModalProps {
   isOpen: boolean;
@@ -36,6 +36,27 @@ export const AssetReceiptFormModal = ({
   const [showRejectionForm, setShowRejectionForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const { data: bulkAssignments = [], isLoading: isLoadingBulk } = useQuery<
+    AssetAssignment[]
+  >({
+    queryKey: ['asset-assignments', 'bulk', assignment?.form_number],
+    queryFn: async () => {
+      if (!assignment?.form_number) return [];
+      const res = await api.get(
+        `/asset-assignments/bulk/${assignment.form_number}`,
+      );
+      return res.data;
+    },
+    enabled: !!assignment?.form_number && isOpen,
+  });
+
+  const displayAssignments =
+    assignment?.form_number && bulkAssignments.length > 0
+      ? bulkAssignments
+      : assignment
+        ? [assignment]
+        : [];
+
   const [isPreparing, setIsPreparing] = useState(
     assignment?.form_status === 'DRAFT' ||
       assignment?.form_status === 'REJECTED' ||
@@ -52,6 +73,9 @@ export const AssetReceiptFormModal = ({
   const [phoneNumber, setPhoneNumber] = useState(
     assignment?.user?.phone_number || '',
   );
+  const [assetUpdates, setAssetUpdates] = useState<
+    Record<string, { serial: string; tag: string }>
+  >({});
 
   React.useEffect(() => {
     if (assignment) {
@@ -68,9 +92,46 @@ export const AssetReceiptFormModal = ({
     }
   }, [assignment]);
 
+  React.useEffect(() => {
+    if (bulkAssignments.length > 0) {
+      const updates: Record<string, { serial: string; tag: string }> = {};
+      bulkAssignments.forEach((asg) => {
+        if (asg.asset) {
+          updates[asg.asset.id] = {
+            serial: asg.asset.serial_number || '',
+            tag: asg.asset.tag_id || '',
+          };
+        }
+      });
+      setAssetUpdates(updates);
+    }
+  }, [bulkAssignments]);
+
+  const updateAssetDetail = (
+    assetId: string,
+    field: 'serial' | 'tag',
+    value: string,
+  ) => {
+    setAssetUpdates((prev) => ({
+      ...prev,
+      [assetId]: {
+        ...(prev[assetId] || { serial: '', tag: '' }),
+        [field]: value,
+      },
+    }));
+  };
+
   const signMutation = useMutation({
     mutationFn: async () => {
       if (!assignment) return;
+      if (assignment.form_number) {
+        return await api.patch(
+          `/asset-assignments/bulk/${assignment.form_number}/sign-user`,
+          {
+            signatureName,
+          },
+        );
+      }
       return await api.patch(`/asset-assignments/${assignment.id}/sign-user`, {
         signatureName,
       });
@@ -91,6 +152,27 @@ export const AssetReceiptFormModal = ({
   const prepareMutation = useMutation({
     mutationFn: async (sendToUser: boolean) => {
       if (!assignment) return;
+
+      if (assignment.form_number) {
+        const bulkPayload = {
+          condition_on_assign: condition,
+          received_from_name: handoverName,
+          user_phone_number: phoneNumber,
+          sendToUser,
+          userSignatureName:
+            isFinanceOfficer && isRecipient ? signatureName : undefined,
+          assets: Object.entries(assetUpdates).map(([id, details]) => ({
+            id,
+            serial_number: details.serial,
+            tag_id: details.tag,
+          })),
+        };
+        return await api.patch(
+          `/asset-assignments/bulk/${assignment.form_number}/prepare`,
+          bulkPayload,
+        );
+      }
+
       const payload: Record<string, unknown> = {
         condition_on_assign: condition,
         received_from_name: handoverName,
@@ -119,6 +201,16 @@ export const AssetReceiptFormModal = ({
   const verifyMutation = useMutation({
     mutationFn: async (approve: boolean) => {
       if (!assignment) return;
+      if (assignment.form_number) {
+        return await api.patch(
+          `/asset-assignments/bulk/${assignment.form_number}/verify`,
+          {
+            approve,
+            remarks: !approve ? rejectionRemarks : undefined,
+            adminSignatureName: approve ? adminSignatureName : undefined,
+          },
+        );
+      }
       return await api.patch(`/asset-assignments/${assignment.id}/verify`, {
         approve,
         remarks: !approve ? rejectionRemarks : undefined,
@@ -184,11 +276,12 @@ export const AssetReceiptFormModal = ({
             <CheckCircle2 className="w-12 h-12 text-[#ff8000]" />
           </div>
           <h2 className="text-3xl font-semibold text-slate-900 mb-4 tracking-tight">
-            Form Signed!
+            {displayAssignments.length > 1 ? 'Batch Signed!' : 'Form Signed!'}
           </h2>
           <p className="text-slate-500 font-medium">
-            Your digital signature has been recorded. The form has been
-            submitted for final admin verification.
+            {displayAssignments.length > 1
+              ? 'Your digital signature has been recorded for the entire batch. The forms have been submitted for final verification.'
+              : 'Your digital signature has been recorded. The form has been submitted for final admin verification.'}
           </p>
         </div>
       </div>
@@ -209,7 +302,9 @@ export const AssetReceiptFormModal = ({
             </div>
             <div>
               <h2 className="text-xl font-semibold text-slate-800 tracking-tight leading-none mb-1">
-                Asset Receipt Form
+                {displayAssignments.length > 1
+                  ? 'Bulk Asset Receipt Form'
+                  : 'Asset Receipt Form'}
               </h2>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
@@ -436,38 +531,78 @@ export const AssetReceiptFormModal = ({
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="text-slate-800">
-                      <td className="px-3 py-2 text-sm font-bold border-r border-slate-900 text-center">
-                        01
-                      </td>
-                      <td className="px-3 py-2 text-sm font-bold border-r border-slate-900">
-                        {assignment.asset?.name}
-                      </td>
-                      <td className="px-3 py-2 text-sm font-bold border-r border-slate-900 font-mono tracking-wider">
-                        {canEdit ? (
-                          <input
-                            type="text"
-                            value={serial}
-                            onChange={(e) => setSerial(e.target.value)}
-                            className="bg-orange-50/50 w-full outline-none focus:ring-1 focus:ring-orange-500 rounded px-1"
-                          />
-                        ) : (
-                          assignment.asset?.serial_number
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-sm font-bold font-mono tracking-wider bg-slate-50">
-                        {canEdit ? (
-                          <input
-                            type="text"
-                            value={tagId}
-                            onChange={(e) => setTagId(e.target.value)}
-                            className="bg-orange-100/50 w-full outline-none focus:ring-1 focus:ring-orange-500 rounded px-1"
-                          />
-                        ) : (
-                          assignment.asset?.tag_id
-                        )}
-                      </td>
-                    </tr>
+                    {isLoadingBulk ? (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-6 h-6 border-2 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                              Synchronizing batch data...
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      displayAssignments.map((asg, idx) => (
+                        <tr
+                          key={asg.id}
+                          className="text-slate-800 border-b border-slate-900 last:border-0"
+                        >
+                          <td className="px-3 py-2 text-sm font-bold border-r border-slate-900 text-center">
+                            {String(idx + 1).padStart(2, '0')}
+                          </td>
+                          <td className="px-3 py-2 text-sm font-bold border-r border-slate-900">
+                            {asg.asset?.name}
+                          </td>
+                          <td className="px-3 py-2 text-sm font-bold border-r border-slate-900 font-mono tracking-wider">
+                            {canEdit ? (
+                              <input
+                                type="text"
+                                value={
+                                  asg.asset
+                                    ? assetUpdates[asg.asset.id]?.serial || ''
+                                    : ''
+                                }
+                                onChange={(e) =>
+                                  asg.asset &&
+                                  updateAssetDetail(
+                                    asg.asset.id,
+                                    'serial',
+                                    e.target.value,
+                                  )
+                                }
+                                className="bg-orange-50/50 w-full outline-none focus:ring-1 focus:ring-orange-500 rounded px-1"
+                              />
+                            ) : (
+                              asg.asset?.serial_number
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-sm font-bold font-mono tracking-wider bg-slate-50">
+                            {canEdit ? (
+                              <input
+                                type="text"
+                                value={
+                                  asg.asset
+                                    ? assetUpdates[asg.asset.id]?.tag || ''
+                                    : ''
+                                }
+                                onChange={(e) =>
+                                  asg.asset &&
+                                  updateAssetDetail(
+                                    asg.asset.id,
+                                    'tag',
+                                    e.target.value,
+                                  )
+                                }
+                                className="bg-orange-100/50 w-full outline-none focus:ring-1 focus:ring-orange-500 rounded px-1"
+                              />
+                            ) : (
+                              asg.asset?.tag_id
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -505,14 +640,18 @@ export const AssetReceiptFormModal = ({
                 <span className="text-white font-bold underline decoration-orange-400 underline-offset-4">
                   {assignment.user?.full_name}
                 </span>
-                , hereby acknowledge receipt of the asset(s) listed above in the
-                condition described. I understand that I am fully responsible
-                for its safe custody, proper usage, and maintenance as per HISP
-                Rwanda policies. I agree to immediately report any loss, theft,
-                or damage to the administration and acknowledge that financial
-                penalties may apply if damage results from negligence. This
-                asset remains the property of HISP Rwanda and must be returned
-                upon request or end of service.
+                , hereby acknowledge receipt of the{' '}
+                {displayAssignments.length > 1 ? 'assets' : 'asset'} listed
+                above in the condition described. I understand that I am fully
+                responsible for{' '}
+                {displayAssignments.length > 1 ? 'their' : 'its'} safe custody,
+                proper usage, and maintenance as per HISP Rwanda policies. I
+                agree to immediately report any loss, theft, or damage to the
+                administration and acknowledge that financial penalties may
+                apply if damage results from negligence.{' '}
+                {displayAssignments.length > 1 ? 'These assets' : 'This asset'}{' '}
+                remain the property of HISP Rwanda and must be returned upon
+                request or end of service.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-8 pt-6">
@@ -577,7 +716,7 @@ export const AssetReceiptFormModal = ({
                   <p className="text-xs font-medium text-rose-600 leading-relaxed italic">
                     "
                     {assignment.rejection_reason ||
-                      'Information provided does not match our records.'}
+                      'The digital signature provided does not match our official records.'}
                     "
                   </p>
                 </div>
@@ -620,16 +759,16 @@ export const AssetReceiptFormModal = ({
               <button
                 onClick={() => signMutation.mutate()}
                 disabled={!signatureName || signMutation.isPending}
-                className="w-full py-5 bg-[#ff8000] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.3em] rounded-[2rem] shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transform active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                className="w-full py-3.5 bg-slate-900 hover:bg-black disabled:opacity-50 text-white font-bold text-[11px] uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 {signMutation.isPending ? (
                   <>
-                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                    Signing Document...
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Processing Signature...
                   </>
                 ) : (
                   <>
-                    Sign & Submit Form <CheckCircle2 className="w-5 h-5" />
+                    Sign Document <CheckCircle2 className="w-4 h-4" />
                   </>
                 )}
               </button>
@@ -660,11 +799,11 @@ export const AssetReceiptFormModal = ({
                 </p>
               </div>
             )}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <button
                 onClick={() => prepareMutation.mutate(false)}
                 disabled={prepareMutation.isPending}
-                className="flex-1 py-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95"
+                className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider rounded-xl transition-all active:scale-95"
               >
                 Save Draft
               </button>
@@ -674,16 +813,16 @@ export const AssetReceiptFormModal = ({
                   prepareMutation.isPending ||
                   (isFinanceOfficer && isRecipient && !signatureName)
                 }
-                className="flex-[2] py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                className="flex-[2] py-3.5 bg-[#ff8000] hover:bg-orange-600 text-white font-bold text-[10px] uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
               >
                 {prepareMutation.isPending ? (
-                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
                     {isFinanceOfficer && isRecipient
                       ? 'Sign & Forward to Director'
-                      : 'Ready & Send to Recipient'}{' '}
-                    <CheckCircle2 className="w-5 h-5" />
+                      : 'Complete & Send for Signature'}{' '}
+                    <CheckCircle2 className="w-4 h-4" />
                   </>
                 )}
               </button>
@@ -715,7 +854,7 @@ export const AssetReceiptFormModal = ({
                   value={rejectionRemarks}
                   onChange={(e) => setRejectionRemarks(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-medium outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 min-h-[100px]"
-                  placeholder="e.g., Serial number listed is incorrect or staff details need update..."
+                  placeholder="e.g., Digital signature does not match official record or is incomplete..."
                 />
                 <button
                   onClick={() => verifyMutation.mutate(false)}
@@ -749,23 +888,23 @@ export const AssetReceiptFormModal = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex gap-3">
                   <button
                     onClick={() => setShowRejectionForm(true)}
-                    className="py-5 bg-white border-2 border-slate-200 hover:border-rose-400 hover:text-rose-600 text-slate-600 font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 active:scale-95"
+                    className="flex-1 py-3.5 bg-white border border-slate-200 hover:border-rose-400 hover:text-rose-600 text-slate-500 font-bold text-[10px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
-                    Reject Form <XCircle className="w-5 h-5" />
+                    Reject Form <XCircle className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => verifyMutation.mutate(true)}
                     disabled={verifyMutation.isPending || !adminSignatureName}
-                    className="py-5 bg-[#ff8000] hover:bg-orange-600 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_15px_30px_-10px_rgba(255,128,0,0.4)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                    className="flex-[2] py-3.5 bg-[#ff8000] hover:bg-orange-600 text-white font-bold text-[10px] uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
                   >
                     {verifyMutation.isPending ? (
-                      <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        Verify & Approve <CheckCircle2 className="w-5 h-5" />
+                        Verify & Approve <CheckCircle2 className="w-4 h-4" />
                       </>
                     )}
                   </button>
@@ -779,18 +918,18 @@ export const AssetReceiptFormModal = ({
           (isAdmin &&
             (assignment.form_status === 'PENDING_USER_SIGNATURE' ||
               assignment.form_status === 'PENDING_ADMIN_REVIEW'))) && (
-          <div className="p-8 border-t border-slate-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] flex gap-4 print:hidden">
+          <div className="px-8 py-5 border-t border-slate-100 bg-white flex gap-3 print:hidden">
             {isAdmin && (
               <button
                 onClick={handlePrint}
-                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
               >
-                <Printer className="w-5 h-5 text-slate-400" /> Print Document
+                <Printer className="w-4 h-4 text-slate-400" /> Print Receipt
               </button>
             )}
             <button
               onClick={onClose}
-              className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 font-bold rounded-2xl"
+              className="px-8 py-3 bg-white border border-slate-200 text-slate-400 font-bold text-[11px] uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
             >
               Close
             </button>

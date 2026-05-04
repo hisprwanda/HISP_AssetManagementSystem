@@ -63,6 +63,7 @@ export class UsersService implements OnApplicationBootstrap {
         role: 'Admin and Finance Director',
         department: dept,
         status: UserStatus.ACTIVE,
+        is_temporary_password: false,
       });
 
       await this.userRepo.save(admin);
@@ -110,13 +111,10 @@ export class UsersService implements OnApplicationBootstrap {
       provisioning_password: password,
       department: { id: department_id } as Department,
       status: UserStatus.INACTIVE,
+      is_invitation_sent: false,
+      is_temporary_password: true,
     });
     const savedUser = await this.userRepo.save(user);
-    const subject = `Welcome to HISP Asset Management System`;
-    const text = `Hello ${savedUser.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
-    const html = `<p>Hello ${savedUser.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
-
-    await this.mailService.sendMail(savedUser.email, subject, text, html);
 
     return savedUser;
   }
@@ -185,16 +183,11 @@ export class UsersService implements OnApplicationBootstrap {
           provisioning_password: rawPassword,
           department: department,
           status: UserStatus.INACTIVE,
+          is_invitation_sent: false,
+          is_temporary_password: true,
         });
 
         await this.userRepo.save(newUser);
-
-        // Send Real Email instead of mock
-        const subject = `Welcome to HISP Asset Management System`;
-        const text = `Hello ${full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${rawPassword}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
-        const html = `<p>Hello ${full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${rawPassword}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
-
-        await this.mailService.sendMail(email, subject, text, html);
 
         results.success++;
       } catch (err: unknown) {
@@ -217,7 +210,11 @@ export class UsersService implements OnApplicationBootstrap {
     const query = this.userRepo
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.department', 'department')
-      .addSelect(['user.password_hash', 'user.provisioning_password']);
+      .addSelect([
+        'user.password_hash',
+        'user.provisioning_password',
+        'user.is_temporary_password',
+      ]);
 
     if (departmentId) {
       query.where('department.id = :departmentId', { departmentId });
@@ -309,5 +306,67 @@ export class UsersService implements OnApplicationBootstrap {
     );
 
     await this.userRepo.remove(user);
+  }
+
+  async changePassword(userId: string, newPassword: string): Promise<User> {
+    const user = await this.findOne(userId);
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password_hash = hashedPassword;
+    user.provisioning_password = newPassword; // Updated as permanent password for logs
+    user.is_temporary_password = false;
+
+    return await this.userRepo.save(user);
+  }
+
+  async sendInvitationEmail(id: string): Promise<void> {
+    const user = await this.userRepo.findOne({
+      where: { id },
+      select: ['id', 'full_name', 'email', 'provisioning_password'],
+    });
+
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+
+    const subject = `Welcome to HISP Asset Management System`;
+    const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
+    const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+
+    await this.mailService.sendMail(user.email, subject, text, html);
+
+    user.is_invitation_sent = true;
+    await this.userRepo.save(user);
+  }
+
+  async bulkSendInvitationEmails(): Promise<{
+    success: number;
+    failed: number;
+  }> {
+    const users = await this.userRepo.find({
+      where: { is_invitation_sent: false },
+      select: ['id', 'full_name', 'email', 'provisioning_password'],
+    });
+
+    let success = 0;
+    let failed = 0;
+
+    for (const user of users) {
+      try {
+        const subject = `Welcome to HISP Asset Management System`;
+        const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
+        const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+
+        await this.mailService.sendMail(user.email, subject, text, html);
+
+        user.is_invitation_sent = true;
+        await this.userRepo.save(user);
+        success++;
+      } catch (error) {
+        console.error(`Failed to send invitation to ${user.email}:`, error);
+        failed++;
+      }
+    }
+
+    return { success, failed };
   }
 }

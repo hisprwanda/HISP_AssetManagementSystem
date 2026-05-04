@@ -33,6 +33,10 @@ export class AssetRequestsService {
     private readonly itemRepo: Repository<RequestableItem>,
     @InjectRepository(Asset)
     private readonly assetRepo: Repository<Asset>,
+    @InjectRepository(Department)
+    private readonly departmentRepo: Repository<Department>,
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
     private readonly notificationsService: NotificationsService,
     private readonly assignmentsService: AssetAssignmentsService,
   ) {}
@@ -62,7 +66,8 @@ export class AssetRequestsService {
       const roleUpper = requester.role.toUpperCase();
       if (
         roleUpper === 'FINANCE OFFICER' ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'OPERATIONS OFFICER'
       ) {
         this.notificationsService
           .notifyPersonalRequest({
@@ -263,7 +268,8 @@ export class AssetRequestsService {
       const roleUpper = user.role.toUpperCase();
       if (
         roleUpper === 'FINANCE OFFICER' ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'OPERATIONS OFFICER'
       ) {
         this.notificationsService
           .notifyPersonalRequest({
@@ -368,26 +374,70 @@ export class AssetRequestsService {
     return await this.requestRepo.save(request);
   }
   async deploy(id: string, dto: DeployAssetRequestDto) {
-    const request = await this.findOne(id);
-    if (!request.requested_by) {
+    console.log(`[Deploy] Starting deployment for Request ID: ${id}`);
+    const request = await this.requestRepo.findOne({
+      where: { id },
+      relations: ['requested_by', 'department'],
+    });
+
+    if (!request || !request.requested_by) {
+      console.error('[Deploy] Request or requester not found');
       throw new BadRequestException('Request does not have a valid requester.');
     }
 
-    const finalAssetIds: string[] = [...(dto.asset_ids || [])];
-
+    const finalAssetIds: string[] = [];
+    if (dto.asset_ids && dto.asset_ids.length > 0) {
+      console.log(`[Deploy] Updating ${dto.asset_ids.length} existing assets`);
+      for (const assetId of dto.asset_ids) {
+        const asset = await this.assetRepo.findOne({ where: { id: assetId } });
+        if (asset) {
+          asset.department = request.department;
+          asset.department_id = request.department?.id;
+          asset.location = request.department?.name || 'Kigali Headquarters';
+          asset.assigned_to = request.requested_by;
+          asset.assigned_to_user_id = request.requested_by.id;
+          asset.status = 'IN_STOCK';
+          await this.assetRepo.save(asset);
+          finalAssetIds.push(asset.id);
+        }
+      }
+    }
     if (dto.new_assets && dto.new_assets.length > 0) {
+      console.log(
+        `[Deploy] Found ${dto.new_assets.length} new assets to create`,
+      );
+      const requester = await this.userRepo.findOne({
+        where: { id: request.requested_by.id },
+        relations: ['department'],
+      });
+      const department = await this.departmentRepo.findOne({
+        where: { id: request.department.id },
+      });
       for (const newAsset of dto.new_assets) {
-        const matchingItem = (
-          (request.items as Array<{
-            name: string;
-            estimated_unit_cost?: number;
-            financials?: { unit_cost: number };
-          }>) || []
-        ).find((i) => i.name === newAsset.name);
+        const matchingItem = ((request.items as unknown as any[]) || []).find(
+          (i: { name: string }) =>
+            String(i.name || '')
+              .trim()
+              .toLowerCase() ===
+            String(newAsset.name || '')
+              .trim()
+              .toLowerCase(),
+        ) as {
+          unit_price?: number;
+          financials?: { unit_cost?: number };
+          estimated_unit_cost?: number;
+          cost?: number;
+          price?: number;
+          amount?: number;
+        };
 
         const cost: number =
+          Number(matchingItem?.unit_price) ||
           Number(matchingItem?.financials?.unit_cost) ||
           Number(matchingItem?.estimated_unit_cost) ||
+          Number(matchingItem?.cost) ||
+          Number(matchingItem?.price) ||
+          Number(matchingItem?.amount) ||
           0;
 
         const purchaseDate = dto.purchase_date
@@ -395,23 +445,37 @@ export class AssetRequestsService {
           : request.purchase_order?.order_date
             ? new Date(request.purchase_order.order_date)
             : new Date();
+        const locationName =
+          department?.name || request.department?.name || 'Kigali Headquarters';
+        const fullCategory = await this.categoryRepo.findOne({
+          where: { id: newAsset.category_id },
+        });
 
         console.log(
-          `[Deploy] Creating asset ${newAsset.name} with cost ${cost} and date ${purchaseDate.toISOString()}`,
+          `[Deploy] Creating new asset: ${newAsset.name} | Cost: ${cost} | Loc: ${locationName} | User: ${requester?.full_name} | Category: ${fullCategory?.name}`,
         );
 
         const asset = this.assetRepo.create({
           name: newAsset.name,
-          serial_number: newAsset.serial_number,
+          serial_number: newAsset.serial_number || null,
           tag_id: newAsset.tag_id,
           status: 'IN_STOCK',
-          category: { id: newAsset.category_id } as unknown as Category,
-          department: request.department,
+          category: fullCategory,
+          category_id: fullCategory?.id,
+          department: department,
+          department_id: department?.id,
+          location: locationName,
           purchase_cost: cost,
           purchase_date: purchaseDate,
           current_value: cost,
+          assigned_to: requester,
+          assigned_to_user_id: requester?.id,
         });
+
         const savedAsset = await this.assetRepo.save(asset);
+        console.log(
+          `[Deploy] Created Asset ID: ${savedAsset.id} (Cost: ${savedAsset.purchase_cost})`,
+        );
         finalAssetIds.push(savedAsset.id);
       }
     }
@@ -419,7 +483,9 @@ export class AssetRequestsService {
     if (finalAssetIds.length === 0) {
       throw new BadRequestException('No assets provided for deployment.');
     }
-
+    console.log(
+      `[Deploy] Initiating bulk assignment for ${finalAssetIds.length} assets`,
+    );
     const assignments = await this.assignmentsService.prepareBulkByAdmin({
       asset_ids: finalAssetIds,
       user_id: request.requested_by.id,
@@ -427,9 +493,9 @@ export class AssetRequestsService {
         dto.condition_notes || `Deployed for request: ${request.title}`,
       received_from_name: dto.received_from_name || 'HISP Admin',
     });
-
     request.status = 'DEPLOYED';
     await this.requestRepo.save(request);
+    console.log('[Deploy] Handover workflow initialized successfully.');
 
     return {
       message: 'Deployment initiated successfully',

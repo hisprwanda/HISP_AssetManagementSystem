@@ -13,6 +13,7 @@ import { CreateAssetAssignmentDto } from './dto/create-assets-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-assets-assignment.dto';
 import { PrepareAssignmentDto } from './dto/prepare-assignment.dto';
 import { PrepareBulkAssignmentDto } from './dto/prepare-bulk-assignment.dto';
+import { UpdateBulkPrepareDto } from './dto/update-bulk-prepare.dto';
 
 @Injectable()
 export class AssetAssignmentsService {
@@ -135,6 +136,70 @@ export class AssetAssignmentsService {
     }
 
     return assignment;
+  }
+
+  async updateBulkPrepareByAdmin(
+    formNumber: string,
+    dto: UpdateBulkPrepareDto,
+  ): Promise<AssetAssignment[]> {
+    const assignments = await this.assignmentRepo.find({
+      where: { form_number: formNumber },
+      relations: ['asset', 'user'],
+    });
+
+    if (assignments.length === 0) {
+      throw new NotFoundException(
+        `No assignments found for batch ${formNumber}`,
+      );
+    }
+
+    const firstAsg = assignments[0];
+    if (dto.user_phone_number && firstAsg.user) {
+      firstAsg.user.phone_number = dto.user_phone_number;
+      await this.userRepo.save(firstAsg.user);
+    }
+
+    for (const a of assignments) {
+      a.condition_on_assign = dto.condition_on_assign ?? a.condition_on_assign;
+      a.received_from_name = dto.received_from_name ?? a.received_from_name;
+
+      if (dto.assets && a.asset) {
+        const assetUpdate = dto.assets.find((ua) => ua.id === a.asset?.id);
+        if (assetUpdate) {
+          if (assetUpdate.serial_number)
+            a.asset.serial_number = assetUpdate.serial_number;
+          if (assetUpdate.tag_id) a.asset.tag_id = assetUpdate.tag_id;
+          await this.assetRepo.save(a.asset);
+        }
+      }
+      if (dto.userSignatureName) {
+        a.user_signature_name = dto.userSignatureName;
+        a.user_signed_at = new Date();
+        a.form_status = 'PENDING_ADMIN_REVIEW';
+      } else if (dto.sendToUser) {
+        a.form_status = 'PENDING_USER_SIGNATURE';
+      }
+    }
+
+    const saved = await this.assignmentRepo.save(assignments);
+
+    if (dto.userSignatureName) {
+      await this.notificationsService.notifyAssignmentAction({
+        action: 'SIGNED_BY_USER',
+        assignmentId: formNumber,
+        assetName: `Batch: ${formNumber}`,
+        userId: firstAsg.user.id,
+      });
+    } else if (dto.sendToUser) {
+      await this.notificationsService.notifyAssignmentAction({
+        action: 'SENT_TO_USER',
+        assignmentId: formNumber,
+        assetName: `Batch: ${formNumber}`,
+        userId: firstAsg.user.id,
+      });
+    }
+
+    return saved;
   }
 
   async signByUser(id: string, signatureName: string) {
@@ -311,11 +376,9 @@ export class AssetAssignmentsService {
     });
 
     const saved = await this.assignmentRepo.save(assignments);
-
-    // Notify user once for the bulk assignment
     await this.notificationsService.notifyAssignmentAction({
       action: 'SENT_TO_USER',
-      assignmentId: formNumber, // Use formNumber for bulk notifications
+      assignmentId: formNumber,
       assetName: `Batch of ${assets.length} items`,
       userId: user.id,
     });
@@ -346,8 +409,6 @@ export class AssetAssignmentsService {
     });
 
     const saved = await this.assignmentRepo.save(updated);
-
-    // Notify admin once
     if (saved[0].user) {
       await this.notificationsService.notifyAssignmentAction({
         action: 'SIGNED_BY_USER',
@@ -402,8 +463,6 @@ export class AssetAssignmentsService {
     }
 
     const saved = await this.assignmentRepo.save(assignments);
-
-    // Notify user once
     await this.notificationsService.notifyAssignmentAction({
       action: approve ? 'APPROVED' : 'REJECTED',
       assignmentId: formNumber,
@@ -413,5 +472,12 @@ export class AssetAssignmentsService {
     });
 
     return saved;
+  }
+
+  async findByFormNumber(formNumber: string): Promise<AssetAssignment[]> {
+    return await this.assignmentRepo.find({
+      where: { form_number: formNumber },
+      relations: ['asset', 'user'],
+    });
   }
 }

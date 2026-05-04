@@ -34,6 +34,14 @@ export const AuthProvider = ({
     setToken(newToken);
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      sessionStorage.setItem('hisp_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    }
+  };
+
   const logout = () => {
     sessionStorage.removeItem('hisp_token');
     sessionStorage.removeItem('hisp_user');
@@ -43,7 +51,14 @@ export const AuthProvider = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, isAuthenticated: !!token }}
+      value={{
+        user,
+        token,
+        login,
+        updateUser,
+        logout,
+        isAuthenticated: !!token,
+      }}
     >
       {children}
     </AuthContext.Provider>

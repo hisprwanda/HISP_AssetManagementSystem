@@ -38,10 +38,8 @@ export class NotificationsService {
     for (const user of allUsers) {
       const roleUpper = user.role.toUpperCase();
       const isAdmin =
-        roleUpper.includes('SYSTEM_ADMIN') ||
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('FINANCE') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER';
       const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
       const isCEO =
         roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
@@ -204,10 +202,8 @@ export class NotificationsService {
     for (const user of allUsers) {
       const roleUpper = user.role.toUpperCase();
       const isAdmin =
-        roleUpper.includes('SYSTEM_ADMIN') ||
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('FINANCE') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER';
       const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
 
       if (user.id === requestedById) {
@@ -263,9 +259,9 @@ export class NotificationsService {
     const admins = allUsers.filter((u) => {
       const roleUpper = u.role.toUpperCase();
       return (
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('SYSTEM_ADMIN') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'FINANCE OFFICER'
       );
     });
 
@@ -346,9 +342,9 @@ export class NotificationsService {
     const isAdminOrHOD = (u: User) => {
       const roleUpper = u.role.toUpperCase();
       const isAdmin =
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('SYSTEM_ADMIN') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR';
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'FINANCE OFFICER';
       const isHOD =
         (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
         u.department?.id === asset.department?.id;
@@ -425,9 +421,9 @@ export class NotificationsService {
     const recipients = allUsers.filter((u) => {
       const roleUpper = u.role.toUpperCase();
       return (
-        roleUpper.includes('ADMIN') ||
-        roleUpper.includes('FINANCE') ||
-        roleUpper === 'ADMIN AND FINANCE DIRECTOR'
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'FINANCE OFFICER'
       );
     });
 
@@ -471,11 +467,14 @@ export class NotificationsService {
     let recipient: User | undefined;
 
     const roleUpper = requesterRole.toUpperCase();
-    if (roleUpper === 'FINANCE OFFICER') {
+    if (roleUpper === 'FINANCE OFFICER' || roleUpper === 'OPERATIONS OFFICER') {
       recipient = allUsers.find(
         (u) => u.role.toUpperCase() === 'ADMIN AND FINANCE DIRECTOR',
       );
-    } else if (roleUpper === 'ADMIN AND FINANCE DIRECTOR') {
+    } else if (
+      roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+      roleUpper === 'FINANCE OFFICER'
+    ) {
       recipient = allUsers.find(
         (u) => u.role.toUpperCase() === 'FINANCE OFFICER',
       );

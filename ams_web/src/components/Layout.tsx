@@ -378,27 +378,21 @@ export const Layout = () => {
                               : 'group-hover:scale-110'
                           }`}
                         />
-                        <span className="text-xs font-semibold">
-                          {item.name}
-                        </span>
+                        <div className="relative">
+                          <span className="text-xs font-semibold">
+                            {item.name}
+                          </span>
+                          {((item.name === 'My Profile' &&
+                            user?.is_temporary_password) ||
+                            (item.name === 'Incidents Report' &&
+                              pendingIncidentsCount > 0) ||
+                            ((item.name === 'Asset Requests' ||
+                              item.name === 'Procurement') &&
+                              pendingRequestsCount > 0)) && (
+                            <span className="absolute -top-1 -right-2 w-2 h-2 bg-[#ff8000] rounded-full border border-white animate-pulse shadow-[0_0_8px_rgba(255,128,0,0.5)]" />
+                          )}
+                        </div>
                       </div>
-                      {item.name === 'Incidents Report' &&
-                        pendingIncidentsCount > 0 && (
-                          <span
-                            className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-600' : 'bg-orange-500 text-white shadow-sm'}`}
-                          >
-                            {pendingIncidentsCount}
-                          </span>
-                        )}
-                      {(item.name === 'Asset Requests' ||
-                        item.name === 'Procurement') &&
-                        pendingRequestsCount > 0 && (
-                          <span
-                            className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${effectivelyActive ? 'bg-white text-orange-950' : 'bg-orange-950 text-white shadow-sm'}`}
-                          >
-                            {pendingRequestsCount}
-                          </span>
-                        )}
                     </div>
                   );
                 }}
@@ -417,7 +411,10 @@ export const Layout = () => {
                 {user?.full_name || 'Admin User'}
               </span>
               <span className="text-[9px] text-[#e49f37] uppercase font-semibold tracking-wider">
-                {user?.role || 'SYSTEM ADMIN'}
+                {user?.role === 'HOD' &&
+                user?.department?.name === 'Office of the CEO'
+                  ? 'CEO'
+                  : user?.role || 'SYSTEM ADMIN'}
               </span>
             </div>
           </div>

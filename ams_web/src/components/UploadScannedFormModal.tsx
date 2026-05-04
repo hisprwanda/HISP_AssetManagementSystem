@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  X,
   Upload,
   FileText,
   CheckCircle2,
@@ -90,14 +89,14 @@ export const UploadScannedFormModal = ({
   if (showSuccess) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div className="bg-white rounded-[2rem] p-12 shadow-2xl max-w-sm w-full text-center animate-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+        <div className="bg-white rounded-[2rem] p-12 shadow-2xl max-w-sm w-full text-center border border-slate-200">
+          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-emerald-100 shadow-sm">
+            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
           </div>
-          <h2 className="text-2xl font-semibold text-slate-900 mb-2">
-            Upload Complete!
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight mb-1">
+            Upload Complete
           </h2>
-          <p className="text-slate-500 font-medium text-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
             The scanned paper trail has been archived successfully.
           </p>
         </div>
@@ -111,81 +110,80 @@ export const UploadScannedFormModal = ({
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[80]"
         onClick={onClose}
       />
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl z-[90] overflow-hidden animate-in zoom-in duration-300">
-        <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-3xl shadow-2xl z-[90] overflow-hidden animate-in zoom-in duration-300 border border-slate-200">
+        <div className="px-8 py-7 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-[#ff8000]">
-              <Upload className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-[#ff8000] flex items-center justify-center text-white shadow-lg shadow-orange-100 transform rotate-3">
+              <Upload className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-800 tracking-tight">
+              <h3 className="text-base font-bold text-slate-800 tracking-tight leading-tight">
                 Upload Scanned Form
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Paper Trail Digitalization
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                Digital Archiving
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-4 relative group hover:border-[#ff8000] hover:bg-orange-50/30 transition-all">
+          <div className="bg-white p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-4 relative group hover:border-[#ff8000] hover:bg-orange-50/30 transition-all cursor-pointer">
             <input
               type="file"
               accept=".pdf"
               onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
             />
             {file ? (
-              <div className="flex flex-col items-center">
-                <FileText className="w-12 h-12 text-[#ff8000] mb-2" />
-                <span className="text-sm font-bold text-slate-700 truncate max-w-xs">
+              <div className="flex flex-col items-center animate-in fade-in zoom-in">
+                <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-3">
+                  <FileText className="w-8 h-8 text-[#ff8000]" />
+                </div>
+                <span className="text-sm font-bold text-slate-700 truncate max-w-[250px]">
                   {file.name}
                 </span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB • PDF Document
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                  <Upload className="w-6 h-6 text-slate-400 group-hover:text-[#ff8000]" />
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 mb-3 group-hover:scale-110 group-hover:bg-white transition-all">
+                  <Upload className="w-5 h-5 text-slate-400 group-hover:text-[#ff8000]" />
                 </div>
-                <p className="text-sm font-bold text-slate-500">
+                <p className="text-sm font-bold text-slate-600">
                   Click or drag PDF form here
                 </p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                   PDF ONLY • MAX 10MB
                 </p>
               </div>
             )}
           </div>
 
-          <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100 space-y-2">
-            <div className="flex items-center gap-2 text-[#ff8000]">
-              <FileText className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-widest">
-                Asset Target
-              </span>
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#ff8000]" />
+              Target Assignment
+            </p>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-slate-800">
+                {assignment.asset?.name}
+              </p>
+              <p className="text-xs font-semibold text-slate-500">
+                Recipient:{' '}
+                <span className="text-slate-800">
+                  {assignment.user?.full_name}
+                </span>
+              </p>
             </div>
-            <p className="text-sm font-bold text-orange-950">
-              {assignment.asset?.name}
-            </p>
-            <p className="text-[10px] font-bold text-[#ff8000]">
-              Recipient: {assignment.user?.full_name}
-            </p>
           </div>
 
           {error && (
             <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake duration-300">
               <AlertCircle className="w-5 h-5 text-rose-500" />
-              <p className="text-xs font-bold text-rose-600 uppercase tracking-widest">
+              <p className="text-[11px] font-bold text-rose-600 uppercase tracking-widest">
                 {error}
               </p>
             </div>
@@ -194,16 +192,16 @@ export const UploadScannedFormModal = ({
           <button
             type="submit"
             disabled={!file || uploadMutation.isPending}
-            className="w-full py-5 bg-[#ff8000] hover:bg-[#e49f37] disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)] flex items-center justify-center gap-3 transition-all active:scale-95"
+            className="w-full py-3.5 bg-[#ff8000] hover:bg-[#e67300] disabled:opacity-50 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-orange-100 flex items-center justify-center gap-3 transition-all active:scale-95"
           >
             {uploadMutation.isPending ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Uploading Scanned Form...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Archiving...
               </>
             ) : (
               <>
-                Archived Scanned Form <CheckCircle2 className="w-4 h-4" />
+                Archive Scanned Form <CheckCircle2 className="w-4 h-4" />
               </>
             )}
           </button>

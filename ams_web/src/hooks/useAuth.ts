@@ -15,16 +15,10 @@ export const useAuth = () => {
   const roleUpper = role.toUpperCase();
   const deptUpper = deptName.toUpperCase();
 
-  const isFinanceAdmin =
-    roleUpper.includes('SYSTEM_ADMIN') ||
-    roleUpper.includes('ADMIN') ||
-    roleUpper.includes('FINANCE') ||
-    deptUpper.includes('ADMIN AND FINANCE') ||
-    deptUpper.includes('ADMIN & FINANCE') ||
-    deptUpper.includes('FINANCE');
-
   const isFinanceDirector = roleUpper === 'ADMIN AND FINANCE DIRECTOR';
   const isFinanceOfficer = roleUpper === 'FINANCE OFFICER';
+
+  const isFinanceAdmin = isFinanceDirector || isFinanceOfficer;
 
   const isHOD =
     roleUpper.includes('HOD') ||

@@ -54,6 +54,7 @@ interface User {
   role: string;
   department?: { name: string; type: string };
   status?: string;
+  is_invitation_sent?: boolean;
   password_hash?: string;
   provisioning_password?: string;
   created_at: string;
@@ -188,6 +189,12 @@ export const SystemTrail = () => {
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
+  const pendingInvitationsCount = useMemo(() => {
+    return (users || []).filter(
+      (u) => !u.is_invitation_sent && u.status !== 'ACTIVE',
+    ).length;
+  }, [users]);
+
   const bulkCreateMutation = useMutation({
     mutationFn: async (userData: Record<string, unknown>[]) => {
       const chunkSize = 10;
@@ -224,6 +231,32 @@ export const SystemTrail = () => {
       alert(
         `Bulk Provisioning Failure: ${Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage}`,
       );
+    },
+  });
+
+  const sendInvitationMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await api.post(`/users/${userId}/send-invitation`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (error: Error) => {
+      alert(`Failed to send invitation: ${error.message}`);
+    },
+  });
+
+  const bulkSendInvitationsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/users/bulk-send-invitations');
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      alert(`Sent ${data.success} invitations. ${data.failed} failed.`);
+    },
+    onError: (error: Error) => {
+      alert(`Bulk invitation failed: ${error.message}`);
     },
   });
 
@@ -332,7 +365,7 @@ export const SystemTrail = () => {
       'Phone Number',
       'Role',
       'Department',
-      'Provisioning Password',
+      'Password (Permanent/Temp)',
       'Provisioned At',
     ];
 
@@ -520,6 +553,18 @@ export const SystemTrail = () => {
               <Upload className="w-3.5 h-3.5" />
               {isUploading ? 'Processing...' : 'Bulk Provision'}
             </button>
+            {pendingInvitationsCount > 1 && (
+              <button
+                onClick={() => bulkSendInvitationsMutation.mutate()}
+                disabled={bulkSendInvitationsMutation.isPending}
+                className="px-4 py-2 bg-white border border-[#ff8000] text-[#ff8000] rounded-xl font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm hover:bg-orange-50 flex items-center gap-2 disabled:opacity-50"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                {bulkSendInvitationsMutation.isPending
+                  ? 'Sending...'
+                  : 'Bulk Email'}
+              </button>
+            )}
             <input
               type="file"
               ref={fileInputRef}
@@ -647,20 +692,38 @@ export const SystemTrail = () => {
                       <div className="flex items-center gap-2">
                         <Shield className="w-4 h-4 text-orange-400/50" />
                         <span className="text-[10px] font-semibold text-slate-700 uppercase tracking-widest">
-                          {user.role}
+                          {user.role === 'HOD' &&
+                          user.department?.name === 'Office of the CEO'
+                            ? 'CEO'
+                            : user.role}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      {user.status === 'ACTIVE' ? (
-                        <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
-                          ACTIVE
-                        </span>
-                      ) : (
-                        <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100 shadow-sm">
-                          {user.status || 'INACTIVE'}
-                        </span>
-                      )}
+                      <div className="flex items-center justify-end gap-3">
+                        {!user.is_invitation_sent &&
+                          user.status !== 'ACTIVE' && (
+                            <button
+                              onClick={() =>
+                                sendInvitationMutation.mutate(user.id)
+                              }
+                              disabled={sendInvitationMutation.isPending}
+                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-all"
+                              title="Send Invitation Email"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </button>
+                          )}
+                        {user.status === 'ACTIVE' ? (
+                          <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
+                            ACTIVE
+                          </span>
+                        ) : (
+                          <span className="inline-flex px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100 shadow-sm">
+                            {user.status || 'INACTIVE'}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

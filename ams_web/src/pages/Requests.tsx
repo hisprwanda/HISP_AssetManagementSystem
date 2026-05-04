@@ -148,12 +148,10 @@ export const Requests = () => {
       filtered = filtered.filter((r) => r.requested_by?.id === currentUser?.id);
     } else {
       filtered = filtered.filter((r) => {
-        // 1. CEO Privilege: Full executive overview
         if (isCEO) {
           return true;
         }
 
-        // 2. Admin Privilege: See everything formalized (passed HOD)
         if (isAdmin) {
           if (
             isFinanceDirector &&
@@ -161,14 +159,12 @@ export const Requests = () => {
           ) {
             return true;
           }
-          // The CEO doesn't formalize requests, so Admins handle pending requests from the CEO's office
           if (r.department?.name === 'Office of the CEO') {
             return true;
           }
           return r.status !== 'PENDING';
         }
 
-        // 3. HOD Privilege: See department only
         if (isHOD) {
           return r.department?.id === currentUser?.department?.id;
         }

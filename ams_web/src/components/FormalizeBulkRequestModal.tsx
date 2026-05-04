@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, FileText, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetRequest } from '../types/assets';
 import { useAuth } from '../hooks/useAuth';
@@ -109,44 +109,40 @@ export const FormalizeBulkRequestModal: React.FC<
         onClick={onClose}
       />
 
-      <div className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+      <div
+        className={`relative bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200 flex flex-col ${success ? 'max-w-sm w-full' : 'w-full max-w-4xl max-h-[90vh]'}`}
+      >
         {success ? (
-          <div className="p-20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mb-6 border border-emerald-100">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100 shadow-sm">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight mb-1">
               Requisition Officialized
             </h2>
-            <p className="text-slate-500 font-medium">
-              The official purchase requisition for batch {batchNumber} has been{' '}
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+              Batch {batchNumber} has been{' '}
               {isAdmin
-                ? 'forwarded to the Office of the CEO for final review.'
+                ? 'forwarded to CEO for final review.'
                 : 'sent to Admin.'}
             </p>
           </div>
         ) : (
           <>
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-8 py-7 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#ff8000] flex items-center justify-center shadow-lg shadow-orange-200">
-                  <FileText className="w-6 h-6 text-white" />
+                <div className="w-11 h-11 rounded-2xl bg-[#ff8000] flex items-center justify-center shadow-lg shadow-orange-100 transform rotate-3">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800 leading-tight">
-                    Official Purchase Requisition
+                  <h2 className="text-lg font-bold text-slate-800 tracking-tight leading-tight">
+                    Official Requisition
                   </h2>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
-                    Batch: {batchNumber} • {requests.length} Line Items
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    Batch {batchNumber} • {requests.length} Line Items
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-white rounded-xl transition-colors text-slate-400"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
 
             <form

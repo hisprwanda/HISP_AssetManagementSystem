@@ -9,10 +9,19 @@ import { User } from '../users/entities/user.entity';
 
 import { RequestableItem } from '../requestable-items/entities/requestable-item.entity';
 import { Asset } from '../assets/entities/asset.entity';
+import { Department } from '../departments/entities/department.entity';
+import { Category } from '../categories/entities/category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AssetRequest, User, RequestableItem, Asset]),
+    TypeOrmModule.forFeature([
+      AssetRequest,
+      User,
+      RequestableItem,
+      Asset,
+      Department,
+      Category,
+    ]),
     NotificationsModule,
     AssetAssignmentsModule,
   ],

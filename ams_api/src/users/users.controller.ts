@@ -59,9 +59,27 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @Post(':id/change-password')
+  @ApiOperation({ summary: 'Change user password' })
+  changePassword(@Param('id') id: string, @Body('password') password: string) {
+    return this.usersService.changePassword(id, password);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Remove a user' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Post(':id/send-invitation')
+  @ApiOperation({ summary: 'Send invitation email to a user' })
+  sendInvitation(@Param('id') id: string) {
+    return this.usersService.sendInvitationEmail(id);
+  }
+
+  @Post('bulk-send-invitations')
+  @ApiOperation({ summary: 'Send invitation emails to all pending users' })
+  bulkSendInvitations() {
+    return this.usersService.bulkSendInvitationEmails();
   }
 }

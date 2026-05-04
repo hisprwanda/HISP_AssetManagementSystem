@@ -6,7 +6,6 @@ import {
   Box,
   User as UserIcon,
   Activity,
-  ArrowRight,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { AssetRequest, Category } from '../types/assets';
@@ -169,151 +168,190 @@ export const DeployRequestAssetsModal: React.FC<
         onClick={onClose}
       />
 
-      <div className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+      <div
+        className={`relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200 flex flex-col ${isSuccess ? 'max-w-sm w-full' : 'w-full max-w-5xl max-h-[92vh]'}`}
+      >
         {isSuccess ? (
-          <div className="p-20 flex flex-col items-center justify-center text-center">
-            <div className="w-24 h-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-6 border border-emerald-100 shadow-inner">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100 shadow-sm">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">
-              Deployed!
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight mb-1">
+              Handover Complete
             </h2>
-            <p className="text-slate-500 font-medium text-lg">
-              Assets have been assigned and the receipt is being generated.
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              The registry has been updated successfully.
             </p>
           </div>
         ) : (
           <>
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 rounded-2xl bg-[#ff8000] flex items-center justify-center shadow-xl shadow-orange-200">
-                  <PackagePlus className="w-7 h-7 text-white" />
+            <div className="px-8 py-7 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-2xl bg-[#ff8000] flex items-center justify-center shadow-lg shadow-orange-100 transform rotate-3">
+                  <PackagePlus className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800 leading-tight">
+                  <h2 className="text-lg font-bold text-slate-800 tracking-tight leading-tight">
                     Automated Deployment
                   </h2>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
-                    Fulfilling Request:{' '}
-                    <span className="text-[#ff8000] font-extrabold">
-                      {request.title}
-                    </span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    Fulfilling:{' '}
+                    <span className="text-[#ff8000]">{request.title}</span>
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-1 bg-orange-50/50 rounded-3xl p-5 border border-orange-100/50">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-8 rounded-xl bg-[#ff8000] flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-white" />
+              <div className="grid grid-cols-12 gap-8">
+                <div className="col-span-4 bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                      <UserIcon className="w-5 h-5" />
                     </div>
-                    <span className="text-[10px] font-bold text-[#ff8000] uppercase tracking-widest">
-                      Requester Context
-                    </span>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Requester
+                      </p>
+                      <h3 className="text-base font-bold text-slate-800">
+                        {request.requested_by?.full_name}
+                      </h3>
+                    </div>
                   </div>
-                  <p className="text-lg font-bold text-slate-800 mb-0.5">
-                    {request.requested_by?.full_name}
-                  </p>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-tight">
-                    {request.department?.name}
-                  </p>
-                </div>
 
-                <div className="col-span-2 space-y-4">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
-                      Handed Over By (Admin Signature)
-                    </label>
-                    <input
-                      type="text"
-                      value={receivedFromName}
-                      onChange={(e) => setReceivedFromName(e.target.value)}
-                      placeholder="Enter your name to sign..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
-                      Global Deployment Notes
-                    </label>
-                    <textarea
-                      value={conditionNotes}
-                      onChange={(e) => setConditionNotes(e.target.value)}
-                      placeholder="Optional notes for this deployment..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all h-20 resize-none"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
-                        Global Purchase Date
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Directorate
+                      </p>
+                      <p className="text-sm font-semibold text-slate-600">
+                        {request.department?.name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Asset Category
+                      </p>
+                      <p className="text-sm font-semibold text-slate-600">
+                        Standard Issue
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-span-8 space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">
+                        Handed Over By (Admin Name)
                       </label>
                       <input
-                        type="date"
-                        value={purchaseDate}
-                        onChange={(e) => setPurchaseDate(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                        type="text"
+                        value={receivedFromName}
+                        onChange={(e) => setReceivedFromName(e.target.value)}
+                        placeholder="Enter your name..."
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:border-[#ff8000] focus:ring-2 focus:ring-orange-500/10 outline-none transition-all"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block px-2">
-                        Warranty Expiry Date
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">
+                        Deployment Notes
                       </label>
-                      <input
-                        type="date"
-                        value={warrantyExpiry}
-                        onChange={(e) => setWarrantyExpiry(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                      <textarea
+                        value={conditionNotes}
+                        onChange={(e) => setConditionNotes(e.target.value)}
+                        placeholder="Add any specific notes for this deployment..."
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-[#ff8000] focus:ring-2 focus:ring-orange-500/10 outline-none transition-all h-24 resize-none"
                       />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">
+                          Purchase Date
+                        </label>
+                        <input
+                          type="date"
+                          value={purchaseDate}
+                          onChange={(e) => setPurchaseDate(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:border-[#ff8000] outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">
+                          Warranty Expiry
+                        </label>
+                        <input
+                          type="date"
+                          value={warrantyExpiry}
+                          onChange={(e) => setWarrantyExpiry(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:border-[#ff8000] outline-none transition-all"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Hardware Matching
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    Hardware Matching Registry
                   </h4>
-                  <span className="text-[10px] font-bold text-[#ff8000] bg-orange-50 px-2 py-1 rounded-full uppercase tracking-widest">
-                    {
-                      flatItems.filter(
-                        (item) =>
-                          !!selectedCategoryIds[item.uniqueId] &&
-                          (!!assetSNs[item.uniqueId] ||
-                            !!assetTags[item.uniqueId]),
-                      ).length
-                    }{' '}
-                    / {flatItems.length} Matched
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#ff8000] transition-all duration-500"
+                        style={{
+                          width: `${(flatItems.filter((i) => selectedCategoryIds[i.uniqueId] && (assetSNs[i.uniqueId] || assetTags[i.uniqueId])).length / flatItems.length) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#ff8000] bg-orange-50 px-3 py-1 rounded-full uppercase tracking-wider">
+                      {
+                        flatItems.filter(
+                          (i) =>
+                            selectedCategoryIds[i.uniqueId] &&
+                            (assetSNs[i.uniqueId] || assetTags[i.uniqueId]),
+                        ).length
+                      }{' '}
+                      / {flatItems.length} Matched
+                    </span>
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                   {flatItems.map((item) => (
                     <div
                       key={item.uniqueId}
-                      className="group bg-white border border-slate-100 rounded-3xl p-4 flex items-center gap-6 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
+                      className={`bg-white border rounded-2xl p-5 flex items-start gap-6 transition-all ${
+                        assetSNs[item.uniqueId] || assetTags[item.uniqueId]
+                          ? 'border-emerald-200 bg-emerald-50/20'
+                          : 'border-slate-100'
+                      }`}
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">
-                        <Box className="w-6 h-6 text-slate-400 group-hover:text-[#ff8000]" />
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                          assetSNs[item.uniqueId] || assetTags[item.uniqueId]
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-slate-50 text-slate-400'
+                        }`}
+                      >
+                        {assetSNs[item.uniqueId] || assetTags[item.uniqueId] ? (
+                          <CheckCircle2 className="w-6 h-6" />
+                        ) : (
+                          <Box className="w-6 h-6" />
+                        )}
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">
-                          {item.displayLabel}
-                        </p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                          Requested Spec
-                        </p>
-                      </div>
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h5 className="text-sm font-bold text-slate-800 mb-1">
+                              {item.displayLabel}
+                            </h5>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                              ID: {item.uniqueId}
+                            </span>
+                          </div>
 
-                      <ArrowRight className="w-4 h-4 text-slate-300" />
-
-                      <div className="flex-[4] flex flex-col gap-3 min-w-0">
-                        <div className="flex gap-3">
                           <select
                             value={selectedCategoryIds[item.uniqueId] || ''}
                             onChange={(e) =>
@@ -322,7 +360,7 @@ export const DeployRequestAssetsModal: React.FC<
                                 e.target.value,
                               )
                             }
-                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all appearance-none cursor-pointer"
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[11px] font-bold text-slate-600 outline-none cursor-pointer"
                           >
                             <option value="">Select Category...</option>
                             {categories?.map((cat) => (
@@ -334,74 +372,60 @@ export const DeployRequestAssetsModal: React.FC<
                         </div>
 
                         {selectedCategoryIds[item.uniqueId] && (
-                          <div className="flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <div className="flex-1 relative">
-                              <input
-                                type="text"
-                                value={assetSNs[item.uniqueId] || ''}
-                                onChange={(e) =>
-                                  setAssetSNs((prev) => ({
-                                    ...prev,
-                                    [item.uniqueId]: e.target.value,
-                                  }))
-                                }
-                                placeholder="Write Serial Number..."
-                                className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                              />
-                            </div>
-                            <div className="flex-1 relative">
-                              <input
-                                type="text"
-                                value={assetTags[item.uniqueId] || ''}
-                                onChange={(e) =>
-                                  setAssetTags((prev) => ({
-                                    ...prev,
-                                    [item.uniqueId]: e.target.value,
-                                  }))
-                                }
-                                placeholder="Write Tag Number..."
-                                className="w-full bg-orange-50/30 border border-orange-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
-                              />
-                            </div>
+                          <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
+                            <input
+                              type="text"
+                              value={assetSNs[item.uniqueId] || ''}
+                              onChange={(e) =>
+                                setAssetSNs((prev) => ({
+                                  ...prev,
+                                  [item.uniqueId]: e.target.value,
+                                }))
+                              }
+                              placeholder="Serial Number"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-xs font-semibold focus:border-[#ff8000] outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={assetTags[item.uniqueId] || ''}
+                              onChange={(e) =>
+                                setAssetTags((prev) => ({
+                                  ...prev,
+                                  [item.uniqueId]: e.target.value,
+                                }))
+                              }
+                              placeholder="Asset Tag ID"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-xs font-semibold focus:border-[#ff8000] outline-none"
+                            />
                           </div>
                         )}
                       </div>
-
-                      {(assetSNs[item.uniqueId] ||
-                        assetTags[item.uniqueId]) && (
-                        <div className="flex flex-col gap-1 w-32 items-end">
-                          <div className="flex items-center gap-1.5 text-emerald-500">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase">
-                              Ready
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
+            <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-4 rounded-2xl font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all active:scale-95"
+                className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:text-slate-700 transition-colors uppercase tracking-wider text-xs"
               >
                 Cancel
               </button>
               <button
                 onClick={() => deployMutation.mutate()}
                 disabled={deployMutation.isPending || !isFormValid}
-                className="flex-[2] bg-[#ff8000] hover:bg-[#e67300] text-white py-4 rounded-2xl font-bold shadow-xl shadow-orange-200 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                className="flex-1 bg-[#ff8000] hover:bg-[#e67300] disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
               >
                 {deployMutation.isPending ? (
-                  <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Activity className="w-5 h-5" />
-                    Complete Automated Handover
+                    <Activity className="w-4 h-4" />
+                    <span className="text-sm uppercase tracking-wider">
+                      Complete Handover
+                    </span>
                   </>
                 )}
               </button>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import {
-  X,
   ClipboardCheck,
   Send,
   CheckCircle2,
@@ -145,64 +144,62 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
         onClick={onClose}
       />
 
-      <div className="relative bg-white w-full max-w-3xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+      <div
+        className={`relative bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200 flex flex-col ${isSuccess ? 'max-w-sm w-full' : 'w-full max-w-3xl max-h-[90vh]'}`}
+      >
         {isSuccess ? (
-          <div className="p-20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mb-6 border border-emerald-100">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100 shadow-sm">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Success!</h2>
-            <p className="text-slate-500 font-medium">
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight mb-1">
+              Success!
+            </h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               The bulk operation was completed successfully.
             </p>
           </div>
         ) : (
           <>
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-8 py-7 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200 ${isSignatureView ? 'bg-orange-600' : 'bg-[#ff8000]'}`}
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 ${isSignatureView ? 'bg-orange-600 shadow-orange-100' : 'bg-[#ff8000] shadow-orange-100'}`}
                 >
                   {isSignatureView ? (
-                    <PenTool className="w-6 h-6 text-white" />
+                    <PenTool className="w-5 h-5 text-white" />
                   ) : (
-                    <ClipboardCheck className="w-6 h-6 text-white" />
+                    <ClipboardCheck className="w-5 h-5 text-white" />
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800 leading-tight">
+                  <h2 className="text-lg font-bold text-slate-800 tracking-tight leading-tight">
                     {isSignatureView
-                      ? 'Sign Handover Receipt'
+                      ? 'Executive Handover'
                       : isVerificationView
-                        ? 'Verify Bulk Handover'
-                        : 'Bulk Handover Preparation'}
+                        ? 'Final Verification'
+                        : 'Handover Preparation'}
                   </h2>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                     {formNumber
-                      ? `Receipt: ${formNumber}`
-                      : `Hardware Cart • ${selectedAssetIds.length} Items`}
+                      ? `Receipt ${formNumber}`
+                      : `Hardware Batch • ${selectedAssetIds.length} Items`}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-white rounded-xl transition-colors text-slate-400"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
 
-            <div className="p-8 overflow-y-auto space-y-8 custom-scrollbar">
+            <div className="p-7 overflow-y-auto space-y-8 custom-scrollbar">
               {!formNumber && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-5">
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2.5 block ml-1">
                       Receiving Staff
                     </label>
                     <select
                       value={userId}
                       onChange={(e) => setUserId(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all cursor-pointer"
                     >
                       <option value="">Select recipient...</option>
                       {users?.map((u) => (
@@ -213,15 +210,15 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                     </select>
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2.5 block ml-1">
                       Handed Over By
                     </label>
                     <select
                       value={receivedFromName}
                       onChange={(e) => setReceivedFromName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all cursor-pointer"
                     >
-                      <option value="">Select admin...</option>
+                      <option value="">Select administrator...</option>
                       {admins.map((admin) => (
                         <option key={admin.id} value={admin.full_name}>
                           {admin.full_name}
@@ -230,35 +227,35 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                     </select>
                   </div>
                   <div className="col-span-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 block">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2.5 block ml-1">
                       Global Condition Notes
                     </label>
                     <textarea
                       value={conditionNotes}
                       onChange={(e) => setConditionNotes(e.target.value)}
-                      placeholder="Shared notes for all items in this cart..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all min-h-[80px] resize-none"
+                      placeholder="Specify the condition of items being handed over..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-orange-500/10 focus:border-[#ff8000] outline-none transition-all min-h-[70px] resize-none"
                     />
                   </div>
                 </div>
               )}
 
               {formNumber && (
-                <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                         Recipient
                       </p>
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="text-xs font-bold text-slate-700">
                         {bulkAssignments?.[0]?.user?.full_name}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                         Handed Over By
                       </p>
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="text-xs font-bold text-slate-700">
                         {bulkAssignments?.[0]?.received_from_name}
                       </p>
                     </div>
@@ -267,34 +264,37 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
               )}
 
               <div>
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
-                  Hardware List
+                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                  Hardware Matching Table
                 </h4>
-                <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
                   <table className="w-full text-left">
                     <thead className="bg-slate-50 border-b border-slate-100">
                       <tr>
-                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                           Asset Name
                         </th>
-                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                           Tag ID
                         </th>
-                        <th className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                           Serial Number
                         </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {selectedAssets.map((asset) => (
-                        <tr key={asset.id} className="bg-white">
-                          <td className="px-4 py-3 text-sm font-bold text-slate-700">
+                        <tr
+                          key={asset.id}
+                          className="bg-white hover:bg-slate-50/50 transition-colors"
+                        >
+                          <td className="px-4 py-2.5 text-xs font-bold text-slate-700">
                             {asset.name}
                           </td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">
+                          <td className="px-4 py-2.5 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
                             {asset.tag_id}
                           </td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-400">
+                          <td className="px-4 py-2.5 text-[10px] font-bold text-slate-400">
                             {asset.serial_number}
                           </td>
                         </tr>
@@ -305,22 +305,18 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
               </div>
 
               {isSignatureView && (
-                <div className="bg-orange-50/50 rounded-3xl p-6 border border-orange-100">
-                  <label className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-3 block flex items-center gap-2">
-                    <PenTool className="w-3 h-3" /> Digital Signature (Full
+                <div className="bg-orange-50/50 rounded-2xl p-6 border border-orange-100">
+                  <label className="text-[9px] font-bold text-orange-600 uppercase tracking-widest mb-3 block flex items-center gap-2">
+                    <PenTool className="w-3 h-3" /> Personnel Signature (Full
                     Name)
                   </label>
                   <input
                     type="text"
                     value={signatureName}
                     onChange={(e) => setSignatureName(e.target.value)}
-                    placeholder="Type your full name to sign..."
-                    className="w-full bg-white border border-orange-200 rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300"
+                    placeholder="Signature..."
+                    className="w-full bg-white border border-orange-200 rounded-xl px-4 py-3 text-base font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300"
                   />
-                  <p className="mt-2 text-[10px] text-orange-400 font-medium italic">
-                    By signing, you confirm receipt of the hardware items listed
-                    above in good working condition.
-                  </p>
                 </div>
               )}
 
@@ -341,10 +337,10 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
               )}
             </div>
 
-            <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
+            <div className="p-7 bg-slate-50 border-t border-slate-100 flex gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-4 rounded-2xl font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all"
+                className="flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
               >
                 Cancel
               </button>
@@ -355,13 +351,13 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                   disabled={
                     prepareMutation.isPending || !userId || !receivedFromName
                   }
-                  className="flex-[2] bg-[#ff8000] hover:bg-orange-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                  className="flex-[2] bg-gradient-to-r from-[#ff8000] to-orange-500 hover:shadow-orange-100 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {prepareMutation.isPending ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
-                      <Send className="w-5 h-5" /> Generate & Send Receipt
+                      <Send className="w-4 h-4" /> Send Receipt
                     </>
                   )}
                 </button>
@@ -387,16 +383,16 @@ export const BulkAssetReceiptModal: React.FC<BulkAssetReceiptModalProps> = ({
                 <div className="flex gap-2 w-full flex-[2]">
                   <button
                     onClick={() => verifyMutation.mutate(false)}
-                    className="flex-1 py-4 rounded-2xl font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all"
+                    className="flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all"
                   >
                     Reject
                   </button>
                   <button
                     onClick={() => verifyMutation.mutate(true)}
                     disabled={verifyMutation.isPending || !adminSignature}
-                    className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                    className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-emerald-100 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
                   >
-                    Verify & Finalize
+                    Verify
                   </button>
                 </div>
               )}

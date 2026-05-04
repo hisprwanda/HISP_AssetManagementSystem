@@ -37,7 +37,6 @@ export class AssetIncidentsService {
       });
       if (!asset) throw new NotFoundException('Asset not found');
 
-      // Hybrid Rule: Automatically update asset status to BROKEN on report
       asset.status = 'BROKEN';
       await queryRunner.manager.save(asset);
 
@@ -51,18 +50,12 @@ export class AssetIncidentsService {
         status: 'PENDING',
       });
 
-      // Business Rule: If an Admin/Finance user reports an incident, it goes immediately to CEO
       const reporter = await this.usersService.findOne(dto.user_id);
       if (reporter) {
         const roleUpper = reporter.role.toUpperCase();
-        const deptUpper = (reporter.department?.name || '').toUpperCase();
         const isAdmin =
-          roleUpper.includes('ADMIN') ||
-          roleUpper.includes('SYSTEM_ADMIN') ||
-          roleUpper.includes('FINANCE') ||
-          deptUpper.includes('ADMIN AND FINANCE') ||
-          deptUpper.includes('ADMIN & FINANCE') ||
-          deptUpper.includes('FINANCE');
+          roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+          roleUpper === 'FINANCE OFFICER';
 
         if (isAdmin) {
           incident.status = 'CEO_REVIEW';
@@ -129,11 +122,9 @@ export class AssetIncidentsService {
       incident.resolution_notes = dto.resolution_notes;
       incident.status = dto.incident_status;
 
-      // Update Asset Status
       if (incident.asset) {
         incident.asset.status = dto.new_asset_status;
 
-        // If unfixable/replaced/liability, remove from current user if it's being disposed
         if (dto.new_asset_status === 'DISPOSED') {
           incident.asset.assigned_to = null;
         }
@@ -141,9 +132,7 @@ export class AssetIncidentsService {
         await queryRunner.manager.save(incident.asset);
       }
 
-      // Outcome specific logic
       if (dto.incident_status === 'RESOLVED_REPLACED') {
-        // Auto-generate replacement request
         const request = queryRunner.manager.create(AssetRequest, {
           requested_by: incident.reported_by,
           department: incident.reported_by.department,
@@ -163,7 +152,6 @@ export class AssetIncidentsService {
         const savedRequest = await queryRunner.manager.save(request);
         incident.replacement_request = savedRequest;
       } else if (dto.incident_status === 'REJECTED_LIABILITY') {
-        // Calculate penalty (Previous logic preserved for Liability case)
         const { current_value } = this.assetsService.calculateDepreciation(
           incident.asset,
         );
@@ -173,7 +161,6 @@ export class AssetIncidentsService {
       const updatedIncident = await queryRunner.manager.save(incident);
       await queryRunner.commitTransaction();
 
-      // Notifications
       try {
         await this.notificationsService.notifyIncidentVerdict({
           incidentId: updatedIncident.id,
@@ -219,7 +206,6 @@ export class AssetIncidentsService {
     });
     if (!incident) throw new NotFoundException('Incident not found');
 
-    // CEO can review items in repair or pending if they are high stakes
     incident.status = 'CEO_REVIEW';
     incident.ceo_remarks = remarks;
     const saved = await this.incidentRepo.save(incident);

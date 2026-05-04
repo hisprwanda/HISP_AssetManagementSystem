@@ -59,7 +59,10 @@ export const ViewUserModal = ({
               {user.role === 'Admin and Finance' && (
                 <Shield className="w-3 h-3" />
               )}
-              {user.role}
+              {user.role === 'HOD' &&
+              user.department?.name === 'Office of the CEO'
+                ? 'CEO'
+                : user.role}
             </div>
           </div>
         </div>

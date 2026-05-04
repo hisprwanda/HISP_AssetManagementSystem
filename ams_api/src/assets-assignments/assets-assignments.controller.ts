@@ -15,6 +15,7 @@ import { CreateAssetAssignmentDto } from './dto/create-assets-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-assets-assignment.dto';
 import { PrepareAssignmentDto } from './dto/prepare-assignment.dto';
 import { PrepareBulkAssignmentDto } from './dto/prepare-bulk-assignment.dto';
+import { UpdateBulkPrepareDto } from './dto/update-bulk-prepare.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -132,6 +133,18 @@ export class AssetAssignmentsController {
     return this.assetAssignmentsService.prepareBulkByAdmin(dto);
   }
 
+  @Patch('bulk/:formNumber/prepare')
+  @ApiOperation({ summary: 'Admin preparation of bulk receipt form (Update)' })
+  updateBulkPrepareByAdmin(
+    @Param('formNumber') formNumber: string,
+    @Body() dto: UpdateBulkPrepareDto,
+  ) {
+    return this.assetAssignmentsService.updateBulkPrepareByAdmin(
+      formNumber,
+      dto,
+    );
+  }
+
   @Patch('bulk/:formNumber/sign-user')
   @ApiOperation({ summary: 'Record staff signature on bulk receipt form' })
   signBulkByUser(
@@ -157,5 +170,11 @@ export class AssetAssignmentsController {
       body.remarks,
       body.adminSignatureName,
     );
+  }
+
+  @Get('bulk/:formNumber')
+  @ApiOperation({ summary: 'Get all assignments for a specific form number' })
+  findByFormNumber(@Param('formNumber') formNumber: string) {
+    return this.assetAssignmentsService.findByFormNumber(formNumber);
   }
 }

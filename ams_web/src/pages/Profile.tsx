@@ -10,16 +10,65 @@ import {
   Laptop,
   CheckCircle2,
   AlertCircle,
+  ShieldAlert,
+  Key,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { Asset } from '../types/assets';
 
 export const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
   }>();
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (password: string) => {
+      const response = await api.post(`/users/${user?.id}/change-password`, {
+        password,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      updateUser({ is_temporary_password: false });
+      setIsPasswordModalOpen(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError('');
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      setPasswordError(
+        err.response?.data?.message || 'Failed to update password',
+      );
+    },
+  });
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters long');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    changePasswordMutation.mutate(newPassword);
+  };
 
   useEffect(() => {
     setHeaderTitle('My Account Profile');
@@ -83,6 +132,33 @@ export const Profile = () => {
           </div>
         </div>
       </div>
+
+      {user.is_temporary_password && (
+        <div className="relative overflow-hidden bg-orange-600 rounded-[1.5rem] p-6 shadow-xl shadow-orange-100 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="flex items-center gap-4 relative z-10 text-white">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/30 backdrop-blur-md">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold tracking-tight">
+                Security Action Required
+              </h3>
+              <p className="text-xs font-medium text-orange-50 leading-relaxed max-w-md">
+                You are currently using a system-generated temporary password.
+                For your account's security, please create a permanent password
+                now.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsPasswordModalOpen(true)}
+            className="px-6 py-3 bg-white text-orange-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-orange-50 transition-all shadow-lg active:scale-95 relative z-10 shrink-0"
+          >
+            Create Permanent Password
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-9 flex flex-col gap-6">
@@ -191,7 +267,10 @@ export const Profile = () => {
                     Rank
                   </p>
                   <p className="text-xs font-semibold text-orange-950 tracking-tight uppercase group-hover:text-[#ff8000] transition-colors">
-                    {user.role?.replace('_', ' ')}
+                    {user.role === 'HOD' &&
+                    user.department?.name === 'Office of the CEO'
+                      ? 'CEO'
+                      : user.role?.replace('_', ' ')}
                   </p>
                 </div>
               </div>
@@ -230,6 +309,115 @@ export const Profile = () => {
           </div>
         </div>
       </div>
+
+      {isPasswordModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] transition-opacity"
+            onClick={() => setIsPasswordModalOpen(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl z-[110] overflow-hidden animate-in zoom-in duration-300 border border-slate-200">
+            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-200">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-800 tracking-tight">
+                    Change Password
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Security Update
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsPasswordModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="p-8 space-y-5">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="w-4 h-4 text-slate-400" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-12 py-3 text-sm font-semibold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all"
+                      placeholder="Min. 6 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-orange-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="w-4 h-4 text-slate-400" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-12 py-3 text-sm font-semibold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all"
+                      placeholder="Repeat new password"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {passwordError && (
+                <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 animate-in shake duration-300">
+                  <AlertCircle className="w-4 h-4 text-rose-500" />
+                  <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest">
+                    {passwordError}
+                  </p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={changePasswordMutation.isPending}
+                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-orange-100 flex items-center justify-center gap-3 transition-all active:scale-95 mt-4"
+              >
+                {changePasswordMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Updating Security...
+                  </>
+                ) : (
+                  <>
+                    Set Permanent Password <CheckCircle2 className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   );
 };

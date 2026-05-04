@@ -81,8 +81,12 @@ export const ViewRequestModal = ({
         return 'bg-orange-50 text-[#ff8000] border-orange-200';
       case 'CEO_APPROVED':
         return 'bg-orange-50 text-orange-950 border-orange-200 font-semibold';
+      case 'ORDERED':
+        return 'bg-orange-100 text-orange-800 border-orange-200 font-bold';
       case 'FULFILLED':
-        return 'bg-slate-50 text-slate-400 border-slate-200 italic';
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100 font-bold';
+      case 'DEPLOYED':
+        return 'bg-emerald-600 text-white border-emerald-700 font-bold';
       case 'REJECTED':
         return 'bg-orange-50 text-orange-600 border-orange-100 line-through';
       default:
@@ -102,7 +106,10 @@ export const ViewRequestModal = ({
         return <Activity className="w-3.5 h-3.5" />;
       case 'CEO_APPROVED':
         return <ShieldCheck className="w-3.5 h-3.5" />;
+      case 'ORDERED':
+        return <ShoppingCart className="w-3.5 h-3.5" />;
       case 'FULFILLED':
+      case 'DEPLOYED':
         return <CheckCircle2 className="w-3.5 h-3.5" />;
       case 'REJECTED':
         return <XCircle className="w-3.5 h-3.5" />;
@@ -144,6 +151,7 @@ export const ViewRequestModal = ({
                 'CEO_APPROVED',
                 'ORDERED',
                 'FULFILLED',
+                'DEPLOYED',
                 'REJECTED',
               ].includes(request.status)
             ? 'completed'
@@ -160,6 +168,7 @@ export const ViewRequestModal = ({
                 'CEO_APPROVED',
                 'ORDERED',
                 'FULFILLED',
+                'DEPLOYED',
                 'REJECTED',
               ].includes(request.status)
             ? 'completed'
@@ -169,7 +178,9 @@ export const ViewRequestModal = ({
       label: 'CEO Approval',
       status: ['APPROVED', 'CEO_REVIEW'].includes(request.status)
         ? 'current'
-        : ['CEO_APPROVED', 'ORDERED', 'FULFILLED'].includes(request.status)
+        : ['CEO_APPROVED', 'ORDERED', 'FULFILLED', 'DEPLOYED'].includes(
+              request.status,
+            )
           ? 'completed'
           : request.status === 'REJECTED'
             ? 'rejected'
@@ -180,7 +191,7 @@ export const ViewRequestModal = ({
       status:
         request.status === 'CEO_APPROVED'
           ? 'current'
-          : ['ORDERED', 'FULFILLED'].includes(request.status)
+          : ['ORDERED', 'FULFILLED', 'DEPLOYED'].includes(request.status)
             ? 'completed'
             : 'pending',
     },
@@ -189,7 +200,7 @@ export const ViewRequestModal = ({
       status:
         request.status === 'ORDERED'
           ? 'current'
-          : request.status === 'FULFILLED'
+          : ['FULFILLED', 'DEPLOYED'].includes(request.status)
             ? 'completed'
             : 'pending',
     },
@@ -421,48 +432,53 @@ export const ViewRequestModal = ({
             </div>
           )}
 
-          {request.purchase_order && (
-            <div className="bg-slate-900 rounded-[2rem] p-8 text-white space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                <ShoppingCart className="w-24 h-24" />
+          {isAdmin && request.purchase_order && (
+            <div className="bg-slate-900 rounded-[2rem] p-8 text-white space-y-6 relative overflow-hidden border-l-[6px] border-[#ff8000]">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-white">
+                <ShoppingCart className="w-32 h-32" />
               </div>
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">
-                    Official Purchase Order
-                  </h3>
-                  <span className="text-[10px] font-bold bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full border border-orange-500/30">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#ff8000] mb-1">
+                      Official Purchase Order
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      HISP-RWANDA PROCUREMENT RECORD
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-bold bg-[#ff8000]/20 text-[#ff8000] px-4 py-1.5 rounded-full border border-[#ff8000]/30 shadow-sm">
                     {request.purchase_order.po_number}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                      Issued To
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                      Issued To (Vendor)
                     </p>
-                    <p className="text-xs font-bold text-white truncate">
+                    <p className="text-xs font-bold text-white tracking-tight">
                       {request.purchase_order.vendor_details?.split('\n')[0]}
                     </p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                      Total Value
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                      Authorized Value
                     </p>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-sm font-bold text-[#ff8000]">
                       {request.purchase_order.grand_total?.toLocaleString()} RWF
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
+                <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#ff8000] shadow-[0_0_8px_rgba(255,128,0,0.5)]" />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {request.purchase_order.is_digitally_signed
-                          ? 'Digitally Signed by Vendor'
-                          : 'Manually Signed Record'}
+                          ? 'Digitally Authenticated'
+                          : 'Administrative Record'}
                       </span>
                     </div>
                     {request.purchase_order.scanned_po_url && (
@@ -470,9 +486,9 @@ export const ViewRequestModal = ({
                         href={`${api.defaults.baseURL}${request.purchase_order.scanned_po_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-[10px] font-bold text-orange-400 hover:text-orange-300 transition-colors uppercase tracking-widest"
+                        className="flex items-center gap-2 text-[10px] font-bold text-[#ff8000] hover:text-white transition-all uppercase tracking-widest bg-[#ff8000]/10 px-3 py-1.5 rounded-lg border border-[#ff8000]/20"
                       >
-                        <ExternalLink className="w-3 h-3" /> View Scanned PO
+                        <ExternalLink className="w-3 h-3" /> View Document
                       </a>
                     )}
                   </div>
