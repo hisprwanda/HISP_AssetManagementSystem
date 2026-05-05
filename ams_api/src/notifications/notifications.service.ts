@@ -98,6 +98,40 @@ export class NotificationsService {
     await this.notifRepo.save(notifications);
   }
 
+  async notifyHODNewRequest(params: {
+    requestId: string;
+    requestTitle: string;
+    requesterName: string;
+    departmentId: string;
+  }): Promise<void> {
+    const { requestId, requestTitle, requesterName, departmentId } = params;
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const hods = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      return (
+        (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
+        u.department?.id === departmentId
+      );
+    });
+
+    if (hods.length === 0) return;
+
+    const notifications = hods.map((hod) => {
+      return this.notifRepo.create({
+        recipient: { id: hod.id } as User,
+        title: 'New Procurement Request Pending Review',
+        message: `${requesterName} has submitted a new procurement request for "${requestTitle}". Please review the justification and advance it to the next workflow stage.`,
+        type: 'INFO',
+        request_id: requestId,
+        request_title: requestTitle,
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
   async notifyIncidentForwarded(params: {
     incidentId: string;
     assetName: string;

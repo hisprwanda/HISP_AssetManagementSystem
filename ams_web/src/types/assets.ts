@@ -152,7 +152,7 @@ export interface AssetIncident {
   incident_type: 'BROKEN' | 'MISSING';
   location: string;
   issue_description: string;
-  explanation?: string; // Legacy support
+  explanation?: string;
   evidence_url?: string;
   status:
     | 'PENDING'
@@ -161,9 +161,9 @@ export interface AssetIncident {
     | 'RESOLVED_FIXED'
     | 'RESOLVED_REPLACED'
     | 'REJECTED_LIABILITY';
-  investigation_status?: string; // Legacy support
+  investigation_status?: string;
   resolution_notes?: string;
-  investigation_remarks?: string; // Legacy support
+  investigation_remarks?: string;
   ceo_remarks?: string;
   penalty_amount?: number;
   penalty_resolved_at?: string | null;

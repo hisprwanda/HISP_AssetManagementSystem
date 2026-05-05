@@ -314,7 +314,7 @@ export class UsersService implements OnApplicationBootstrap {
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     user.password_hash = hashedPassword;
-    user.provisioning_password = newPassword; // Updated as permanent password for logs
+    user.provisioning_password = newPassword;
     user.is_temporary_password = false;
 
     return await this.userRepo.save(user);

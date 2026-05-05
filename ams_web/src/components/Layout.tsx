@@ -64,7 +64,6 @@ export const Layout = () => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: assets } = useQuery({
     queryKey: ['assets'],
@@ -186,10 +185,6 @@ export const Layout = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
       if (e.key === 'Escape') {
         setShowResults(false);
       }
@@ -437,7 +432,6 @@ export const Layout = () => {
                   <Search className="w-4 h-4 text-orange-400/60 group-focus-within:text-[#ff8000] transition-colors" />
                 </div>
                 <input
-                  ref={inputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => {
@@ -449,7 +443,7 @@ export const Layout = () => {
                   className="w-full bg-white/60 border border-white rounded-2xl pl-11 pr-12 py-3 text-sm focus:bg-white focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000]/30 outline-none transition-all placeholder:text-slate-400 font-medium shadow-sm"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  {searchQuery ? (
+                  {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
@@ -457,10 +451,6 @@ export const Layout = () => {
                     >
                       <X className="w-3.5 h-3.5 text-slate-400" />
                     </button>
-                  ) : (
-                    <span className="text-[10px] font-bold text-slate-300 border border-slate-200 rounded px-1.5 py-0.5">
-                      ⌘K
-                    </span>
                   )}
                 </div>
               </form>

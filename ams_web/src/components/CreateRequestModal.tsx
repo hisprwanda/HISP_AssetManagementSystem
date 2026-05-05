@@ -39,6 +39,7 @@ interface User {
   id: string;
   full_name?: string;
   role?: string;
+  phone_number?: string;
 }
 
 export const CreateRequestModal = ({
@@ -397,7 +398,19 @@ export const CreateRequestModal = ({
                       <select
                         required
                         value={requestedById}
-                        onChange={(e) => setRequestedById(e.target.value)}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          setRequestedById(selectedId);
+                          const selectedUser = users?.find(
+                            (u: User) => u.id === selectedId,
+                          );
+                          if (selectedUser?.phone_number) {
+                            setContactPhone(selectedUser.phone_number);
+                          }
+                          if (selectedUser?.full_name) {
+                            setContactName(selectedUser.full_name);
+                          }
+                        }}
                         disabled={!departmentId || loadingUsers}
                         className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium appearance-none disabled:opacity-50"
                       >

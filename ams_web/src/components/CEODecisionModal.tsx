@@ -30,7 +30,6 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
       />
 
       <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden border border-white">
-        {/* Header Section */}
         <div
           className={`relative px-8 py-8 overflow-hidden ${isApprove ? 'bg-orange-50' : 'bg-rose-50'}`}
         >
@@ -65,7 +64,6 @@ export const CEODecisionModal: React.FC<CEODecisionModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="p-7">
           <div className="mb-6">
             <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-3 px-1">

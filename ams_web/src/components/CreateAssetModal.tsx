@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Category } from '@/types/assets';
-
 interface User {
   id: string;
   full_name?: string;

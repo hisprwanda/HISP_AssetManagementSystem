@@ -14,10 +14,9 @@ import { AssignmentHistory } from './pages/AssignmentHistory';
 import { Penalties } from './pages/Penalties';
 import { ProcurementTrail } from './pages/ProcurementTrail';
 import { IncidentTrail } from './pages/IncidentTrail';
-
+import { FinancialTrail } from './pages/FinancialTrail';
 import { RequestTrail } from './pages/RequestTrail';
 import { AssetTrail } from './pages/AssetTrail';
-
 import { Profile } from './pages/Profile';
 import { Overview } from './pages/Overview';
 
@@ -41,7 +40,7 @@ function App() {
             <Route path="/asset-trail" element={<AssetTrail />} />
             <Route path="/procurement-trail" element={<ProcurementTrail />} />
             <Route path="/incident-trail" element={<IncidentTrail />} />
-
+            <Route path="/financial-trail" element={<FinancialTrail />} />
             <Route path="/request-trail" element={<RequestTrail />} />
             <Route path="/assignment-history" element={<AssignmentHistory />} />
             <Route path="/profile" element={<Profile />} />

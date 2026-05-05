@@ -66,28 +66,28 @@ export const ConfirmActionModal = ({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-[380px] bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
-        <div className="p-8 flex flex-col items-center text-center">
+      <div className="relative w-full max-w-[320px] bg-white rounded-[1.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
+        <div className="p-6 flex flex-col items-center text-center">
           <div
-            className={`w-14 h-14 rounded-2xl ${styles.iconBg} flex items-center justify-center mb-5 shadow-sm border border-white/50 backdrop-blur-xl`}
+            className={`w-10 h-10 rounded-xl ${styles.iconBg} flex items-center justify-center mb-4 shadow-sm border border-white/50 backdrop-blur-xl`}
           >
-            <Icon className={`w-7 h-7 ${styles.icon}`} />
+            <Icon className={`w-5 h-5 ${styles.icon}`} />
           </div>
 
-          <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase mb-2 px-4">
+          <h3 className="text-sm font-bold text-slate-900 tracking-tight uppercase mb-1.5 px-4">
             {title}
           </h3>
 
-          <p className="text-[11px] font-semibold text-slate-500 leading-relaxed max-w-[280px] px-2">
+          <p className="text-[10px] font-semibold text-slate-500 leading-relaxed max-w-[240px] px-2">
             {message}
           </p>
         </div>
 
-        <div className="px-8 pb-8 flex items-center gap-3">
+        <div className="px-6 pb-6 flex items-center gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+            className="flex-1 px-4 py-2.5 rounded-xl font-bold text-[9px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
           >
             {cancelText}
           </button>
@@ -98,12 +98,12 @@ export const ConfirmActionModal = ({
               onClose();
             }}
             disabled={isLoading}
-            className={`flex-[1.5] px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all transform active:scale-95 disabled:opacity-50 ${styles.button}`}
+            className={`flex-[1.2] px-4 py-2.5 rounded-xl font-bold text-[9px] uppercase tracking-widest transition-all transform active:scale-95 disabled:opacity-50 ${styles.button}`}
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
-                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing
+                <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Wait
               </span>
             ) : (
               confirmText

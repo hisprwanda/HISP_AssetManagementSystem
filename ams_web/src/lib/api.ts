@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios';
 export const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    'https://questionnaire-attending-dress-same.trycloudflare.com',
+    'https://sprint-bathroom-fewer-firewire.trycloudflare.com',
   headers: {
     'Content-Type': 'application/json',
   },

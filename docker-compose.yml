@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://questionnaire-attending-dress-same.trycloudflare.com
+      - VITE_API_URL=https://sprint-bathroom-fewer-firewire.trycloudflare.com
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped

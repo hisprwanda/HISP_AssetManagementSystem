@@ -692,7 +692,7 @@ export const HODOverview = () => {
             For transfer requests, discrepancy reporting, or off-boarding
             protocols, please contact the{' '}
             <span className="text-slate-600 font-bold">
-              Operations Directorate
+              Admin and Finance Directorate
             </span>{' '}
             immediately.
           </p>

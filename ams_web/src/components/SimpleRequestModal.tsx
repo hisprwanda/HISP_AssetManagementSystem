@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Plus,
+  Trash2,
+  ClipboardList,
   ShoppingCart,
   Package,
   FileText,
@@ -32,6 +35,14 @@ export const SimpleRequestModal = ({
   const { user: currentUser, isAdmin } = useAuth();
   const queryClient = useQueryClient();
 
+  const [items, setItems] = useState<
+    {
+      categoryId: string;
+      categoryName: string;
+      itemName: string;
+      quantity: number;
+    }[]
+  >([]);
   const [categoryId, setCategoryId] = useState('');
   const [itemName, setItemName] = useState('');
   const [isOther, setIsOther] = useState(false);
@@ -105,6 +116,7 @@ export const SimpleRequestModal = ({
   });
 
   const resetForm = () => {
+    setItems([]);
     setCategoryId('');
     setItemName('');
     setIsOther(false);
@@ -112,29 +124,59 @@ export const SimpleRequestModal = ({
     setError(null);
   };
 
+  const addItem = () => {
+    if (!categoryId || !itemName) {
+      setError('Please select a category and an item.');
+      return;
+    }
+    const categoryName =
+      categories?.find((c) => c.id === categoryId)?.name || '';
+    setItems([...items, { categoryId, categoryName, itemName, quantity: 1 }]);
+    setCategoryId('');
+    setItemName('');
+    setIsOther(false);
+    setError(null);
+  };
+
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryId || !itemName || !description) {
-      setError('Please fill in all fields.');
+    if (items.length === 0 && (!categoryId || !itemName)) {
+      setError('Please add at least one item.');
       return;
     }
 
-    const selectedCategory = categories?.find((c) => c.id === categoryId);
+    if (!description) {
+      setError('Please provide a description.');
+      return;
+    }
+
+    const finalItems = [...items];
+    if (categoryId && itemName) {
+      const categoryName =
+        categories?.find((c) => c.id === categoryId)?.name || '';
+      finalItems.push({ categoryId, categoryName, itemName, quantity: 1 });
+    }
 
     const payload = {
-      title: `Staff Request: ${itemName}`,
+      title:
+        `Staff Request: ${finalItems.map((i) => i.itemName).join(', ')}`.substring(
+          0,
+          100,
+        ),
       requested_by_id: currentUser?.id,
       department_id: currentUser?.department?.id,
       urgency: 'MEDIUM',
       status: isAdmin ? 'APPROVED' : 'PENDING',
-      items: [
-        {
-          name: itemName,
-          description: `Requested Category: ${selectedCategory?.name || 'Unknown'}`,
-          quantity: 1,
-          unit_price: 0,
-        },
-      ],
+      items: finalItems.map((item) => ({
+        name: item.itemName,
+        description: `Category: ${item.categoryName}`,
+        quantity: item.quantity,
+        unit_price: 0,
+      })),
       financials: {
         subtotal: 0,
         transport_fees: 0,
@@ -176,15 +218,52 @@ export const SimpleRequestModal = ({
                 <ShoppingCart className="w-6 h-6 text-[#ff8000]" />
               </div>
               <DialogTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
-                Request New Asset
+                Request Assets
               </DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
-                Submit a simplified request. your HOD will be notified to fill
-                in the official details.
+              <DialogDescription className="text-slate-500 font-medium text-sm">
+                Add one or more items to your request. Your HOD will be notified
+                to finalize the details.
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-5 py-4">
+            <form onSubmit={handleSubmit} className="space-y-6 py-4">
+              {items.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
+                    <ClipboardList className="w-3 h-3" /> Added Items (
+                    {items.length})
+                  </label>
+                  <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                    {items.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 bg-orange-50/50 border border-orange-100 rounded-2xl group hover:bg-orange-50 transition-colors animate-in fade-in slide-in-from-left-2 duration-300"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-white border border-orange-100 flex items-center justify-center text-orange-500 shadow-sm">
+                            <Package className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800 leading-tight">
+                              {item.itemName}
+                            </p>
+                            <p className="text-[9px] font-bold text-orange-400 uppercase tracking-widest">
+                              {item.categoryName}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(idx)}
+                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {error && (
                 <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-3 text-red-600 text-sm font-bold">
                   <AlertCircle className="w-5 h-5 shrink-0" />
@@ -206,7 +285,6 @@ export const SimpleRequestModal = ({
                       setIsOther(false);
                     }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all appearance-none"
-                    required
                   >
                     <option value="">Select a category...</option>
                     {categories?.map((cat) => (
@@ -251,7 +329,6 @@ export const SimpleRequestModal = ({
                                 }
                               }}
                               className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm font-bold text-slate-700 focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all appearance-none"
-                              required
                               disabled={!categoryId}
                             >
                               <option value="">
@@ -286,7 +363,6 @@ export const SimpleRequestModal = ({
                                   : 'Type the item name manually...'
                               }
                               className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm font-medium focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] outline-none transition-all"
-                              required
                             />
                           </div>
                         )}
@@ -294,6 +370,17 @@ export const SimpleRequestModal = ({
                     );
                   })()}
                 </div>
+
+                {categoryId && itemName && (
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="w-full mt-3 py-3 bg-white border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:border-[#ff8000] hover:text-[#ff8000] hover:bg-orange-50 transition-all flex items-center justify-center gap-2 group"
+                  >
+                    <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
+                    Add Another Item
+                  </button>
+                )}
               </div>
 
               <div className="space-y-2">

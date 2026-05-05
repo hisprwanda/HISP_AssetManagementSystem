@@ -130,6 +130,7 @@ export const Assets = () => {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [isBulkReceiptModalOpen, setIsBulkReceiptModalOpen] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState<number | null>(null);
   const itemsPerPage = 10;
 
   const { data: categories, isLoading: loadingCats } = useQuery<Category[]>({
@@ -277,13 +278,11 @@ export const Assets = () => {
     mutationFn: async () => await api.post('/assets/recalculate'),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
-      alert(
-        `Financials synchronized successfully! Updated ${data.data.updated} assets.`,
-      );
+      setSyncSuccess(data.data.updated);
+      setTimeout(() => setSyncSuccess(null), 5000);
     },
     onError: (err: unknown) => {
       console.error('Sync failed:', err);
-      alert('Failed to sync financials. Please check connection.');
     },
   });
 
@@ -1295,6 +1294,31 @@ export const Assets = () => {
                 ) : (
                   'Delete'
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {syncSuccess !== null && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none p-4">
+          <div className="bg-white/80 backdrop-blur-xl border border-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2rem] p-8 max-w-sm w-full pointer-events-auto animate-in fade-in zoom-in slide-in-from-bottom-8 duration-500 text-center">
+            <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-inner border border-orange-100">
+              <ClipboardCheck className="w-10 h-10 text-[#ff8000]" />
+            </div>
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight mb-2">
+              Sync Complete
+            </h2>
+            <p className="text-slate-500 font-medium leading-relaxed">
+              Financial data synchronized successfully for{' '}
+              <span className="text-[#ff8000] font-bold">{syncSuccess}</span>{' '}
+              assets.
+            </p>
+            <div className="mt-8">
+              <button
+                onClick={() => setSyncSuccess(null)}
+                className="w-full py-3.5 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-slate-200"
+              >
+                Continue
               </button>
             </div>
           </div>

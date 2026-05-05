@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   FileClock,
   Laptop,
+  Banknote,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useNavigate, useOutletContext } from 'react-router-dom';
@@ -122,6 +123,14 @@ export const AuditTrail = () => {
       icon: Laptop,
       link: '/asset-trail',
       type: 'assets',
+    },
+    {
+      title: 'Financial Records',
+      description:
+        'Comprehensive record of asset purchase costs, depreciation, and current market valuations.',
+      icon: Banknote,
+      link: '/financial-trail',
+      type: 'financials',
     },
   ];
 

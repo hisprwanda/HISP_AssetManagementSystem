@@ -60,10 +60,33 @@ export class AssetRequestsService {
     });
 
     const saved = await this.requestRepo.save(request);
-    const requester = await this.userRepo.findOne({ where: { id: userId } });
+    const requester = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['department'],
+    });
 
     if (requester) {
       const roleUpper = requester.role.toUpperCase();
+      const isAdmin =
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER';
+
+      if (!isAdmin) {
+        this.notificationsService
+          .notifyHODNewRequest({
+            requestId: saved.id,
+            requestTitle: saved.title,
+            requesterName: requester.full_name,
+            departmentId: requester.department?.id,
+          })
+          .catch((err) =>
+            console.error(
+              '[NotificationsService] Failed to send HOD request notification:',
+              err,
+            ),
+          );
+      }
+
       if (
         roleUpper === 'FINANCE OFFICER' ||
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
@@ -265,6 +288,20 @@ export class AssetRequestsService {
     const saved = await this.requestRepo.save(requests);
 
     if (user) {
+      this.notificationsService
+        .notifyHODNewRequest({
+          requestId: saved[0]?.id,
+          requestTitle: `Batch Request: ${saved.length} items`,
+          requesterName: user.full_name,
+          departmentId: user.department?.id,
+        })
+        .catch((err) =>
+          console.error(
+            '[NotificationsService] Failed to send HOD batch request notification:',
+            err,
+          ),
+        );
+
       const roleUpper = user.role.toUpperCase();
       if (
         roleUpper === 'FINANCE OFFICER' ||
