@@ -58,6 +58,7 @@ export const CreateRequestModal = ({
   const [requestedById, setRequestedById] = useState('');
   const [urgency, setUrgency] = useState('MEDIUM');
   const [description, setDescription] = useState('');
+  const [isSharedLocal, setIsSharedLocal] = useState(false);
 
   const [items, setItems] = useState<RequestLineItem[]>([
     {
@@ -88,6 +89,7 @@ export const CreateRequestModal = ({
         setRequestedById(baseRequest.requested_by?.id || '');
         setUrgency(baseRequest.urgency || 'MEDIUM');
         setDescription(baseRequest.description || '');
+        setIsSharedLocal(baseRequest.is_shared || false);
         setDestination(baseRequest.logistics?.destination || '');
         setContactName(baseRequest.logistics?.contact_name || '');
         setContactPhone(baseRequest.logistics?.contact_phone || '');
@@ -118,8 +120,10 @@ export const CreateRequestModal = ({
         setDepartmentId(user.department.id);
         if (requestMode === 'SHARED' || isAdmin || isCEO) {
           setRequestedById(user.id);
+          setIsSharedLocal(requestMode === 'SHARED');
         } else {
           setRequestedById('');
+          setIsSharedLocal(false);
         }
       } else if (!isHOD && !isAdmin && !isCEO) {
         setDepartmentId('');
@@ -258,7 +262,7 @@ export const CreateRequestModal = ({
           quantity: item.quantity,
           unit_price: item.unit_price,
         })),
-        is_shared: requestMode === 'SHARED',
+        is_shared: isSharedLocal,
         financials: {
           subtotal: itemsSubtotal,
           transport_fees: transportFees,
@@ -442,6 +446,36 @@ export const CreateRequestModal = ({
                       <div className="w-full pl-9 pr-4 py-2.5 bg-orange-50 border border-orange-200 rounded-xl text-[#ff8000] text-sm font-semibold truncate">
                         {user?.full_name} (HOD)
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {(isHOD || isAdmin || isCEO) && (
+                  <div className="space-y-1.5 group">
+                    <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Asset Usage Mode
+                    </label>
+                    <div className="flex gap-2 p-1 bg-slate-50 border border-slate-200 rounded-xl h-[42px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSharedLocal(false);
+                          if (requestMode === 'SHARED') setRequestedById('');
+                        }}
+                        className={`flex-1 flex items-center justify-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${!isSharedLocal ? 'bg-white text-slate-800 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        Individual
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSharedLocal(true);
+                          setRequestedById(user?.id || '');
+                        }}
+                        className={`flex-1 flex items-center justify-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${isSharedLocal ? 'bg-[#ff8000] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        Shared
+                      </button>
                     </div>
                   </div>
                 )}

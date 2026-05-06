@@ -395,6 +395,7 @@ export class AssetRequestsService {
       req.status = 'HOD_APPROVED';
       req.urgency = dto.urgency;
       if (dto.description) req.description = dto.description;
+      if (dto.is_shared !== undefined) req.is_shared = dto.is_shared;
       return req;
     });
 
@@ -434,6 +435,10 @@ export class AssetRequestsService {
           asset.assigned_to = request.requested_by;
           asset.assigned_to_user_id = request.requested_by.id;
           asset.status = 'IN_STOCK';
+          asset.is_shared = !!request.is_shared;
+          console.log(
+            `[Deploy] Asset ${asset.tag_id} is_shared set to: ${asset.is_shared} (from Request ${request.id})`,
+          );
           await this.assetRepo.save(asset);
           finalAssetIds.push(asset.id);
         }
@@ -507,7 +512,11 @@ export class AssetRequestsService {
           current_value: cost,
           assigned_to: requester,
           assigned_to_user_id: requester?.id,
+          is_shared: !!request.is_shared,
         });
+        console.log(
+          `[Deploy] New Asset ${newAsset.name} is_shared set to: ${!!request.is_shared}`,
+        );
 
         const savedAsset = await this.assetRepo.save(asset);
         console.log(

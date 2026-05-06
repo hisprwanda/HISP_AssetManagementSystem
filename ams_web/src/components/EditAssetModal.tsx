@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Laptop, Hash, Building2, Save, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Category, Asset } from '@/types/assets';
+import { useAuth } from '@/hooks/useAuth';
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ export const EditAssetModal = ({
   onClose,
   asset,
 }: EditAssetModalProps) => {
+  const { isHOD, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,6 +42,7 @@ export const EditAssetModal = ({
     purchase_cost: '',
     purchase_date: '',
     warranty_expiry: '',
+    is_shared: false,
   });
   useEffect(() => {
     if (asset && isOpen) {
@@ -60,6 +63,7 @@ export const EditAssetModal = ({
         warranty_expiry: asset.warranty_expiry
           ? new Date(asset.warranty_expiry).toISOString().split('T')[0]
           : '',
+        is_shared: asset.is_shared || false,
       });
     }
   }, [asset, isOpen]);
@@ -163,7 +167,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2 group">
@@ -176,7 +181,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, category_id: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={isHOD && !isAdmin}
                 >
                   <option value="" disabled>
                     Select...
@@ -197,8 +203,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  disabled={false}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-50"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   <option value="IN_STOCK">In Stock</option>
                   <option value="ASSIGNED">Assigned</option>
@@ -221,6 +227,68 @@ export const EditAssetModal = ({
                     </p>
                   )}
               </div>
+
+              <div className="space-y-2 group col-span-2">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                  Ownership Type
+                </label>
+                <div className="flex gap-4">
+                  <label
+                    className={`flex-1 flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${!formData.is_shared ? 'bg-orange-50 border-[#ff8000]' : 'bg-slate-50 border-slate-100 opacity-60'}`}
+                  >
+                    <input
+                      type="radio"
+                      className="hidden"
+                      checked={!formData.is_shared}
+                      onChange={() =>
+                        setFormData({ ...formData, is_shared: false })
+                      }
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${!formData.is_shared ? 'border-[#ff8000]' : 'border-slate-300'}`}
+                    >
+                      {!formData.is_shared && (
+                        <div className="w-2 h-2 bg-[#ff8000] rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-none">
+                        Individual Assignment
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium mt-1">
+                        Assigned to a specific staff member
+                      </p>
+                    </div>
+                  </label>
+                  <label
+                    className={`flex-1 flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${formData.is_shared ? 'bg-orange-50 border-[#ff8000]' : 'bg-slate-50 border-slate-100 opacity-60'}`}
+                  >
+                    <input
+                      type="radio"
+                      className="hidden"
+                      checked={formData.is_shared}
+                      onChange={() =>
+                        setFormData({ ...formData, is_shared: true })
+                      }
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.is_shared ? 'border-[#ff8000]' : 'border-slate-300'}`}
+                    >
+                      {formData.is_shared && (
+                        <div className="w-2 h-2 bg-[#ff8000] rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-none">
+                        Shared Resource
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium mt-1">
+                        Departmental pool (Office usage)
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -240,7 +308,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, serial_number: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2 group">
@@ -254,7 +323,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, tag_id: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -280,7 +350,8 @@ export const EditAssetModal = ({
                       assigned_to_user_id: '',
                     })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={isHOD && !isAdmin}
                 >
                   <option value="" disabled>
                     Select...
@@ -304,8 +375,12 @@ export const EditAssetModal = ({
                       assigned_to_user_id: e.target.value,
                     })
                   }
-                  disabled={!formData.department_id || loadingUsers}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-50"
+                  disabled={
+                    !formData.department_id ||
+                    loadingUsers ||
+                    (isHOD && !isAdmin)
+                  }
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   <option value="">
                     {loadingUsers ? 'Loading staff...' : '-- Unassigned --'}
@@ -328,7 +403,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="space-y-2 group col-span-2">
@@ -342,7 +418,8 @@ export const EditAssetModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, purchase_cost: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                  disabled={isHOD && !isAdmin}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
 

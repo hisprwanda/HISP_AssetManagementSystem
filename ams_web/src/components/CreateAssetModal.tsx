@@ -49,6 +49,7 @@ export const CreateAssetModal = ({
     purchase_cost: '',
     purchase_date: '',
     warranty_expiry: '',
+    is_shared: false,
   });
 
   const { data: categories } = useQuery({
@@ -114,6 +115,7 @@ export const CreateAssetModal = ({
         purchase_cost: '',
         purchase_date: '',
         warranty_expiry: '',
+        is_shared: false,
       });
     } catch (err: unknown) {
       const axiosError = err as {
@@ -213,9 +215,68 @@ export const CreateAssetModal = ({
                     <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     IN STOCK (PENDING VERIFICATION)
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1.5 font-bold italic">
-                    All new assets start in stock for digital verification.
-                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 group col-span-2">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000]">
+                  Ownership Type
+                </label>
+                <div className="flex gap-4">
+                  <label
+                    className={`flex-1 flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${!formData.is_shared ? 'bg-orange-50 border-[#ff8000]' : 'bg-slate-50 border-slate-100 opacity-60'}`}
+                  >
+                    <input
+                      type="radio"
+                      className="hidden"
+                      checked={!formData.is_shared}
+                      onChange={() =>
+                        setFormData({ ...formData, is_shared: false })
+                      }
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${!formData.is_shared ? 'border-[#ff8000]' : 'border-slate-300'}`}
+                    >
+                      {!formData.is_shared && (
+                        <div className="w-2 h-2 bg-[#ff8000] rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-none">
+                        Individual Assignment
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium mt-1">
+                        Assigned to a specific staff member
+                      </p>
+                    </div>
+                  </label>
+                  <label
+                    className={`flex-1 flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${formData.is_shared ? 'bg-orange-50 border-[#ff8000]' : 'bg-slate-50 border-slate-100 opacity-60'}`}
+                  >
+                    <input
+                      type="radio"
+                      className="hidden"
+                      checked={formData.is_shared}
+                      onChange={() =>
+                        setFormData({ ...formData, is_shared: true })
+                      }
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.is_shared ? 'border-[#ff8000]' : 'border-slate-300'}`}
+                    >
+                      {formData.is_shared && (
+                        <div className="w-2 h-2 bg-[#ff8000] rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-none">
+                        Shared Resource
+                      </p>
+                      <p className="text-[9px] text-slate-400 font-medium mt-1">
+                        Departmental pool (Office usage)
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>

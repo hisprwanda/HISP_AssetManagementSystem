@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Eye,
   FileCheck,
+  Edit3,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -19,6 +20,7 @@ import { Asset, AssetIncident, AssetAssignment } from '../types/assets';
 import { ViewAssetModal } from '../components/ViewAssetModal';
 import { AssetReceiptFormModal } from '../components/AssetReceiptFormModal';
 import { Pagination } from '../components/Pagination';
+import { EditAssetModal } from '../components/EditAssetModal';
 
 export const HODOverview = () => {
   const { user: currentUser } = useAuth();
@@ -30,6 +32,8 @@ export const HODOverview = () => {
   const [sharedPage, setSharedPage] = useState(1);
   const [staffPage, setStaffPage] = useState(1);
   const [incidentsPage, setIncidentsPage] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [assetForEdit, setAssetForEdit] = useState<Asset | null>(null);
   const itemsPerPage = 10;
 
   const { data: assets } = useQuery<Asset[]>({
@@ -65,7 +69,7 @@ export const HODOverview = () => {
     const staffAssets = departmentAssets.filter(
       (a) => a.assigned_to?.id !== currentUser?.id && !a.is_shared,
     );
-    const sharedAssets = departmentAssets.filter((a) => a.is_shared);
+    const sharedAssets = departmentAssets.filter((a) => !!a.is_shared);
 
     return {
       total: departmentAssets.length,
@@ -288,10 +292,17 @@ export const HODOverview = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-col gap-0.5">
-                            <code className="text-xs font-bold text-slate-600 tracking-tighter">
-                              {asset.tag_id || 'NON-TAGGED'}
-                            </code>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <code className="text-xs font-bold text-slate-600 tracking-tighter">
+                                {asset.tag_id || 'NON-TAGGED'}
+                              </code>
+                              {asset.is_shared && (
+                                <span className="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-[8px] font-bold rounded uppercase tracking-tighter border border-orange-200">
+                                  Shared
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[9px] font-medium text-slate-400">
                               {asset.serial_number}
                             </span>
@@ -327,12 +338,24 @@ export const HODOverview = () => {
                                 <FileCheck className="w-3.5 h-3.5" /> Sign Form
                               </button>
                             )}
-                          <button
-                            onClick={() => setSelectedAsset(asset)}
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setAssetForEdit(asset);
+                                setIsEditModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Edit Asset"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setSelectedAsset(asset)}
+                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -421,7 +444,7 @@ export const HODOverview = () => {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-xs font-medium text-slate-400 italic font-serif">
+                          <span className="text-xs font-medium text-slate-500">
                             {asset.location || 'HQ Stores'}
                           </span>
                         </td>
@@ -431,12 +454,24 @@ export const HODOverview = () => {
                           >
                             {asset.status.replace('_', ' ')}
                           </span>
-                          <button
-                            onClick={() => setSelectedAsset(asset)}
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setAssetForEdit(asset);
+                                setIsEditModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Edit Asset"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setSelectedAsset(asset)}
+                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -523,12 +558,24 @@ export const HODOverview = () => {
                               ? 'Signature Required'
                               : asset.status.replace('_', ' ')}
                           </div>
-                          <button
-                            onClick={() => setSelectedAsset(asset)}
-                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setAssetForEdit(asset);
+                                setIsEditModalOpen(true);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="Edit Asset"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setSelectedAsset(asset)}
+                              className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -739,6 +786,15 @@ export const HODOverview = () => {
         isOpen={!!signingAssignment}
         onClose={() => setSigningAssignment(null)}
         assignment={signingAssignment}
+      />
+
+      <EditAssetModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setAssetForEdit(null);
+        }}
+        asset={assetForEdit}
       />
     </div>
   );

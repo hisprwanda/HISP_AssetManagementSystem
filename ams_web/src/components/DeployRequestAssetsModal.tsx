@@ -233,7 +233,9 @@ export const DeployRequestAssetsModal: React.FC<
                         Asset Category
                       </p>
                       <p className="text-sm font-semibold text-slate-600">
-                        Standard Issue
+                        {request.is_shared
+                          ? 'Shared Departmental'
+                          : 'Individual Assignment'}
                       </p>
                     </div>
                   </div>

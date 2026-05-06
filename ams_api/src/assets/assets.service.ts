@@ -65,6 +65,7 @@ export class AssetsService {
         assigned_to: assigned_to_user_id
           ? ({ id: assigned_to_user_id } as User)
           : undefined,
+        is_shared: !!assetData.is_shared,
         status: assigned_to_user_id
           ? 'IN_STOCK'
           : assetData.status || 'IN_STOCK',
@@ -363,6 +364,12 @@ export class AssetsService {
       delete otherData.category_id;
       delete otherData.department_id;
       delete otherData.assigned_to_user_id;
+
+      if (updateAssetDto.is_shared !== undefined) {
+        asset.is_shared = !!updateAssetDto.is_shared;
+        delete otherData.is_shared;
+      }
+
       Object.assign(asset, otherData);
       const dep = this.calculateDepreciation(asset);
       asset.current_value = dep.current_value;

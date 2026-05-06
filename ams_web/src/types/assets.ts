@@ -142,6 +142,7 @@ export interface AssetRequest {
     contact_email?: string;
     contact_phone: string;
   };
+  is_shared?: boolean;
   created_at: string;
 }
 
