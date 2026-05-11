@@ -43,7 +43,7 @@ export const AssetReceiptFormModal = ({
     queryFn: async () => {
       if (!assignment?.form_number) return [];
       const res = await api.get(
-        `/asset-assignments/bulk/${assignment.form_number}`,
+        `/asset-assignments/bulk/details?formNumber=${assignment.form_number}`,
       );
       return res.data;
     },
@@ -125,12 +125,10 @@ export const AssetReceiptFormModal = ({
     mutationFn: async () => {
       if (!assignment) return;
       if (assignment.form_number) {
-        return await api.patch(
-          `/asset-assignments/bulk/${assignment.form_number}/sign-user`,
-          {
-            signatureName,
-          },
-        );
+        return await api.patch('/asset-assignments/bulk/sign-user', {
+          formNumber: assignment.form_number,
+          signatureName,
+        });
       }
       return await api.patch(`/asset-assignments/${assignment.id}/sign-user`, {
         signatureName,
@@ -145,8 +143,14 @@ export const AssetReceiptFormModal = ({
         setShowSuccess(false);
       }, 2000);
     },
-    onError: (err: { response?: { data?: { message?: string } } }) =>
-      setError(err.response?.data?.message || 'Failed to sign document.'),
+    onError: (err: unknown) => {
+      const axiosError = err as {
+        response?: { data?: { message?: string } };
+      };
+      console.error('--- SIGN_MUTATION_FAILED ---');
+      console.error(axiosError);
+      setError(axiosError.response?.data?.message || 'Internal Server Error');
+    },
   });
 
   const prepareMutation = useMutation({
@@ -167,10 +171,10 @@ export const AssetReceiptFormModal = ({
             tag_id: details.tag,
           })),
         };
-        return await api.patch(
-          `/asset-assignments/bulk/${assignment.form_number}/prepare`,
-          bulkPayload,
-        );
+        return await api.patch('/asset-assignments/bulk/prepare-update', {
+          formNumber: assignment.form_number,
+          ...bulkPayload,
+        });
       }
 
       const payload: Record<string, unknown> = {
@@ -202,14 +206,12 @@ export const AssetReceiptFormModal = ({
     mutationFn: async (approve: boolean) => {
       if (!assignment) return;
       if (assignment.form_number) {
-        return await api.patch(
-          `/asset-assignments/bulk/${assignment.form_number}/verify`,
-          {
-            approve,
-            remarks: !approve ? rejectionRemarks : undefined,
-            adminSignatureName: approve ? adminSignatureName : undefined,
-          },
-        );
+        return await api.patch('/asset-assignments/bulk/verify', {
+          formNumber: assignment.form_number,
+          approve,
+          remarks: !approve ? rejectionRemarks : undefined,
+          adminSignatureName: approve ? adminSignatureName : undefined,
+        });
       }
       return await api.patch(`/asset-assignments/${assignment.id}/verify`, {
         approve,

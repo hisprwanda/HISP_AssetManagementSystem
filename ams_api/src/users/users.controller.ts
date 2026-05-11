@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -17,6 +19,19 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('setup/status')
+  @ApiOperation({ summary: 'Check if system has been initialized' })
+  getSetupStatus() {
+    return this.usersService.getSetupStatus();
+  }
+
+  @Post('setup/initialize')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Initialize system admin on first run' })
+  initializeSystemAdmin(@Body() createAdminDto: CreateUserDto) {
+    return this.usersService.initializeSystemAdmin(createAdminDto);
+  }
 
   @Post('bulk')
   @ApiOperation({ summary: 'Bulk register users' })

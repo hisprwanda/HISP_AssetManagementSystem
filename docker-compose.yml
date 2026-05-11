@@ -47,7 +47,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://coding-irc-tops-cooler.trycloudflare.com
+      - VITE_API_URL=https://installations-reef-mba-international.trycloudflare.com
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped

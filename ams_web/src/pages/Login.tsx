@@ -14,7 +14,21 @@ export const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/overview');
+      return;
     }
+
+    const checkSetup = async () => {
+      try {
+        const res = await api.get('/users/setup/status');
+        if (!res.data.isSetupComplete) {
+          navigate('/setup', { replace: true });
+        }
+      } catch {
+        // If the check fails, stay on the login page
+      }
+    };
+
+    checkSetup();
   }, [isAuthenticated, navigate]);
 
   // const handleSubmit = (e: React.FormEvent) => {

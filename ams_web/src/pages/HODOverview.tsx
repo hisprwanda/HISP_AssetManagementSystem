@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
+import { Step } from 'react-joyride';
 import { useQuery } from '@tanstack/react-query';
+import { Tour } from '../components/Tour';
 import {
   Building2,
   Monitor,
@@ -161,6 +163,35 @@ export const HODOverview = () => {
     }
   };
 
+  const hodSteps: Step[] = [
+    {
+      target: '#hod-welcome',
+      content:
+        "Welcome to your HOD Portal. From here, you can manage all assets within your department's jurisdiction.",
+      skipBeacon: true,
+    },
+    {
+      target: '#hod-stats',
+      content:
+        'These tiles give you a quick count of your personal assets, shared resources, and items held by your staff.',
+    },
+    {
+      target: '#hod-personal',
+      content:
+        'This section tracks equipment assigned directly to you. Look out for "Sign Form" buttons to finalize handovers.',
+    },
+    {
+      target: '#hod-shared',
+      content:
+        'Manage items that belong to the whole department, such as printers or shared workstations.',
+    },
+    {
+      target: '#hod-staff',
+      content:
+        'Keep an eye on assets held by your team members to ensure proper accountability across your directorate.',
+    },
+  ];
+
   if (!stats) return null;
 
   return (
@@ -177,7 +208,10 @@ export const HODOverview = () => {
                 {currentUser?.department?.name || 'Unknown'} Directorate
               </div>
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight leading-none mb-2">
+            <h1
+              id="hod-welcome"
+              className="text-2xl font-semibold text-slate-900 tracking-tight leading-none mb-2"
+            >
               HOD Overview Dashboard
             </h1>
             <p className="text-slate-500 font-medium text-xs max-w-xl leading-relaxed">
@@ -187,7 +221,10 @@ export const HODOverview = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div
+          id="hod-stats"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
+        >
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
               <Box className="w-5 h-5 text-[#ff8000]" />
@@ -203,8 +240,8 @@ export const HODOverview = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-              <Users className="w-5 h-5 text-slate-500" />
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-slate-100">
+              <Users className="w-5 h-5 text-orange-500" />
             </div>
             <div>
               <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 leading-none mb-1">
@@ -246,7 +283,7 @@ export const HODOverview = () => {
         </div>
 
         <div className="space-y-12">
-          <div className="space-y-6">
+          <div id="hod-personal" className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-[#ff8000] rounded-full shadow-[0_0_10px_rgba(255,128,0,0.3)]" />
@@ -384,7 +421,7 @@ export const HODOverview = () => {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div id="hod-shared" className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-slate-400 rounded-full" />
@@ -488,7 +525,7 @@ export const HODOverview = () => {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div id="hod-staff" className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
                 <div className="w-1.5 h-6 bg-slate-200 rounded-full shadow-inner" />
@@ -796,6 +833,7 @@ export const HODOverview = () => {
         }}
         asset={assetForEdit}
       />
+      <Tour steps={hodSteps} tourKey="hod_dashboard" />
     </div>
   );
 };

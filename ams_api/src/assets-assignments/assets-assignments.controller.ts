@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AssetAssignmentsService } from './assets-assignments.service';
@@ -31,6 +32,57 @@ export class AssetAssignmentsController {
   constructor(
     private readonly assetAssignmentsService: AssetAssignmentsService,
   ) {}
+
+  @Post('bulk/prepare')
+  @ApiOperation({ summary: 'Admin preparation of bulk receipt form' })
+  prepareBulkByAdmin(@Body() dto: PrepareBulkAssignmentDto) {
+    return this.assetAssignmentsService.prepareBulkByAdmin(dto);
+  }
+
+  @Patch('bulk/prepare-update')
+  @ApiOperation({ summary: 'Admin preparation of bulk receipt form (Update)' })
+  updateBulkPrepareByAdmin(
+    @Body('formNumber') formNumber: string,
+    @Body() dto: UpdateBulkPrepareDto,
+  ) {
+    return this.assetAssignmentsService.updateBulkPrepareByAdmin(
+      formNumber,
+      dto,
+    );
+  }
+
+  @Patch('bulk/sign-user')
+  @ApiOperation({ summary: 'Record staff signature on bulk receipt form' })
+  signBulkByUser(
+    @Body('formNumber') formNumber: string,
+    @Body('signatureName') signatureName: string,
+  ) {
+    return this.assetAssignmentsService.signBulkByUser(
+      formNumber,
+      signatureName,
+    );
+  }
+
+  @Patch('bulk/verify')
+  @ApiOperation({ summary: 'Admin final approval/rejection of bulk receipt' })
+  verifyBulkByAdmin(
+    @Body('formNumber') formNumber: string,
+    @Body()
+    body: { approve: boolean; remarks?: string; adminSignatureName?: string },
+  ) {
+    return this.assetAssignmentsService.verifyBulkByAdmin(
+      formNumber,
+      body.approve,
+      body.remarks,
+      body.adminSignatureName,
+    );
+  }
+
+  @Get('bulk/details')
+  @ApiOperation({ summary: 'Get all assignments for a specific form number' })
+  findByFormNumber(@Query('formNumber') formNumber: string) {
+    return this.assetAssignmentsService.findByFormNumber(formNumber);
+  }
 
   @Post(':id/upload-scanned')
   @ApiOperation({ summary: 'Upload a scanned PDF paper form' })
@@ -125,56 +177,5 @@ export class AssetAssignmentsController {
       body.remarks,
       body.adminSignatureName,
     );
-  }
-
-  @Post('bulk/prepare')
-  @ApiOperation({ summary: 'Admin preparation of bulk receipt form' })
-  prepareBulkByAdmin(@Body() dto: PrepareBulkAssignmentDto) {
-    return this.assetAssignmentsService.prepareBulkByAdmin(dto);
-  }
-
-  @Patch('bulk/:formNumber/prepare')
-  @ApiOperation({ summary: 'Admin preparation of bulk receipt form (Update)' })
-  updateBulkPrepareByAdmin(
-    @Param('formNumber') formNumber: string,
-    @Body() dto: UpdateBulkPrepareDto,
-  ) {
-    return this.assetAssignmentsService.updateBulkPrepareByAdmin(
-      formNumber,
-      dto,
-    );
-  }
-
-  @Patch('bulk/:formNumber/sign-user')
-  @ApiOperation({ summary: 'Record staff signature on bulk receipt form' })
-  signBulkByUser(
-    @Param('formNumber') formNumber: string,
-    @Body('signatureName') signatureName: string,
-  ) {
-    return this.assetAssignmentsService.signBulkByUser(
-      formNumber,
-      signatureName,
-    );
-  }
-
-  @Patch('bulk/:formNumber/verify')
-  @ApiOperation({ summary: 'Admin final approval/rejection of bulk receipt' })
-  verifyBulkByAdmin(
-    @Param('formNumber') formNumber: string,
-    @Body()
-    body: { approve: boolean; remarks?: string; adminSignatureName?: string },
-  ) {
-    return this.assetAssignmentsService.verifyBulkByAdmin(
-      formNumber,
-      body.approve,
-      body.remarks,
-      body.adminSignatureName,
-    );
-  }
-
-  @Get('bulk/:formNumber')
-  @ApiOperation({ summary: 'Get all assignments for a specific form number' })
-  findByFormNumber(@Param('formNumber') formNumber: string) {
-    return this.assetAssignmentsService.findByFormNumber(formNumber);
   }
 }

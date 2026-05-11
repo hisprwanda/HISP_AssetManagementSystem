@@ -291,10 +291,10 @@ export class NotificationsService {
     if (!targetUser) return;
 
     const admins = allUsers.filter((u) => {
+      if (!u.role) return false;
       const roleUpper = u.role.toUpperCase();
       return (
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
-        roleUpper === 'FINANCE OFFICER' ||
         roleUpper === 'FINANCE OFFICER'
       );
     });
@@ -312,7 +312,7 @@ export class NotificationsService {
       case 'SIGNED_BY_USER':
         recipients = admins;
         title = 'Form Signed: Review Required';
-        message = `${targetUser.full_name} has signed the receipt form for "${assetName}". Please verify the signature and approve the assignment.`;
+        message = `${targetUser.full_name || 'A staff member'} has signed the receipt form for "${assetName}". Please verify the signature and approve the assignment.`;
         break;
       case 'REJECTED':
         recipients = [targetUser];

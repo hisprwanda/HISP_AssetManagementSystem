@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: string;
   department?: { id: string; name: string } | null;
+  phone_number?: string;
   is_temporary_password?: boolean;
 }
 

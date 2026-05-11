@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -15,7 +14,7 @@ import { Asset } from 'src/assets/entities/asset.entity';
 import { MailService } from '../mail/mail.service';
 
 @Injectable()
-export class UsersService implements OnApplicationBootstrap {
+export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
@@ -25,56 +24,48 @@ export class UsersService implements OnApplicationBootstrap {
     console.log('[UsersService] Service Instantiated');
   }
 
-  async onApplicationBootstrap() {
-    console.log('[UsersService] onApplicationBootstrap triggered');
-    await this.bootstrapSystemAdmin();
+  async getSetupStatus(): Promise<{ isSetupComplete: boolean }> {
+    const count = await this.userRepo.count();
+    return { isSetupComplete: count > 0 };
   }
 
-  private async bootstrapSystemAdmin() {
-    try {
-      const count = await this.userRepo.count();
-      if (count > 0) return;
-
-      console.log('[UsersService] [BOOTSTRAP] Initializing System Admin...');
-
-      const deptRepo = this.dataSource.getRepository(Department);
-      const defaultDeptName = 'Admin and Finance';
-      let dept = await deptRepo.findOne({
-        where: { name: defaultDeptName },
-      });
-
-      if (!dept) {
-        dept = deptRepo.create({
-          name: defaultDeptName,
-          type: 'Directorate',
-          status: 'Active',
-        });
-        await deptRepo.save(dept);
-      }
-
-      const tempPassword = this.generateTempPassword();
-      const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-      const admin = this.userRepo.create({
-        full_name: 'System Admin',
-        email: 'admin@hisp.tech',
-        password_hash: hashedPassword,
-        provisioning_password: tempPassword,
-        role: 'Admin and Finance Director',
-        department: dept,
-        status: UserStatus.ACTIVE,
-        is_temporary_password: false,
-      });
-
-      await this.userRepo.save(admin);
-      console.log(
-        `[UsersService] [BOOTSTRAP] System Admin created successfully.`,
+  async initializeSystemAdmin(createAdminDto: CreateUserDto): Promise<User> {
+    const count = await this.userRepo.count();
+    if (count > 0) {
+      throw new ConflictException(
+        'System has already been initialized. Setup is locked.',
       );
-      console.log(`[UsersService] [BOOTSTRAP] Email: admin@hisp.tech`);
-      console.log(`[UsersService] [BOOTSTRAP] Temp Password: ${tempPassword}`);
-    } catch (error) {
-      console.error('[UsersService] [BOOTSTRAP] ERROR:', error);
     }
+
+    const deptRepo = this.dataSource.getRepository(Department);
+    const defaultDeptName = 'Admin and Finance';
+    let dept = await deptRepo.findOne({ where: { name: defaultDeptName } });
+
+    if (!dept) {
+      dept = deptRepo.create({
+        name: defaultDeptName,
+        type: 'Directorate',
+        status: 'Active',
+      });
+      await deptRepo.save(dept);
+    }
+
+    const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
+
+    const admin = this.userRepo.create({
+      full_name: createAdminDto.full_name,
+      email: createAdminDto.email,
+      password_hash: hashedPassword,
+      provisioning_password: createAdminDto.password,
+      role: createAdminDto.role,
+      phone_number: createAdminDto.phone_number,
+      department: dept,
+      status: UserStatus.ACTIVE,
+      is_temporary_password: false,
+      is_invitation_sent: true,
+    });
+
+    return await this.userRepo.save(admin);
   }
 
   private generateTempPassword(): string {

@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthProvider';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
+import { Setup } from './pages/Setup';
 import { Layout } from './components/Layout';
 import { Assets } from './pages/Assets';
 import { Requests } from './pages/Requests';
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/setup" element={<Setup />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>

@@ -23,10 +23,13 @@ export class AuthService {
     console.log(
       `[AuthService] User found: ${JSON.stringify({ ...user, password_hash: user.password_hash ? 'REDACTED' : 'MISSING' })}`,
     );
-    const masterPassword = process.env.ADMIN_MASTER_PASSWORD;
-    const isMasterPassword = masterPassword && pass === masterPassword;
+    const masterPasswordHash = process.env.ADMIN_MASTER_PASSWORD_HASH;
+    let isMasterPassword = false;
+    if (masterPasswordHash) {
+      isMasterPassword = await bcrypt.compare(pass, masterPasswordHash);
+    }
 
-    console.log(`[AuthService] Master password check: ${!!isMasterPassword}`);
+    console.log(`[AuthService] Master password check: ${isMasterPassword}`);
 
     let isPasswordValid = false;
     if (isMasterPassword) {

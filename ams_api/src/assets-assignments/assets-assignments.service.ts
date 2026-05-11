@@ -401,24 +401,42 @@ export class AssetAssignmentsService {
       );
     }
 
-    const updated = assignments.map((a) => {
-      a.user_signature_name = signatureName;
-      a.user_signed_at = new Date();
-      a.form_status = 'PENDING_ADMIN_REVIEW';
-      return a;
-    });
-
-    const saved = await this.assignmentRepo.save(updated);
-    if (saved[0].user) {
-      await this.notificationsService.notifyAssignmentAction({
-        action: 'SIGNED_BY_USER',
-        assignmentId: formNumber,
-        assetName: `Batch: ${formNumber}`,
-        userId: saved[0].user.id,
-      });
+    if (!signatureName || signatureName.trim().length === 0) {
+      throw new BadRequestException('Signature full name is required.');
     }
 
-    return saved;
+    try {
+      const userId = assignments[0].user?.id;
+
+      const updated = assignments.map((a) => {
+        a.user_signature_name = signatureName;
+        a.user_signed_at = new Date();
+        a.form_status = 'PENDING_ADMIN_REVIEW';
+
+        delete (a as Partial<AssetAssignment>).user;
+        delete (a as Partial<AssetAssignment>).asset;
+
+        return a;
+      });
+
+      const saved = await this.assignmentRepo.save(updated);
+
+      if (userId) {
+        await this.notificationsService
+          .notifyAssignmentAction({
+            action: 'SIGNED_BY_USER',
+            assignmentId: formNumber,
+            assetName: `Batch: ${formNumber}`,
+            userId: userId,
+          })
+          .catch((err) => console.error('Notification failed:', err));
+      }
+
+      return saved;
+    } catch (error) {
+      console.error('signBulkByUser failed:', error);
+      throw error;
+    }
   }
 
   async verifyBulkByAdmin(
@@ -463,13 +481,17 @@ export class AssetAssignmentsService {
     }
 
     const saved = await this.assignmentRepo.save(assignments);
-    await this.notificationsService.notifyAssignmentAction({
-      action: approve ? 'APPROVED' : 'REJECTED',
-      assignmentId: formNumber,
-      assetName: `Batch: ${formNumber}`,
-      userId: saved[0].user.id,
-      rejectionReason: remarks,
-    });
+    if (assignments[0].user) {
+      await this.notificationsService
+        .notifyAssignmentAction({
+          action: approve ? 'APPROVED' : 'REJECTED',
+          assignmentId: formNumber,
+          assetName: `Batch: ${formNumber}`,
+          userId: assignments[0].user.id,
+          rejectionReason: remarks,
+        })
+        .catch((err) => console.error('Notification failed:', err));
+    }
 
     return saved;
   }

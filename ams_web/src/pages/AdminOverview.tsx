@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
+import { Step } from 'react-joyride';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Tour } from '../components/Tour';
 import {
   Banknote,
   ArrowRight,
@@ -13,7 +15,6 @@ import {
   Clock,
   FileText,
   ClipboardCheck,
-  Plus,
   RotateCcw,
   CheckCircle2,
   AlertTriangle,
@@ -49,6 +50,7 @@ export const AdminOverview = () => {
   } = useAuth();
   const [requestsPage, setRequestsPage] = useState(1);
   const [inventoryPage, setInventoryPage] = useState(1);
+  const [sharedInventoryPage, setSharedInventoryPage] = useState(1);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [finalizeAsset, setFinalizeAsset] = useState<Asset | null>(null);
   const [damageAsset, setDamageAsset] = useState<Asset | null>(null);
@@ -196,8 +198,8 @@ export const AdminOverview = () => {
             new Date(a.created_at || 0).getTime(),
         ),
       pendingReturns: assets.filter((a) => a.status === 'RETURN_PENDING'),
-      userAssets: assets.filter((a) => {
-        if (a.status === 'DISPOSED') return false;
+      personalAssets: assets.filter((a) => {
+        if (a.status === 'DISPOSED' || a.is_shared) return false;
         const isAssigned = a.assigned_to?.id === currentUser?.id;
         const hasActivePenalty = incidents?.some(
           (i) =>
@@ -207,6 +209,10 @@ export const AdminOverview = () => {
             !i.penalty_resolved_at,
         );
         return isAssigned || hasActivePenalty;
+      }),
+      sharedAssets: assets.filter((a) => {
+        if (a.status === 'DISPOSED' || !a.is_shared) return false;
+        return a.assigned_to?.id === currentUser?.id;
       }),
       personalPenalties: incidents?.filter(
         (i) =>
@@ -230,12 +236,46 @@ export const AdminOverview = () => {
   const paginatedUserAssets = useMemo(() => {
     if (!stats) return [];
     const start = (inventoryPage - 1) * itemsPerPage;
-    return stats.userAssets.slice(start, start + itemsPerPage);
+    return stats.personalAssets.slice(start, start + itemsPerPage);
   }, [stats, inventoryPage, itemsPerPage]);
 
   const inventoryTotalPages = Math.ceil(
-    (stats?.userAssets.length || 0) / itemsPerPage,
+    (stats?.personalAssets.length || 0) / itemsPerPage,
   );
+
+  const paginatedSharedAssets = useMemo(() => {
+    if (!stats) return [];
+    const start = (sharedInventoryPage - 1) * itemsPerPage;
+    return stats.sharedAssets.slice(start, start + itemsPerPage);
+  }, [stats, sharedInventoryPage, itemsPerPage]);
+
+  const sharedInventoryTotalPages = Math.ceil(
+    (stats?.sharedAssets.length || 0) / itemsPerPage,
+  );
+
+  const dashboardSteps: Step[] = [
+    {
+      target: '#dashboard-welcome',
+      content:
+        'Welcome to the HISP AMS Dashboard! This is your central hub for monitoring organizational assets.',
+      skipBeacon: true,
+    },
+    {
+      target: '#dashboard-stats',
+      content:
+        'These cards show real-time metrics on global valuation, inventory count, and pending requests.',
+    },
+    {
+      target: '#dashboard-actions',
+      content:
+        'Pay attention to this area! It highlights urgent tasks like pending requisitions or security incidents that need your review.',
+    },
+    {
+      target: '#dashboard-inventory',
+      content:
+        'Finally, this table tracks the specific equipment currently assigned to your account.',
+    },
+  ];
 
   if (!stats) return null;
 
@@ -253,7 +293,10 @@ export const AdminOverview = () => {
                   : 'Administrative Session'}
             </div>
           </div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none">
+          <h1
+            id="dashboard-welcome"
+            className="text-3xl font-semibold text-slate-900 tracking-tight leading-none"
+          >
             {isFinanceDirector
               ? 'Financial Oversight'
               : isFinanceOfficer
@@ -270,15 +313,19 @@ export const AdminOverview = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div
+        id="dashboard-stats"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5"
+      >
         {[
           {
             label: 'Global Valuation',
             value: (stats.totalValue || 0).toLocaleString(),
             unit: 'RWF',
             icon: Banknote,
-            color: 'orange',
-            trend: 'Active Inventory',
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
             path: '/assets',
           },
           {
@@ -286,8 +333,9 @@ export const AdminOverview = () => {
             value: stats.inventoryCount,
             unit: 'UNITS',
             icon: Monitor,
-            color: 'slate',
-            trend: `${(stats.missingAssets || 0) + (stats.brokenAssets || 0)} Incidents Detected`,
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
             path: '/assets',
           },
           {
@@ -295,8 +343,9 @@ export const AdminOverview = () => {
             value: stats.pendingRequestsCount,
             unit: 'OPEN',
             icon: Target,
-            color: 'slate',
-            trend: `${(stats.pendingRequestsValue || 0).toLocaleString()} Exposure`,
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
             path: '/requests',
           },
           {
@@ -304,47 +353,60 @@ export const AdminOverview = () => {
             value: stats.totalUsers,
             unit: 'PEOPLE',
             icon: Users,
-            color: 'slate',
-            trend: 'Access Stable',
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
             path: '/directorate',
+          },
+          {
+            label: 'Resource Erosion',
+            value: (stats.totalDepreciation || 0).toLocaleString(),
+            unit: 'RWF',
+            icon: TrendingDown,
+            color: 'text-orange-500',
+            bg: 'bg-orange-50',
+            border: 'border-orange-100',
+            path: '/assets',
           },
         ].map((stat, i) => (
           <Link
             key={i}
             to={stat.path}
-            className="bg-white border border-slate-100 rounded-lg p-3 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-all block"
+            className="bg-white border border-slate-100 rounded-xl p-3.5 shadow-sm group hover:border-[#ff8000] hover:shadow-md transition-colors block relative overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100 group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors">
-                <stat.icon className="w-3.5 h-3.5 text-[#ff8000] group-hover:text-white transition-colors" />
+            <div className="flex items-center justify-between mb-2.5">
+              <div
+                className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center border ${stat.border} group-hover:bg-[#ff8000] group-hover:border-[#ff8000] transition-colors`}
+              >
+                <stat.icon
+                  className={`w-4 h-4 ${stat.color} group-hover:text-white transition-colors`}
+                />
               </div>
-              <ArrowRight className="w-3 h-3 text-slate-200 group-hover:text-[#ff8000] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-3 h-3 text-slate-200 group-hover:text-[#ff8000] transition-all" />
             </div>
             <p className="text-[8px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 leading-none">
               {stat.label}
             </p>
             <div className="flex items-baseline gap-1 leading-none">
-              <h3 className="text-lg font-semibold text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors">
+              <h3 className="text-base font-semibold text-slate-900 tracking-tight group-hover:text-[#ff8000] transition-colors truncate">
                 {stat.value}
               </h3>
-              <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tight">
+              <span className="text-[8px] font-bold text-slate-400 uppercase">
                 {stat.unit}
               </span>
             </div>
-            <p
-              className={`mt-2 text-[8px] font-bold uppercase tracking-widest ${stat.color === 'slate' && stats.missingAssets + stats.brokenAssets > 0 && i === 0 ? 'text-[#ff8000]' : 'text-slate-400'}`}
-            >
-              {stat.trend}
-            </p>
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-9 space-y-6">
+        <div className="lg:col-span-12 space-y-6">
           {((stats.pendingRequestsCount || 0) > 0 ||
             (stats.brokenAssets || 0) > 0) && (
-            <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 relative overflow-hidden group">
+            <div
+              id="dashboard-actions"
+              className="bg-orange-50 border border-orange-100 rounded-xl p-5 relative overflow-hidden group"
+            >
               <div className="absolute top-0 right-0 w-32 h-full bg-[#ff8000]/5 blur-[60px] -translate-y-1/2 translate-x-1/2" />
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
@@ -619,16 +681,24 @@ export const AdminOverview = () => {
             }}
           />
 
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-8">
+          <div
+            id="dashboard-inventory"
+            className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-8"
+          >
             <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40 mb-6">
               <h3 className="text-[11px] font-semibold text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
                 <div className="w-1.5 h-4 bg-[#ff8000] rounded-full shadow-[0_0_12px_rgba(255,128,0,0.3)]" />
                 {isFinanceDirector
-                  ? "Director's Personal Inventory"
+                  ? "Director's Personal Equipment"
                   : isFinanceOfficer
-                    ? 'My Assigned Equipment'
-                    : 'My Asset Inventory'}
+                    ? 'My Personal Assigned Equipment'
+                    : 'Personal Asset Inventory'}
               </h3>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-orange-50 rounded-md border border-orange-100 text-[8px] font-semibold uppercase tracking-widest text-[#ff8000] shadow-sm">
+                  {stats.personalAssets.length} Executive Items
+                </span>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -652,7 +722,7 @@ export const AdminOverview = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/50">
-                  {stats.userAssets.length > 0 ? (
+                  {stats.personalAssets.length > 0 ? (
                     paginatedUserAssets.map((asset) => (
                       <tr
                         key={asset.id}
@@ -818,7 +888,100 @@ export const AdminOverview = () => {
               totalPages={inventoryTotalPages}
               onPageChange={setInventoryPage}
               itemsPerPage={itemsPerPage}
-              totalItems={stats.userAssets.length}
+              totalItems={stats.personalAssets.length}
+            />
+          </div>
+
+          <div
+            id="dashboard-shared-inventory"
+            className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mb-8"
+          >
+            <div className="p-4 border-b border-slate-100/50 flex items-center justify-between bg-white/40 mb-6">
+              <h3 className="text-[11px] font-semibold text-slate-900 tracking-tight flex items-center gap-3 uppercase tracking-widest">
+                <div className="w-1.5 h-4 bg-orange-300 rounded-full shadow-[0_0_12px_rgba(253,186,116,0.3)]" />
+                Shared Organizational Resources
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100 text-[8px] font-semibold uppercase tracking-widest text-slate-400 shadow-sm">
+                  {stats.sharedAssets.length} Departmental Items
+                </span>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100/50 bg-slate-50/50">
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Shared Asset
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Department
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100/50">
+                  {stats.sharedAssets.length > 0 ? (
+                    paginatedSharedAssets.map((asset) => (
+                      <tr key={asset.id} className="group hover:bg-white/60">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">
+                              <Box className="w-4 h-4 text-slate-400 group-hover:text-[#ff8000]" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-800 tracking-tight leading-none mb-1 group-hover:text-[#ff8000] transition-colors">
+                                {asset.name}
+                              </p>
+                              <code className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 transition-colors">
+                                {asset.tag_id || 'SHARED-RESOURCE'}
+                              </code>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                          {asset.department?.name || 'Central Office'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 border border-slate-200 text-[9px] font-semibold uppercase tracking-widest shadow-sm">
+                            <span className="w-1 h-1 rounded-full bg-slate-300" />
+                            {asset.status}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => setSelectedAsset(asset)}
+                            className="p-1.5 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="py-12 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-widest opacity-20"
+                      >
+                        No Shared Resources Found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={sharedInventoryPage}
+              totalPages={sharedInventoryTotalPages}
+              onPageChange={setSharedInventoryPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={stats.sharedAssets.length}
             />
           </div>
 
@@ -945,75 +1108,6 @@ export const AdminOverview = () => {
             isLoading={penaltyMutation.isPending}
           />
         </div>
-        <div className="lg:col-span-3 space-y-6">
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:border-[#ff8000] transition-all">
-            <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#ff8000]/5 rounded-full blur-[40px] translate-y-1/2 translate-x-1/2" />
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-white border border-orange-200 flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6 text-[#ff8000]" />
-              </div>
-              <h4 className="text-sm font-semibold uppercase tracking-widest mb-2 text-slate-900">
-                Strategic Expansion
-              </h4>
-              <p className="text-slate-500 text-[10px] font-medium leading-relaxed mb-6 px-4">
-                Assign new organizational assets directly into the localized
-                inventory system.
-              </p>
-              <button
-                onClick={() =>
-                  navigate('/assets', { state: { openModal: true } })
-                }
-                className="w-full py-3 bg-[#ff8000] hover:bg-[#e49f37] text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-all shadow-lg shadow-orange-100"
-              >
-                Assign Asset
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-6 px-1">
-              Financial Health
-            </h3>
-            <div className="space-y-6">
-              {stats.topCategories.map(([name, data]) => (
-                <div key={name} className="group/item">
-                  <div className="flex justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 group-hover/item:text-slate-900 transition-colors">
-                    <span>{name}</span>
-                    <span>
-                      {((data.value / (stats.totalValue || 1)) * 100).toFixed(
-                        0,
-                      )}
-                      %
-                    </span>
-                  </div>
-                  <div className="h-2 bg-slate-50 border border-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-orange-400 to-orange-300 group-hover/item:from-[#ff8000] group-hover/item:to-[#e49f37] transition-all duration-700"
-                      style={{
-                        width: `${(data.value / (stats.totalValue || 1)) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2 text-[8px] font-bold text-slate-400 uppercase tracking-[0.05em] leading-none">
-                    <span>{data.count} Units</span>
-                    <span>{data.value.toLocaleString()} RWF</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 pt-8 border-t border-slate-100 text-center">
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-[#ff8000] mb-1 leading-none">
-                Resource Erosion
-              </p>
-              <h4 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center justify-center gap-2">
-                <TrendingDown className="w-5 h-5 text-red-500" />{' '}
-                {stats.totalDepreciation.toLocaleString()}{' '}
-                <span className="text-[9px] text-slate-400">RWF</span>
-              </h4>
-            </div>
-          </div>
-        </div>
       </div>
       <ViewAssetModal
         isOpen={!!selectedAsset}
@@ -1026,6 +1120,7 @@ export const AdminOverview = () => {
         onClose={() => setSigningAssignment(null)}
         assignment={signingAssignment}
       />
+      <Tour steps={dashboardSteps} tourKey="admin_dashboard" />
     </div>
   );
 };
