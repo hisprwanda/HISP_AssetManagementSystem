@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios';
 export const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    'https://installations-reef-mba-international.trycloudflare.com',
+    'https://agency-badge-tba-pdas.trycloudflare.com',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -390,7 +390,9 @@ export const DisposalTrail = () => {
             </p>
             <h3 className="text-lg font-semibold text-slate-800 leading-none">
               {disposedAssets.length}{' '}
-              <span className="text-[9px] font-bold text-slate-400">UNITS</span>
+              <span className="text-[9px] font-semibold text-slate-400">
+                UNITS
+              </span>
             </h3>
           </div>
           <Archive className="w-5 h-5 text-slate-100" />
@@ -402,7 +404,9 @@ export const DisposalTrail = () => {
             </p>
             <h3 className="text-lg font-semibold text-[#ff8000] leading-none">
               {metrics.totalRecovery.toLocaleString()}{' '}
-              <span className="text-[9px] font-bold text-orange-200">RWF</span>
+              <span className="text-[9px] font-semibold text-orange-200">
+                RWF
+              </span>
             </h3>
           </div>
           <TrendingDown className="w-5 h-5 text-orange-50" />
@@ -414,7 +418,9 @@ export const DisposalTrail = () => {
             </p>
             <h3 className="text-lg font-semibold text-slate-800 leading-none">
               {metrics.avgLifecycle}{' '}
-              <span className="text-[9px] font-bold text-slate-400">YEARS</span>
+              <span className="text-[9px] font-semibold text-slate-400">
+                YEARS
+              </span>
             </h3>
           </div>
           <Calendar className="w-5 h-5 text-slate-100" />
@@ -422,54 +428,85 @@ export const DisposalTrail = () => {
       </div>
 
       {!selectedCategory ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-1">
-          {categoryMetrics.map((cat) => {
-            const CatIcon = getCategoryIcon(cat.name);
-            return (
-              <div
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat)}
-                className="group relative bg-white border border-slate-200 rounded-[1.5rem] p-5 shadow-sm hover:shadow-xl hover:border-[#ff8000]/30 transition-all cursor-pointer overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#ff8000]/5 rounded-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500" />
-
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all">
-                    <CatIcon className="w-6 h-6 text-[#ff8000]" />
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-slate-800 mb-1 group-hover:text-[#ff8000] transition-colors">
-                    {cat.name}
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                        Retired
-                      </span>
-                      <span className="text-sm font-semibold text-slate-700">
-                        {cat.count} Units
-                      </span>
-                    </div>
-                    <div className="w-px h-6 bg-slate-100" />
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                        Recovered
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">
-                        {cat.recovery.toLocaleString()} RWF
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-[#ff8000] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                      View Logs &rarr;
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex-1 flex flex-col">
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Asset Category
+                  </th>
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Retired Volume
+                  </th>
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Recovered Value
+                  </th>
+                  <th className="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {categoryMetrics.map((cat) => {
+                  const CatIcon = getCategoryIcon(cat.name);
+                  return (
+                    <tr
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat)}
+                      className="hover:bg-slate-50/50 group transition-colors cursor-pointer"
+                    >
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#ff8000] group-hover:bg-[#ff8000] group-hover:text-white transition-all shadow-inner">
+                            <CatIcon className="w-5 h-5" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-slate-800 tracking-tight group-hover:text-[#ff8000] transition-colors">
+                              {cat.name}
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                              Audit Hub Member
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-slate-700">
+                            {cat.count} Units
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                            Total Disposed
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-[#ff8000]">
+                            {cat.recovery.toLocaleString()} RWF
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                            Net Salvage Value
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100"
+                            title="View Logs"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         <>
@@ -513,7 +550,7 @@ export const DisposalTrail = () => {
                     <tr>
                       <td
                         colSpan={5}
-                        className="px-6 py-12 text-center text-slate-400 font-bold"
+                        className="px-6 py-12 text-center text-slate-400 font-semibold"
                       >
                         Retrieving records...
                       </td>
@@ -524,7 +561,7 @@ export const DisposalTrail = () => {
                       <td colSpan={5} className="px-6 py-20 text-center">
                         <div className="flex flex-col items-center">
                           <Archive className="w-12 h-12 text-slate-100 mb-4" />
-                          <p className="text-slate-400 font-bold">
+                          <p className="text-slate-400 font-semibold">
                             No {selectedCategory.name} disposal records found.
                           </p>
                         </div>
@@ -553,14 +590,14 @@ export const DisposalTrail = () => {
                               <RowIcon className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <span className="font-bold text-slate-800 truncate">
+                              <span className="font-semibold text-slate-800 truncate">
                                 {asset.name}
                               </span>
                               <div className="flex items-center gap-2 mt-0.5">
                                 <span className="text-[9px] font-semibold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded leading-none">
                                   {asset.tag_id || 'NO TAG'}
                                 </span>
-                                <span className="text-[9px] font-bold text-slate-400 truncate max-w-[120px]">
+                                <span className="text-[9px] font-semibold text-slate-400 truncate max-w-[120px]">
                                   {asset.serial_number || 'NO SN'}
                                 </span>
                               </div>
@@ -569,12 +606,12 @@ export const DisposalTrail = () => {
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
                               <FileText className="w-3 h-3 text-slate-300" />
                               {asset.disposal_reason || 'End of life'}
                             </span>
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-orange-400 bg-orange-50 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-semibold text-orange-400 bg-orange-50 px-1.5 py-0.5 rounded">
                                 {lifecycleYears} yrs
                               </span>
                               <span className="text-[9px] text-slate-400 font-medium italic">
@@ -598,19 +635,19 @@ export const DisposalTrail = () => {
                                 ).toLocaleString()}{' '}
                                 RWF
                               </span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">
+                              <span className="text-[9px] font-semibold text-slate-400 uppercase">
                                 Recovery
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 opacity-60">
                               <Box className="w-3 h-3 text-slate-400" />
-                              <span className="text-[10px] font-bold text-slate-500">
+                              <span className="text-[10px] font-semibold text-slate-500">
                                 {Number(
                                   asset.purchase_cost || 0,
                                 ).toLocaleString()}{' '}
                                 RWF
                               </span>
-                              <span className="text-[9px] font-bold text-slate-300 uppercase">
+                              <span className="text-[9px] font-semibold text-slate-300 uppercase">
                                 Input Cost
                               </span>
                             </div>
@@ -625,7 +662,7 @@ export const DisposalTrail = () => {
                             </span>
                             {getResolvedCustodian(asset) &&
                               asset.department && (
-                                <span className="text-[10px] font-bold text-[#ff8000] flex items-center gap-1 mt-0.5">
+                                <span className="text-[10px] font-semibold text-[#ff8000] flex items-center gap-1 mt-0.5">
                                   {asset.department.name}
                                 </span>
                               )}

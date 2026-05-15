@@ -586,14 +586,14 @@ export const AssetTrail = () => {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+                  className="bg-transparent border-none text-[10px] font-semibold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
                 />
                 <span className="text-slate-300 mx-0.5">—</span>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+                  className="bg-transparent border-none text-[10px] font-semibold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
                 />
               </div>
             </div>
@@ -730,7 +730,7 @@ export const AssetTrail = () => {
                             <Icon className="w-5 h-5" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-slate-800 tracking-tight">
+                            <span className="text-sm font-semibold text-slate-800 tracking-tight">
                               {asset.name}
                             </span>
                             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
@@ -745,7 +745,7 @@ export const AssetTrail = () => {
                             <Tag className="w-3.5 h-3.5 text-orange-400" />{' '}
                             {asset.tag_id || 'N/A'}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-300 flex items-center gap-2 uppercase tracking-widest">
+                          <span className="text-[9px] font-semibold text-slate-300 flex items-center gap-2 uppercase tracking-widest">
                             <ShieldCheck className="w-3.5 h-3.5" />{' '}
                             {asset.serial_number}
                           </span>
@@ -753,7 +753,7 @@ export const AssetTrail = () => {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex flex-col gap-2">
-                          <span className="text-[10px] font-bold text-slate-700 flex items-center gap-2 uppercase leading-none">
+                          <span className="text-[10px] font-semibold text-slate-700 flex items-center gap-2 uppercase leading-none">
                             <UserIcon className="w-3.5 h-3.5 text-slate-300" />{' '}
                             {asset.assigned_to?.full_name || 'IN STORE'}
                           </span>
@@ -789,7 +789,7 @@ export const AssetTrail = () => {
                         </span>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                           <Calendar className="w-3.5 h-3.5 text-slate-300" />
                           {asset.purchase_date
                             ? new Date(asset.purchase_date).toLocaleDateString()

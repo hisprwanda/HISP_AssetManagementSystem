@@ -294,14 +294,14 @@ export const RequestTrail = () => {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+              className="bg-transparent border-none text-[10px] font-semibold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
             />
             <span className="text-slate-300 mx-1">—</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent border-none text-[10px] font-bold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
+              className="bg-transparent border-none text-[10px] font-semibold text-slate-600 focus:ring-0 outline-none p-0 cursor-pointer"
             />
           </div>
           {(startDate || endDate) && (
@@ -467,7 +467,7 @@ export const RequestTrail = () => {
                         <span className="text-sm font-semibold text-slate-800">
                           {req.title}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1">
+                        <span className="text-[10px] font-semibold text-slate-400 mt-1 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />{' '}
                           {new Date(req.created_at).toLocaleDateString()}
                         </span>
@@ -482,7 +482,7 @@ export const RequestTrail = () => {
                           <span className="text-xs font-semibold text-slate-700">
                             {req.requested_by?.full_name}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                             {req.department?.name}
                           </span>
                         </div>

@@ -34,7 +34,7 @@ export const FinancialTrail = () => {
   const [endDate, setEndDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showExportConfirm, setShowExportConfirm] = useState(false);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
 
   const { setHeaderTitle } = useOutletContext<{
     setHeaderTitle: (title: string) => void;
@@ -97,7 +97,7 @@ export const FinancialTrail = () => {
   const paginatedAssets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredAssets.slice(start, start + itemsPerPage);
-  }, [filteredAssets, currentPage]);
+  }, [filteredAssets, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
 
@@ -215,7 +215,7 @@ export const FinancialTrail = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-10">
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-6">
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/audit-trail')}
@@ -343,8 +343,8 @@ export const FinancialTrail = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden flex-1 flex flex-col">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[500px]">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -383,7 +383,7 @@ export const FinancialTrail = () => {
                       key={asset.id}
                       className="hover:bg-slate-50/50 group transition-colors"
                     >
-                      <td className="px-8 py-6">
+                      <td className="px-8 py-7">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-white transition-colors border border-transparent group-hover:border-slate-100">
                             <Icon className="w-5 h-5" />
@@ -398,7 +398,7 @@ export const FinancialTrail = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-8 py-7">
                         <div className="flex items-center gap-2">
                           <Building2 className="w-3.5 h-3.5 text-slate-300" />
                           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">
@@ -406,7 +406,7 @@ export const FinancialTrail = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-8 py-7">
                         <div className="flex flex-col">
                           <span className="text-[11px] font-bold text-slate-700">
                             {(asset.purchase_cost || 0).toLocaleString()} RWF
@@ -421,7 +421,7 @@ export const FinancialTrail = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      <td className="px-8 py-7">
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
                             <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
@@ -450,7 +450,7 @@ export const FinancialTrail = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-8 py-6 text-right">
+                      <td className="px-8 py-7 text-right">
                         <div className="flex flex-col items-end">
                           <span className="text-sm font-bold text-emerald-600 tracking-tight">
                             {(asset.current_value || 0).toLocaleString()} RWF

@@ -663,7 +663,7 @@ export const SystemTrail = () => {
                           <span className="font-semibold text-slate-800 text-sm">
                             {user.full_name}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1.5 mt-0.5">
                             <Mail className="w-3 h-3" /> {user.email}
                           </span>
                           <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 mt-0.5 uppercase tracking-tight">
@@ -676,7 +676,7 @@ export const SystemTrail = () => {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="text-[11px] font-bold text-slate-500 tracking-tight">
+                      <span className="text-[11px] font-semibold text-slate-500 tracking-tight">
                         {user.phone_number || 'N/A'}
                       </span>
                     </td>
@@ -755,7 +755,7 @@ export const SystemTrail = () => {
               <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">
                 Provisioning Task
               </h3>
-              <p className="text-[11px] font-bold text-slate-700 leading-tight">
+              <p className="text-[11px] font-semibold text-slate-700 leading-tight">
                 <span
                   className={
                     uploadResult.failed > 0

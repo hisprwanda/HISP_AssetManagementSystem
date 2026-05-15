@@ -405,7 +405,7 @@ export const ProcurementTrail = () => {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-8 py-12 text-center text-slate-400 font-bold"
+                    className="px-8 py-12 text-center text-slate-400 font-semibold"
                   >
                     Loading procurement logs...
                   </td>
@@ -414,7 +414,7 @@ export const ProcurementTrail = () => {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-8 py-12 text-center text-slate-400 font-bold"
+                    className="px-8 py-12 text-center text-slate-400 font-semibold"
                   >
                     No purchase orders found in the archive.
                   </td>
@@ -430,7 +430,7 @@ export const ProcurementTrail = () => {
                         <span className="text-sm font-semibold text-slate-800">
                           {req.purchase_order?.po_number}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 mt-1">
+                        <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mt-1">
                           <Calendar className="w-3 h-3" />
                           {req.purchase_order?.order_date}
                         </span>
@@ -441,14 +441,14 @@ export const ProcurementTrail = () => {
                         <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100">
                           <Building2 className="w-4 h-4 text-[#ff8000]" />
                         </div>
-                        <span className="text-xs font-bold text-slate-600 truncate max-w-[180px]">
+                        <span className="text-xs font-semibold text-slate-600 truncate max-w-[180px]">
                           {req.purchase_order?.vendor_details?.split('\n')[0]}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-700">
+                        <span className="text-xs font-semibold text-slate-700">
                           {req.title}
                         </span>
                         <span className="text-[10px] font-medium text-slate-400 italic">

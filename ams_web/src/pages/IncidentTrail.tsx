@@ -506,7 +506,7 @@ export const IncidentTrail = () => {
                         <span className="text-xs font-semibold text-slate-700">
                           {new Date(inc.reported_at).toLocaleDateString()}
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-tighter mt-1">
                           {new Date(inc.reported_at).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -538,7 +538,7 @@ export const IncidentTrail = () => {
                           <span className="text-xs font-semibold text-slate-800">
                             {inc.asset?.name}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
                             {inc.asset?.tag_id || inc.asset?.serial_number}
                           </span>
                         </div>
@@ -555,7 +555,7 @@ export const IncidentTrail = () => {
                         >
                           {inc.incident_type}
                         </span>
-                        <p className="text-[10px] font-bold text-slate-500 line-clamp-2 italic leading-relaxed">
+                        <p className="text-[10px] font-semibold text-slate-500 line-clamp-2 italic leading-relaxed">
                           "{inc.explanation}"
                         </p>
                       </div>
@@ -608,7 +608,7 @@ export const IncidentTrail = () => {
                               ? 'Resolved'
                               : 'Unresolved'}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-700">
+                          <span className="text-[10px] font-semibold text-slate-700">
                             {Number(inc.penalty_amount).toLocaleString()} RWF
                           </span>
                         </div>
@@ -682,7 +682,7 @@ export const IncidentTrail = () => {
               <DialogTitle className="text-xl font-semibold text-slate-800 tracking-tight">
                 Photo Evidence Viewer
               </DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">
+              <DialogDescription className="text-slate-400 font-semibold text-[10px] uppercase tracking-widest mt-1">
                 Official Incident Photographic Proof
               </DialogDescription>
             </div>

@@ -22,6 +22,10 @@ class AssetUpdateDto {
 }
 
 export class UpdateBulkPrepareDto {
+  @ApiPropertyOptional({ description: 'The form number to update' })
+  @IsString()
+  formNumber: string;
+
   @ApiPropertyOptional({ description: 'Condition of the assets at handover' })
   @IsString()
   @IsOptional()

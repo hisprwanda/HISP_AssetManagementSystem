@@ -601,23 +601,39 @@ export class AssetsService {
       });
 
       if (!asset) throw new NotFoundException('Asset not found');
-      const previousAssigneeId = asset.assigned_to?.id;
+
+      if (asset.status !== 'RETURN_PENDING') {
+        throw new BadRequestException(
+          `Asset is not in a returnable state. Current status: ${asset.status}`,
+        );
+      }
+
+      const previousAssignee = asset.assigned_to;
+      const previousAssigneeId = previousAssignee?.id;
 
       if (params.isDamaged) {
         asset.status = 'BROKEN';
+
+        if (!previousAssigneeId) {
+          throw new BadRequestException(
+            'Cannot report damage: asset has no assigned user to attribute the incident to.',
+          );
+        }
+
         const incident = queryRunner.manager.create(AssetIncident, {
           asset: { id: asset.id },
           reported_by: { id: previousAssigneeId },
           incident_type: 'BROKEN',
           location:
             params.location || asset.location || 'Administration Office',
-          explanation: `[AUTO-GENERATED ON RETURN] Asset returned in bad condition. Remarks: ${params.remarks || 'No details provided.'}`,
-          investigation_status: 'INVESTIGATING',
+          issue_description: `[AUTO-GENERATED ON RETURN] Asset returned in damaged condition. Remarks: ${params.remarks || 'No details provided.'}`,
+          status: 'PENDING',
         });
         await queryRunner.manager.save(incident);
       } else {
         asset.status = 'IN_STOCK';
       }
+
       const activeAssignment = asset.assignment_history?.find(
         (a) => a.returned_at === null,
       );
@@ -626,6 +642,7 @@ export class AssetsService {
         activeAssignment.condition_on_assign = `${activeAssignment.condition_on_assign || ''} [RETURNED: ${params.isDamaged ? 'DAMAGED' : 'GOOD'}]`;
         await queryRunner.manager.save(activeAssignment);
       }
+
       asset.assigned_to = null;
       asset.assigned_to_user_id = null;
 

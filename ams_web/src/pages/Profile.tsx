@@ -98,7 +98,7 @@ export const Profile = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="relative overflow-hidden bg-white border border-slate-100 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)]">
+      <div className="relative overflow-hidden bg-white border border-slate-200 rounded-3xl shadow-sm">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-br from-[#ff8000]/5 via-transparent to-transparent" />
           <div
@@ -114,7 +114,7 @@ export const Profile = () => {
         <div className="relative z-10 p-8 md:p-10">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
             <div className="relative shrink-0">
-              <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-tr from-[#ff8000] to-[#ffb366] flex items-center justify-center text-white text-4xl font-bold shadow-xl shadow-orange-100 border-4 border-white">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#ff8000] to-[#ffb366] flex items-center justify-center text-white text-4xl font-bold shadow-lg border-4 border-white">
                 {user.full_name?.charAt(0)}
               </div>
               <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-emerald-500 border-4 border-white flex items-center justify-center shadow-lg">
@@ -127,13 +127,13 @@ export const Profile = () => {
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight truncate">
                   {user.full_name}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-[10px] font-bold uppercase tracking-widest border border-orange-200">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-700 rounded-lg text-[10px] font-semibold uppercase tracking-widest border border-orange-200">
                   <ShieldCheck className="w-3 h-3" /> Verified
                 </span>
               </div>
 
               <div className="mb-6">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-100/50 text-orange-800 border border-orange-200/50 rounded-full text-[11px] font-bold tracking-wide uppercase">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 text-orange-800 border border-orange-200/50 rounded-lg text-[11px] font-semibold tracking-wide uppercase">
                   {displayRole}
                 </span>
               </div>
@@ -181,18 +181,18 @@ export const Profile = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div className="px-10 py-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
           <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#ff8000] rounded-full" />
               Personal Asset Portfolio
             </h2>
-            <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-400 mt-1 ml-4.5">
+            <p className="text-[10px] uppercase font-semibold tracking-[0.2em] text-slate-400 mt-1 ml-4.5">
               Assigned Hardware Inventory
             </p>
           </div>
-          <div className="px-4 py-1.5 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-600">
+          <div className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600">
             {myAssets.length} {myAssets.length === 1 ? 'Item' : 'Items'}
           </div>
         </div>
@@ -201,16 +201,16 @@ export const Profile = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-50">
-                <th className="px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <th className="px-10 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Asset Detail
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Category
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Tag ID
                 </th>
-                <th className="px-10 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 text-right">
+                <th className="px-10 py-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 text-right">
                   Condition
                 </th>
               </tr>
@@ -228,10 +228,10 @@ export const Profile = () => {
                           <Laptop className="w-5 h-5 text-slate-400 group-hover:text-[#ff8000] transition-colors" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800 tracking-tight leading-none mb-1.5 group-hover:text-[#ff8000] transition-colors">
+                          <p className="text-sm font-semibold text-slate-800 tracking-tight leading-none mb-1.5 group-hover:text-[#ff8000] transition-colors">
                             {asset.name}
                           </p>
-                          <p className="text-[10px] font-bold text-orange-400 uppercase tracking-tight">
+                          <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-tight">
                             Secured Assignment
                           </p>
                         </div>
@@ -248,7 +248,7 @@ export const Profile = () => {
                       </code>
                     </td>
                     <td className="px-10 py-5 text-right">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-orange-50 text-orange-600 border border-orange-100">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-widest bg-orange-50 text-orange-600 border border-orange-100">
                         <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                         {asset.status.replace('_', ' ')}
                       </div>
@@ -274,7 +274,7 @@ export const Profile = () => {
 
       {isPasswordModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>

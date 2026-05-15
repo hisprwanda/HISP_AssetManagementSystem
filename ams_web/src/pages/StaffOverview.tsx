@@ -234,7 +234,7 @@ export const StaffOverview = () => {
                                       setResolutionNotice(
                                         incident.penalty_resolved_at
                                           ? 'This penalty has been fully settled and cleared from your record.'
-                                          : 'Please contact the Directorate of Finance and Administration (DFA) regarding penalty resolution and asset clearance.',
+                                          : 'Please contact the Admin and Finance Directorate regarding penalty resolution and asset clearance.',
                                       )
                                     }
                                     className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-500 transition-colors shadow-sm"
@@ -454,23 +454,32 @@ export const StaffOverview = () => {
       </div>
 
       {resolutionNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-orange-950/20 backdrop-blur-md">
-          <div className="bg-white rounded-[2rem] p-8 shadow-2xl max-w-sm w-full border border-white/20 relative flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-inner">
-              <ShieldAlert className="w-8 h-8 text-[#ff8000]" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full border border-slate-100 relative animate-in zoom-in-95 duration-200">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center shrink-0 border border-orange-100">
+                <ShieldAlert
+                  className="w-5 h-5 text-orange-500"
+                  strokeWidth={1.5}
+                />
+              </div>
+              <div className="flex-1 min-w-0 pt-1">
+                <h4 className="text-sm font-semibold text-slate-800 tracking-tight mb-1">
+                  Penalty Resolution
+                </h4>
+                <p className="text-xs font-medium text-slate-500 leading-relaxed italic">
+                  {resolutionNotice}
+                </p>
+              </div>
             </div>
-            <h4 className="text-xl font-semibold text-slate-900 tracking-tight mb-3">
-              Penalty Resolution
-            </h4>
-            <p className="text-sm font-semibold text-slate-500 leading-relaxed mb-8 italic">
-              {resolutionNotice}
-            </p>
-            <button
-              onClick={() => setResolutionNotice(null)}
-              className="w-full py-4 bg-orange-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-orange-700 shadow-xl"
-            >
-              Acknowledged
-            </button>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setResolutionNotice(null)}
+                className="px-6 py-2.5 bg-orange-500 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-orange-600 shadow-sm transition-all active:scale-95"
+              >
+                Acknowledged
+              </button>
+            </div>
           </div>
         </div>
       )}
