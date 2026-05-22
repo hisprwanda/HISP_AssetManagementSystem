@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -19,6 +20,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
     private readonly mailService: MailService,
   ) {
     console.log('[UsersService] Service Instantiated');
@@ -319,9 +321,12 @@ export class UsersService {
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ||
+      'http://localhost:5173';
     const subject = `Welcome to HISP Asset Management System`;
-    const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
-    const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+    const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
+    const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
 
     await this.mailService.sendMail(user.email, subject, text, html);
 
@@ -343,9 +348,12 @@ export class UsersService {
 
     for (const user of users) {
       try {
+        const frontendUrl =
+          this.configService.get<string>('FRONTEND_URL') ||
+          'http://localhost:5173';
         const subject = `Welcome to HISP Asset Management System`;
-        const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: http://localhost:5173/login\n\nPlease change your password after logging in.`;
-        const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="http://localhost:5173/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+        const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
+        const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
 
         await this.mailService.sendMail(user.email, subject, text, html);
 
