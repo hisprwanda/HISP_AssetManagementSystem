@@ -42,7 +42,7 @@ services:
     depends_on:
       - api
     environment:
-      - VITE_API_URL=http://161.97.64.152:3000
+      - VITE_API_URL=https://admin.hisp.tech/api
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped
