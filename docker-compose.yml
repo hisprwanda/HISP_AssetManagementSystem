@@ -24,7 +24,7 @@ services:
     ports:
       - "0.0.0.0:3000:3000"
     env_file:
-      - .env
+      - ./ams_api/.env
     restart: unless-stopped
     depends_on:
       - database
