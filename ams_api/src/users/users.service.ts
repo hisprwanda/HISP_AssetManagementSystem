@@ -325,8 +325,8 @@ export class UsersService {
       this.configService.get<string>('FRONTEND_URL') ||
       'http://localhost:5173';
     const subject = `Welcome to HISP Asset Management System`;
-    const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
-    const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+    const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using your work email and the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
+    const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using your work email and the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
 
     await this.mailService.sendMail(user.email, subject, text, html);
 
@@ -352,8 +352,8 @@ export class UsersService {
           this.configService.get<string>('FRONTEND_URL') ||
           'http://localhost:5173';
         const subject = `Welcome to HISP Asset Management System`;
-        const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
-        const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
+        const text = `Hello ${user.full_name},\n\nYour account has been created on the HISP Rwanda Asset Management System platform. Please log in using your work email and the temporary password below:\n\nTemporary Password: ${user.provisioning_password}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password after logging in.`;
+        const html = `<p>Hello ${user.full_name},</p><p>Your account has been created on the HISP Rwanda Asset Management System platform. Please log in using your work email and the temporary password below:</p><p><strong>Temporary Password:</strong> ${user.provisioning_password}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password after logging in.</p>`;
 
         await this.mailService.sendMail(user.email, subject, text, html);
 

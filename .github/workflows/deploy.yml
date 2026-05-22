@@ -1,0 +1,40 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          set -e
+          cd ~/HISP_AssetManagementSystem
+
+          echo ">>> Pulling latest code..."
+          git fetch origin master
+          git reset --hard origin/master
+
+          echo ">>> Restarting API container..."
+          docker compose up -d --build api
+
+          echo ">>> Building frontend..."
+          cd ams_web
+          npm install
+          VITE_API_URL=https://admin.hisp.tech/api npm run build
+
+          echo ">>> Deploying frontend..."
+          sudo rm -rf /var/www/admin.hisp.tech/*
+          sudo cp -r dist/* /var/www/admin.hisp.tech/
+
+          echo ">>> Done! Deployment complete."

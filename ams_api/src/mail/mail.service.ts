@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SentMessageInfo, Transporter } from 'nodemailer';
@@ -35,7 +35,7 @@ export class MailService {
   async sendMail(to: string, subject: string, text: string, html?: string) {
     if (!this.transporter) {
       this.logger.warn(`Cannot send email to ${to}: SMTP not configured.`);
-      return;
+      throw new InternalServerErrorException('SMTP not configured.');
     }
 
     try {
@@ -52,6 +52,7 @@ export class MailService {
       this.logger.log(`Message sent: ${String(info?.messageId)}`);
     } catch (error) {
       this.logger.error(`Error sending email to ${to}:`, error);
+      throw new InternalServerErrorException('Failed to send email. Please check your SMTP configuration.');
     }
   }
 }
