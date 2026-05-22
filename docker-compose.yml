@@ -22,7 +22,7 @@ services:
       - /app/node_modules # Anonymous volume prevents your host node_modules from overwriting the container's
       - /app/dist
     ports:
-      - "127.0.0.1:3000:3000"
+      - "0.0.0.0:3000:3000"
     environment:
       - DB_HOST=database
       - DB_PORT=5432
@@ -43,11 +43,11 @@ services:
       - ./ams_web:/app
       - /app/node_modules
     ports:
-      - "127.0.0.1:5173:5173"
+      - "0.0.0.0:5173:5173"
     depends_on:
       - api
     environment:
-      - VITE_API_URL=https://agency-badge-tba-pdas.trycloudflare.com
+      - VITE_API_URL=http://161.97.64.152:3000
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     restart: unless-stopped
