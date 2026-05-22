@@ -34,7 +34,7 @@ jobs:
           VITE_API_URL=https://admin.hisp.tech/api npm run build
 
           echo ">>> Deploying frontend..."
-          sudo rm -rf /var/www/admin.hisp.tech/*
-          sudo cp -r dist/* /var/www/admin.hisp.tech/
+          rm -rf /var/www/admin.hisp.tech/*
+          cp -r dist/* /var/www/admin.hisp.tech/
 
           echo ">>> Done! Deployment complete."
