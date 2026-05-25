@@ -761,11 +761,10 @@ export const Assets = () => {
                       return (
                         <tr
                           key={asset.id}
-                          className={`hover:bg-white/60 transition-colors group ${
-                            selectedAssetIds.includes(asset.id)
+                          className={`hover:bg-white/60 transition-colors group ${selectedAssetIds.includes(asset.id)
                               ? 'bg-orange-50/50'
                               : ''
-                          }`}
+                            }`}
                         >
                           {isAdmin && (
                             <td className="px-6 py-4">
@@ -934,12 +933,12 @@ export const Assets = () => {
                                 (() => {
                                   const latest =
                                     asset.assignment_history &&
-                                    asset.assignment_history.length > 0
+                                      asset.assignment_history.length > 0
                                       ? [...asset.assignment_history].sort(
-                                          (a, b) =>
-                                            new Date(b.assigned_at).getTime() -
-                                            new Date(a.assigned_at).getTime(),
-                                        )[0]
+                                        (a, b) =>
+                                          new Date(b.assigned_at).getTime() -
+                                          new Date(a.assigned_at).getTime(),
+                                      )[0]
                                       : null;
 
                                   const showFormIcon =
@@ -956,7 +955,7 @@ export const Assets = () => {
                                     ((isAdmin &&
                                       (latest.form_status === 'DRAFT' ||
                                         latest.form_status ===
-                                          'PENDING_ADMIN_REVIEW' ||
+                                        'PENDING_ADMIN_REVIEW' ||
                                         latest.form_status === 'REJECTED')) ||
                                       (!isAdmin &&
                                         (latest.form_status ===
@@ -985,13 +984,12 @@ export const Assets = () => {
                                           setIsReceiptModalOpen(true);
                                         }
                                       }}
-                                      className={`p-2 rounded-lg transition-all ${
-                                        needsAction
+                                      className={`p-2 rounded-lg transition-all ${needsAction
                                           ? isUrgent
                                             ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
                                             : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
                                           : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
-                                      }`}
+                                        }`}
                                       title={
                                         !latest
                                           ? 'Upload Scanned PDF (Paper Trail)'
@@ -1028,11 +1026,10 @@ export const Assets = () => {
 
         {isAdmin && selectedCategory && (
           <div
-            className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${
-              isRequestableSidebarOpen
+            className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${isRequestableSidebarOpen
                 ? 'w-72 opacity-100'
                 : 'w-0 opacity-0 overflow-hidden'
-            }`}
+              }`}
           >
             <button
               onClick={() => setIsRequestableSidebarOpen(false)}
@@ -1117,11 +1114,10 @@ export const Assets = () => {
                               disabled={
                                 !!cartItems.find((c) => c.id === item.id)
                               }
-                              className={`p-1.5 rounded-lg transition-all ${
-                                cartItems.find((c) => c.id === item.id)
+                              className={`p-1.5 rounded-lg transition-all ${cartItems.find((c) => c.id === item.id)
                                   ? 'bg-orange-100 text-orange-600 cursor-not-allowed'
                                   : 'text-[#ff8000] hover:bg-orange-50'
-                              }`}
+                                }`}
                               title={
                                 cartItems.find((c) => c.id === item.id)
                                   ? 'In Cart'
@@ -1286,6 +1282,12 @@ export const Assets = () => {
           setSelectedAssignment(null);
         }}
         assignment={selectedAssignment}
+        onUploadScanned={(asg) => {
+          setIsReceiptModalOpen(false);
+          setSelectedAssignment(null);
+          setAssignmentToUpload(asg);
+          setIsUploadModalOpen(true);
+        }}
       />
       <UploadScannedFormModal
         isOpen={isUploadModalOpen}

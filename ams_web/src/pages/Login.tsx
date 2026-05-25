@@ -4,8 +4,6 @@ import {
   ArrowRight,
   Mail,
   Lock,
-  KeyRound,
-  X,
   Eye,
   EyeOff,
   AlertCircle,
@@ -104,7 +102,7 @@ export const Login = () => {
       };
       alert(
         (axiosError.response?.data?.message as string) ||
-          'Failed to process requirement. Please try again.',
+        'Failed to process requirement. Please try again.',
       );
     } finally {
       setIsSubmittingForgot(false);
@@ -163,11 +161,10 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Mail
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                    loginError
-                      ? 'text-red-400'
-                      : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                  }`}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
+                    ? 'text-red-400'
+                    : 'text-slate-400 group-focus-within:text-[#ff8000]'
+                    }`}
                 />
                 <input
                   type="email"
@@ -177,11 +174,10 @@ export const Login = () => {
                     setEmail(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
-                    loginError
-                      ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
-                      : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
+                    ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
+                    : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                    }`}
                   placeholder="example@hisp.tech"
                 />
               </div>
@@ -202,11 +198,10 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Lock
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                    loginError
-                      ? 'text-red-400'
-                      : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                  }`}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
+                    ? 'text-red-400'
+                    : 'text-slate-400 group-focus-within:text-[#ff8000]'
+                    }`}
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -216,11 +211,10 @@ export const Login = () => {
                     setPassword(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
-                    loginError
-                      ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
-                      : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                  }`}
+                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
+                    ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
+                    : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                    }`}
                   placeholder="••••••••••••"
                 />
                 <button
@@ -270,82 +264,60 @@ export const Login = () => {
       {showForgotModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
             onClick={() => !isSubmittingForgot && setShowForgotModal(false)}
           />
-          <div className="relative w-full max-w-[440px] bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20">
-            {/* Header with Icon */}
-            <div className="bg-gradient-to-br from-[#ff8000] to-[#e49f37] p-8 text-white relative overflow-hidden">
-              <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-              <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="bg-white/20 backdrop-blur-md p-4 rounded-2xl mb-4 border border-white/30 shadow-xl">
-                  <KeyRound className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold tracking-tight">
+          <div className="relative w-full max-w-[480px] bg-white rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.2)] overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100">
+            <div className="p-10">
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-slate-800 tracking-tight mb-2">
                   Reset Password
                 </h3>
-                <p className="text-orange-50/80 text-sm font-medium mt-1">
-                  Secure access recovery
+                <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-[320px]">
+                  Enter your work email address and we'll send you a temporary
+                  password.
                 </p>
               </div>
-              <button
-                onClick={() => !isSubmittingForgot && setShowForgotModal(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-white/70" />
-              </button>
-            </div>
 
-            <div className="p-8">
-              <p className="text-slate-500 text-sm leading-relaxed mb-8 text-center px-4">
-                Enter your work email address below. We'll send you a temporary
-                password to regain access to your workspace.
-              </p>
-
-              <form onSubmit={handleForgotSubmit} className="space-y-6">
+              <form onSubmit={handleForgotSubmit} className="space-y-8">
                 <div className="group">
-                  <div className="flex items-center justify-between mb-2 px-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
-                      Work Email Address
-                    </label>
-                  </div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-3 ml-1">
+                    Work Email
+                  </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center border-r border-slate-100">
-                      <Mail className="w-4 h-4 text-slate-400 group-focus-within:text-[#ff8000] transition-colors" />
-                    </div>
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-[#ff8000] transition-colors" />
                     <input
                       type="email"
                       required
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      placeholder="example@hisp.tech"
-                      className="w-full pl-14 pr-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] focus:bg-white transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300"
+                      placeholder="email@hisp.org.rw"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/5 focus:bg-white transition-all text-sm font-semibold text-slate-700 placeholder:text-slate-300"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmittingForgot}
-                    className="w-full bg-gradient-to-r from-[#ff8000] to-[#e49f37] text-white font-bold py-4 rounded-2xl shadow-[0_20px_40px_-10px_rgba(255,128,0,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(255,128,0,0.5)] transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
-                  >
-                    {isSubmittingForgot ? (
-                      <div className="w-5 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <span>Request Recovery Code</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
                     disabled={isSubmittingForgot}
-                    className="w-full py-4 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-slate-600 transition-colors"
+                    className="px-8 py-3.5 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-slate-800 hover:bg-slate-50 rounded-2xl transition-all"
                   >
-                    Back to login
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingForgot || !forgotEmail}
+                    className="flex-1 max-w-[240px] bg-[#ff8000] hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-lg shadow-orange-100 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                  >
+                    {isSubmittingForgot ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        Send Reset Link
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

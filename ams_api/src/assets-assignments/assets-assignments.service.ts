@@ -25,7 +25,7 @@ export class AssetAssignmentsService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async create(createDto: CreateAssetAssignmentDto) {
     const asset = await this.assetRepo.findOne({
@@ -339,6 +339,12 @@ export class AssetAssignmentsService {
       assignment = await this.findOne(id);
       assignment.scanned_form_url = fileUrl;
       assignment.form_status = 'APPROVED';
+    }
+
+    if (assignment.asset && assignment.user) {
+      assignment.asset.status = 'ASSIGNED';
+      assignment.asset.assigned_to = assignment.user;
+      await this.assetRepo.save(assignment.asset);
     }
 
     return await this.assignmentRepo.save(assignment);

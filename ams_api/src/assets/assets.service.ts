@@ -41,7 +41,7 @@ export class AssetsService {
     private readonly incidentRepo: Repository<AssetIncident>,
     private readonly dataSource: DataSource,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async create(createAssetDto: CreateAssetDto): Promise<Asset> {
     const { category_id, department_id, assigned_to_user_id, ...assetData } =
@@ -201,7 +201,11 @@ export class AssetsService {
             category,
             department,
             assigned_to,
-            status: data.status || (assigned_to ? 'ASSIGNED' : 'IN_STOCK'),
+            status: assigned_to
+              ? data.status && data.status !== 'IN_STOCK'
+                ? data.status
+                : 'ASSIGNED'
+              : data.status || 'IN_STOCK',
           });
 
           if (category) {

@@ -24,7 +24,7 @@ export class AssetIncidentsService {
     private readonly dataSource: DataSource,
     private readonly notificationsService: NotificationsService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   async reportIncident(dto: ReportIncidentDto) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -137,7 +137,7 @@ export class AssetIncidentsService {
           requested_by: incident.reported_by,
           department: incident.reported_by.department,
           title: `Replacement for ${incident.asset.name}`,
-          description: `[AUTO-GENERATED REPLACEMENT] Previous asset (${incident.asset.tag_id}) was unfixable. Outcome: ${dto.resolution_notes}`,
+          description: `Previous asset (${incident.asset.tag_id}) was unfixable. Outcome: ${dto.resolution_notes}`,
           status: 'PENDING',
           items: [
             {

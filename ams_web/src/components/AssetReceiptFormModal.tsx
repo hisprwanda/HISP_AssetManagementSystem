@@ -10,6 +10,7 @@ import {
   XCircle,
   AlertCircle,
   Printer,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { AssetAssignment } from '../types/assets';
@@ -20,12 +21,14 @@ interface AssetReceiptFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   assignment: AssetAssignment | null;
+  onUploadScanned?: (assignment: AssetAssignment) => void;
 }
 
 export const AssetReceiptFormModal = ({
   isOpen,
   onClose,
   assignment,
+  onUploadScanned,
 }: AssetReceiptFormModalProps) => {
   const { isAdmin, user: currentUser, isFinanceOfficer } = useAuth();
   const queryClient = useQueryClient();
@@ -59,8 +62,8 @@ export const AssetReceiptFormModal = ({
 
   const [isPreparing, setIsPreparing] = useState(
     assignment?.form_status === 'DRAFT' ||
-      assignment?.form_status === 'REJECTED' ||
-      assignment?.id.includes('legacy-'),
+    assignment?.form_status === 'REJECTED' ||
+    assignment?.id.includes('legacy-'),
   );
   const [condition, setCondition] = useState(
     assignment?.condition_on_assign || '',
@@ -86,8 +89,8 @@ export const AssetReceiptFormModal = ({
       setPhoneNumber(assignment.user?.phone_number || '');
       setIsPreparing(
         assignment.form_status === 'DRAFT' ||
-          assignment.form_status === 'REJECTED' ||
-          assignment.id.includes('legacy-'),
+        assignment.form_status === 'REJECTED' ||
+        assignment.id.includes('legacy-'),
       );
     }
   }, [assignment]);
@@ -313,22 +316,33 @@ export const AssetReceiptFormModal = ({
                   {assignment.form_number || 'STAGED-FORM'}
                 </span>
                 <span
-                  className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-md border ${
-                    assignment.form_status === 'APPROVED'
-                      ? 'bg-slate-900 text-white border-slate-900'
-                      : assignment.form_status === 'REJECTED'
-                        ? 'bg-rose-50 text-rose-600 border-rose-100'
-                        : assignment.form_status === 'PENDING_ADMIN_REVIEW'
-                          ? 'bg-slate-100 text-slate-600 border-slate-200'
-                          : 'bg-orange-50 text-orange-600 border-orange-100'
-                  }`}
+                  className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-md border ${assignment.form_status === 'APPROVED'
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : assignment.form_status === 'REJECTED'
+                      ? 'bg-rose-50 text-rose-600 border-rose-100'
+                      : assignment.form_status === 'PENDING_ADMIN_REVIEW'
+                        ? 'bg-slate-100 text-slate-600 border-slate-200'
+                        : 'bg-orange-50 text-orange-600 border-orange-100'
+                    }`}
                 >
                   {assignment.form_status?.replace(/_/g, ' ') || 'STAGED'}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2"></div>
+          <div className="flex items-center gap-2">
+            {isAdmin &&
+              onUploadScanned &&
+              assignment.form_status === 'DRAFT' && (
+                <button
+                  onClick={() => onUploadScanned(assignment)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 text-[#ff8000] text-[10px] font-bold uppercase tracking-widest rounded-lg border border-orange-100 hover:bg-[#ff8000] hover:text-white transition-all shadow-sm group"
+                >
+                  <Upload className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
+                  Manual PDF Upload
+                </button>
+              )}
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#fafbfd] print:bg-white print:p-0">
           <div className="flex justify-between items-center max-w-lg mx-auto print:hidden bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
@@ -338,13 +352,12 @@ export const AssetReceiptFormModal = ({
                 className="flex flex-col items-center gap-2 relative"
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                    step.completed
-                      ? 'bg-[#ff8000] border-[#ff8000] text-white shadow-[0_0_15px_rgba(255,128,0,0.3)]'
-                      : step.active
-                        ? 'bg-white border-[#ff8000] text-[#ff8000] animate-pulse'
-                        : 'bg-white border-slate-200 text-slate-300'
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${step.completed
+                    ? 'bg-[#ff8000] border-[#ff8000] text-white shadow-[0_0_15px_rgba(255,128,0,0.3)]'
+                    : step.active
+                      ? 'bg-white border-[#ff8000] text-[#ff8000] animate-pulse'
+                      : 'bg-white border-slate-200 text-slate-300'
+                    }`}
                 >
                   {step.completed ? (
                     <CheckCircle2 className="w-5 h-5" />
@@ -353,19 +366,17 @@ export const AssetReceiptFormModal = ({
                   )}
                 </div>
                 <span
-                  className={`text-[9px] font-semibold uppercase tracking-widest ${
-                    step.active || step.completed
-                      ? 'text-slate-700'
-                      : 'text-slate-300'
-                  }`}
+                  className={`text-[9px] font-semibold uppercase tracking-widest ${step.active || step.completed
+                    ? 'text-slate-700'
+                    : 'text-slate-300'
+                    }`}
                 >
                   {step.label}
                 </span>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`absolute left-[calc(100%+0.5rem)] top-5 w-8 h-[2px] ${
-                      step.completed ? 'bg-[#ff8000]' : 'bg-slate-200'
-                    }`}
+                    className={`absolute left-[calc(100%+0.5rem)] top-5 w-8 h-[2px] ${step.completed ? 'bg-[#ff8000]' : 'bg-slate-200'
+                      }`}
                   />
                 )}
               </div>
@@ -920,23 +931,23 @@ export const AssetReceiptFormModal = ({
           (isAdmin &&
             (assignment.form_status === 'PENDING_USER_SIGNATURE' ||
               assignment.form_status === 'PENDING_ADMIN_REVIEW'))) && (
-          <div className="px-8 py-5 border-t border-slate-100 bg-white flex gap-3 print:hidden">
-            {isAdmin && (
+            <div className="px-8 py-5 border-t border-slate-100 bg-white flex gap-3 print:hidden">
+              {isAdmin && (
+                <button
+                  onClick={handlePrint}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
+                >
+                  <Printer className="w-4 h-4 text-slate-400" /> Print Receipt
+                </button>
+              )}
               <button
-                onClick={handlePrint}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
+                onClick={onClose}
+                className="px-8 py-3 bg-white border border-slate-200 text-slate-400 font-bold text-[11px] uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
               >
-                <Printer className="w-4 h-4 text-slate-400" /> Print Receipt
+                Close
               </button>
-            )}
-            <button
-              onClick={onClose}
-              className="px-8 py-3 bg-white border border-slate-200 text-slate-400 font-bold text-[11px] uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
-            >
-              Close
-            </button>
-          </div>
-        )}
+            </div>
+          )}
       </div>
       <style
         dangerouslySetInnerHTML={{
