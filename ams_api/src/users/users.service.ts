@@ -302,14 +302,23 @@ export class UsersService {
   }
 
   async changePassword(userId: string, newPassword: string): Promise<User> {
-    const user = await this.findOne(userId);
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(newPassword, salt);
+    return this.updatePassword(userId, hashedPassword, newPassword, false);
+  }
 
+  async updatePassword(
+    userId: string,
+    hashedPassword: string,
+    provisioningPassword?: string,
+    isTemporary: boolean = true,
+  ): Promise<User> {
+    const user = await this.findOne(userId);
     user.password_hash = hashedPassword;
-    user.provisioning_password = newPassword;
-    user.is_temporary_password = false;
-
+    if (provisioningPassword) {
+      user.provisioning_password = provisioningPassword;
+    }
+    user.is_temporary_password = isTemporary;
     return await this.userRepo.save(user);
   }
 

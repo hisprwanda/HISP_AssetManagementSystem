@@ -3,10 +3,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
     UsersModule,
+    MailModule,
     JwtModule.register({
       global: true,
       secret: 'HISP_RWANDA_AMS_SUPER_SECRET_KEY_2026',
@@ -16,4 +18,4 @@ import { UsersModule } from 'src/users/users.module';
   providers: [AuthService],
   controllers: [AuthController],
 })
-export class AuthModule {}
+export class AuthModule { }
