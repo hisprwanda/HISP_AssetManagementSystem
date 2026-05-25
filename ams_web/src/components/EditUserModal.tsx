@@ -25,7 +25,7 @@ interface StaffUser {
   email: string;
   role: string;
   phone_number?: string;
-  status: string;
+  status?: string;
 }
 
 interface EditUserModalProps {
@@ -68,7 +68,7 @@ export const EditUserModal = ({
       ];
       setRole(
         ALL_ROLES.find((r) => r.toLowerCase() === user.role?.toLowerCase()) ||
-          'Staff',
+        'Staff',
       );
       setStatus(user.status || 'Active');
 
