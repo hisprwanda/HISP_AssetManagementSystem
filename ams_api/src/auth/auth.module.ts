@@ -18,4 +18,4 @@ import { MailModule } from 'src/mail/mail.module';
   providers: [AuthService],
   controllers: [AuthController],
 })
-export class AuthModule { }
+export class AuthModule {}

@@ -62,7 +62,10 @@ export const CreateRequestModal = ({
 
   const [items, setItems] = useState<RequestLineItem[]>([
     {
-      id: typeof crypto.randomUUID !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11),
+      id:
+        typeof crypto.randomUUID !== 'undefined'
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2, 11),
       name: '',
       description: '',
       quantity: 1,
@@ -108,7 +111,10 @@ export const CreateRequestModal = ({
         if (baseRequest.items && baseRequest.items.length > 0) {
           setItems(
             baseRequest.items.map((i) => ({
-              id: typeof crypto.randomUUID !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11),
+              id:
+                typeof crypto.randomUUID !== 'undefined'
+                  ? crypto.randomUUID()
+                  : Math.random().toString(36).substring(2, 11),
               name: i.name,
               description: i.description || '',
               quantity: i.quantity,
@@ -165,7 +171,10 @@ export const CreateRequestModal = ({
     setItems([
       ...items,
       {
-        id: typeof crypto.randomUUID !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11),
+        id:
+          typeof crypto.randomUUID !== 'undefined'
+            ? crypto.randomUUID()
+            : Math.random().toString(36).substring(2, 11),
         name: '',
         description: '',
         quantity: 1,

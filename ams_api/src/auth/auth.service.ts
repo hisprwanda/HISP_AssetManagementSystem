@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async login(email: string, pass: string) {
     console.log(`[AuthService] Login attempt for email: ${email}`);
@@ -69,9 +69,9 @@ export class AuthService {
         is_temporary_password: user.is_temporary_password,
         department: user.department
           ? {
-            id: user.department.id,
-            name: user.department.name,
-          }
+              id: user.department.id,
+              name: user.department.name,
+            }
           : null,
       },
     };
@@ -82,28 +82,43 @@ export class AuthService {
 
     if (!user) {
       // Don't reveal if user exists for security, but we'll log it
-      console.warn(`[AuthService] Password reset requested for non-existent email: ${email}`);
-      return { message: 'If an account exists with this email, you will receive reset instructions.' };
+      console.warn(
+        `[AuthService] Password reset requested for non-existent email: ${email}`,
+      );
+      return {
+        message:
+          'If an account exists with this email, you will receive reset instructions.',
+      };
     }
 
     const tempPassword = this.generateTempPassword();
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
 
-    await this.usersService.updatePassword(user.id, hashedPassword, tempPassword, true);
+    await this.usersService.updatePassword(
+      user.id,
+      hashedPassword,
+      tempPassword,
+      true,
+    );
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
     const subject = 'Password Reset - HISP Asset Management System';
     const text = `Hello ${user.full_name},\n\nYou requested a password reset. Please use the temporary password below to log in:\n\nTemporary Password: ${tempPassword}\n\nLogin Link: ${frontendUrl}/login\n\nPlease change your password immediately after logging in.`;
     const html = `<p>Hello ${user.full_name},</p><p>You requested a password reset. Please use the temporary password below to log in:</p><p><strong>Temporary Password:</strong> ${tempPassword}</p><p><a href="${frontendUrl}/login">Login Here</a></p><p>Please change your password immediately after logging in.</p>`;
 
     await this.mailService.sendMail(user.email, subject, text, html);
 
-    return { message: 'If an account exists with this email, you will receive reset instructions.' };
+    return {
+      message:
+        'If an account exists with this email, you will receive reset instructions.',
+    };
   }
 
   private generateTempPassword(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 6; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));

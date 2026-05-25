@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SentMessageInfo, Transporter } from 'nodemailer';
@@ -52,7 +56,9 @@ export class MailService {
       this.logger.log(`Message sent: ${String(info?.messageId)}`);
     } catch (error) {
       this.logger.error(`Error sending email to ${to}:`, error);
-      throw new InternalServerErrorException('Failed to send email. Please check your SMTP configuration.');
+      throw new InternalServerErrorException(
+        'Failed to send email. Please check your SMTP configuration.',
+      );
     }
   }
 }

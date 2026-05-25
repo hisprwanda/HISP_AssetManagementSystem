@@ -91,10 +91,13 @@ export const Login = () => {
       );
       setShowForgotModal(false);
       setForgotEmail('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { message?: string | string[] } };
+      };
       alert(
-        error.response?.data?.message ||
-        'Failed to process requirement. Please try again.',
+        (axiosError.response?.data?.message as string) ||
+          'Failed to process requirement. Please try again.',
       );
     } finally {
       setIsSubmittingForgot(false);
