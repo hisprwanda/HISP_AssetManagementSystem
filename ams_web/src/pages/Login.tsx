@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
@@ -18,6 +19,8 @@ export const Login = () => {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null);
+  const [forgotError, setForgotError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
@@ -88,21 +91,26 @@ export const Login = () => {
   const handleForgotSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmittingForgot(true);
+    setForgotMessage(null);
+    setForgotError(null);
 
     try {
       await api.post('/auth/forgot-password', { email: forgotEmail });
-      alert(
+      setForgotMessage(
         'If an account exists with this email, you will receive reset instructions shortly.',
       );
-      setShowForgotModal(false);
       setForgotEmail('');
+      setTimeout(() => {
+        setShowForgotModal(false);
+        setForgotMessage(null);
+      }, 4000);
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string | string[] } };
       };
-      alert(
+      setForgotError(
         (axiosError.response?.data?.message as string) ||
-        'Failed to process requirement. Please try again.',
+        'Failed to process request. Please try again.',
       );
     } finally {
       setIsSubmittingForgot(false);
@@ -190,7 +198,11 @@ export const Login = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => setShowForgotModal(true)}
+                  onClick={() => {
+                    setShowForgotModal(true);
+                    setForgotMessage(null);
+                    setForgotError(null);
+                  }}
                   className="text-[10px] font-bold text-[#ff8000] hover:text-[#e49f37] transition-colors uppercase tracking-widest"
                 >
                   Forgot Password?
@@ -297,10 +309,31 @@ export const Login = () => {
                   </div>
                 </div>
 
+                {forgotMessage && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-2.5 animate-in fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] font-semibold text-emerald-700 leading-relaxed">
+                      {forgotMessage}
+                    </p>
+                  </div>
+                )}
+                {forgotError && (
+                  <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-2.5 animate-in fade-in">
+                    <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] font-semibold text-rose-700 leading-relaxed">
+                      {forgotError}
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"
-                    onClick={() => setShowForgotModal(false)}
+                    onClick={() => {
+                      setShowForgotModal(false);
+                      setForgotMessage(null);
+                      setForgotError(null);
+                    }}
                     disabled={isSubmittingForgot}
                     className="px-8 py-3.5 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-slate-800 hover:bg-slate-50 rounded-2xl transition-all"
                   >

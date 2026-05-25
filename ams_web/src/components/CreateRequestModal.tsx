@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  X,
   ShoppingCart,
   FileText,
   Banknote,
@@ -351,12 +350,6 @@ export const CreateRequestModal = ({
                       : 'Official Purchase Requisition'}
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             <form
@@ -388,11 +381,10 @@ export const CreateRequestModal = ({
                         }));
                       }}
                       disabled={loadingDepts || isHOD}
-                      className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
-                        invalidFields.departmentId
-                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                      }`}
+                      className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${invalidFields.departmentId
+                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                        }`}
                     >
                       <option value="" disabled>
                         {loadingDepts ? 'Loading...' : 'Select Directorate...'}
@@ -434,11 +426,10 @@ export const CreateRequestModal = ({
                           }
                         }}
                         disabled={!departmentId || loadingUsers}
-                        className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
-                          invalidFields.requestedById
-                            ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                            : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                        }`}
+                        className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${invalidFields.requestedById
+                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                          }`}
                       >
                         <option value="" disabled>
                           {!departmentId
@@ -541,11 +532,10 @@ export const CreateRequestModal = ({
                       }));
                     }}
                     placeholder="Briefly describe why these assets/services are needed..."
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium min-h-[80px] resize-none border ${
-                      invalidFields.description
-                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                    }`}
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium min-h-[80px] resize-none border ${invalidFields.description
+                      ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                      : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                      }`}
                   />
                 </div>
               </div>
@@ -607,11 +597,10 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_quantity`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-center rounded-xl border ${
-                                invalidFields[`item_${item.id}_quantity`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                              }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-center rounded-xl border ${invalidFields[`item_${item.id}_quantity`]
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                                }`}
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -631,11 +620,10 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_name`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold rounded-xl border ${
-                                invalidFields[`item_${item.id}_name`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                              }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold rounded-xl border ${invalidFields[`item_${item.id}_name`]
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                                }`}
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -671,11 +659,10 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_unit_price`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-right rounded-xl border ${
-                                invalidFields[`item_${item.id}_unit_price`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                              }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-right rounded-xl border ${invalidFields[`item_${item.id}_unit_price`]
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                                }`}
                             />
                           </td>
                           <td className="px-4 py-4 text-right text-sm font-semibold text-slate-800">
@@ -730,11 +717,10 @@ export const CreateRequestModal = ({
                           destination: false,
                         }));
                       }}
-                      className={`w-full px-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium border ${
-                        invalidFields.destination
-                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                      }`}
+                      className={`w-full px-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium border ${invalidFields.destination
+                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                        }`}
                     />
                   </div>
                   <div className="space-y-1.5 group">

@@ -7,6 +7,7 @@ import {
   Building2,
   Tag,
   AlertCircle,
+  CheckCircle2,
   Plus,
   ArrowLeft,
   Edit2,
@@ -431,8 +432,9 @@ export const Assets = () => {
                                 </button>
                                 <button
                                   onClick={(e) => handleDeleteClick(e, cat)}
-                                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100"
-                                  title="Delete Category"
+                                  disabled={cat.name === 'Legacy / Uncategorized'}
+                                  className={`p-2 rounded-lg transition-all shadow-sm border border-transparent ${cat.name === 'Legacy / Uncategorized' ? 'opacity-20 cursor-not-allowed text-slate-300' : 'text-slate-400 hover:text-rose-500 hover:bg-white hover:border-slate-100'}`}
+                                  title={cat.name === 'Legacy / Uncategorized' ? "System Reserved Recovery Category" : "Delete Category"}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -514,13 +516,22 @@ export const Assets = () => {
               <h2 className="text-xl font-semibold text-slate-800 mb-2">
                 Delete Category?
               </h2>
-              <p className="text-slate-500 text-sm font-medium mb-6">
+              <p className="text-slate-500 text-sm font-medium mb-2">
                 Are you sure you want to delete{' '}
                 <span className="font-semibold text-slate-700">
                   "{catToDelete.name}"
                 </span>
                 ?
               </p>
+              <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl mb-6 flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded-full bg-blue-200 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-blue-600" />
+                </div>
+                <p className="text-[10px] font-semibold text-blue-700 leading-tight text-left">
+                  <span className="uppercase tracking-widest block mb-0.5 opacity-70">Asset Preservation</span>
+                  Assigned assets will be moved to <span className="text-blue-900 border-b border-blue-200">"Legacy / Uncategorized"</span> so no records are lost.
+                </p>
+              </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setCatToDelete(null)}
@@ -762,8 +773,8 @@ export const Assets = () => {
                         <tr
                           key={asset.id}
                           className={`hover:bg-white/60 transition-colors group ${selectedAssetIds.includes(asset.id)
-                              ? 'bg-orange-50/50'
-                              : ''
+                            ? 'bg-orange-50/50'
+                            : ''
                             }`}
                         >
                           {isAdmin && (
@@ -985,10 +996,10 @@ export const Assets = () => {
                                         }
                                       }}
                                       className={`p-2 rounded-lg transition-all ${needsAction
-                                          ? isUrgent
-                                            ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
-                                            : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
-                                          : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                        ? isUrgent
+                                          ? 'text-rose-600 bg-rose-50 animate-bounce ring-2 ring-rose-200'
+                                          : 'text-orange-600 bg-orange-50 animate-pulse ring-2 ring-orange-200'
+                                        : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
                                         }`}
                                       title={
                                         !latest
@@ -1027,8 +1038,8 @@ export const Assets = () => {
         {isAdmin && selectedCategory && (
           <div
             className={`shrink-0 flex flex-col gap-3 transition-all duration-300 ease-in-out relative ${isRequestableSidebarOpen
-                ? 'w-72 opacity-100'
-                : 'w-0 opacity-0 overflow-hidden'
+              ? 'w-72 opacity-100'
+              : 'w-0 opacity-0 overflow-hidden'
               }`}
           >
             <button
@@ -1115,8 +1126,8 @@ export const Assets = () => {
                                 !!cartItems.find((c) => c.id === item.id)
                               }
                               className={`p-1.5 rounded-lg transition-all ${cartItems.find((c) => c.id === item.id)
-                                  ? 'bg-orange-100 text-orange-600 cursor-not-allowed'
-                                  : 'text-[#ff8000] hover:bg-orange-50'
+                                ? 'bg-orange-100 text-orange-600 cursor-not-allowed'
+                                : 'text-[#ff8000] hover:bg-orange-50'
                                 }`}
                               title={
                                 cartItems.find((c) => c.id === item.id)

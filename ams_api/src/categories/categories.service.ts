@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
+import { Asset } from 'src/assets/entities/asset.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -14,7 +15,7 @@ export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepo: Repository<Category>,
-  ) {}
+  ) { }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     const existing = await this.categoryRepo.findOne({
@@ -70,7 +71,38 @@ export class CategoriesService {
   }
 
   async remove(id: string): Promise<void> {
-    const category = await this.findOne(id);
-    await this.categoryRepo.remove(category);
+    const defaultCategoryName = 'Legacy / Uncategorized';
+    const categoryToDelete = await this.findOne(id);
+
+    if (categoryToDelete.name === defaultCategoryName) {
+      throw new ConflictException(
+        `The default category "${defaultCategoryName}" cannot be deleted as it serves as a recovery destination for system integrity.`,
+      );
+    }
+
+    await this.categoryRepo.manager.transaction(async (manager) => {
+      let defaultCategory = await manager.findOne(Category, {
+        where: { name: defaultCategoryName },
+      });
+
+      if (!defaultCategory) {
+        defaultCategory = manager.create(Category, {
+          name: defaultCategoryName,
+          description:
+            'Recovery category for assets whose original category has been removed.',
+          depreciation_rate: 0,
+          disposal_rate: 0,
+        });
+        defaultCategory = await manager.save(defaultCategory);
+      }
+
+      await manager.update(
+        Asset,
+        { category_id: id },
+        { category_id: defaultCategory.id },
+      );
+
+      await manager.remove(categoryToDelete);
+    });
   }
 }
