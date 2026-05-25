@@ -1,4 +1,4 @@
-name: HISP AMS Deployment
+name: HISP-AMS Deployment
 
 on:
   push:

@@ -25,6 +25,7 @@ interface StaffUser {
   email: string;
   role: string;
   phone_number?: string;
+  status: string;
 }
 
 interface EditUserModalProps {
@@ -45,6 +46,7 @@ export const EditUserModal = ({
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [role, setRole] = useState('Staff');
+  const [status, setStatus] = useState('Active');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export const EditUserModal = ({
         ALL_ROLES.find((r) => r.toLowerCase() === user.role?.toLowerCase()) ||
           'Staff',
       );
+      setStatus(user.status || 'Active');
 
       setError(null);
     }
@@ -79,6 +82,7 @@ export const EditUserModal = ({
       email: string;
       phone_number: string;
       role: string;
+      status: string;
     }) => {
       const response = await api.patch(`/users/${user!.id}`, updatedUser);
       return response.data;
@@ -114,6 +118,7 @@ export const EditUserModal = ({
       email,
       phone_number: phoneNumber,
       role,
+      status,
     });
   };
 
@@ -219,6 +224,23 @@ export const EditUserModal = ({
                     {r} {r === 'HOD' ? '(Head of Department)' : ''}
                   </option>
                 ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">
+              User Status *
+            </label>
+            <div className="relative">
+              <AlertCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all appearance-none"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
