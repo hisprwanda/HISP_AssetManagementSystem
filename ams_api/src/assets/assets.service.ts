@@ -164,11 +164,22 @@ export class AssetsService {
           }
 
           let assigned_to: User | null = null;
-          const personnelName = data.Personnel || data.personnel_name;
+          const personnelName = (data.Personnel || data.personnel_name)
+            ?.toString()
+            .trim();
           if (personnelName) {
             assigned_to = await queryRunner.manager.findOne(User, {
               where: { full_name: personnelName },
             });
+            if (!assigned_to) {
+              // Try case-insensitive search if direct match fails
+              assigned_to = await queryRunner.manager
+                .createQueryBuilder(User, 'user')
+                .where('LOWER(user.full_name) = LOWER(:name)', {
+                  name: personnelName,
+                })
+                .getOne();
+            }
           }
 
           const entityFields = { ...data };
@@ -203,7 +214,28 @@ export class AssetsService {
             asset.accumulated_depreciation = 0;
           }
 
-          await queryRunner.manager.save(asset);
+          const savedAsset = await queryRunner.manager.save(asset);
+
+          if (assigned_to) {
+            const count = await queryRunner.manager.count(AssetAssignment);
+            const formNumber = `ARF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, '0')}`;
+
+            const initialAssignment = queryRunner.manager.create(
+              AssetAssignment,
+              {
+                asset: savedAsset,
+                user: assigned_to,
+                condition_on_assign: 'Imported via Bulk Upload (Legacy Asset)',
+                assigned_at: new Date(),
+                form_status: 'DRAFT',
+                form_number: formNumber,
+                received_from_name: 'Administration',
+                received_at: new Date(),
+              } as any,
+            );
+            await queryRunner.manager.save(initialAssignment);
+          }
+
           results.success++;
         } catch (err) {
           results.failed++;

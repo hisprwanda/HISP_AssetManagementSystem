@@ -101,6 +101,30 @@ export const ResolveIncidentModal = ({
       newAssetStatus = 'BROKEN';
     }
 
+    if (outcome === 'CEO_REVIEW') {
+      api
+        .patch(`/asset-incidents/${incident.id}/forward`, {
+          remarks: resolutionNotes,
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['asset-incidents'] });
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+            onClose();
+          }, 2000);
+        })
+        .catch((err) => {
+          const axiosError = err as {
+            response?: { data?: { message?: string } };
+          };
+          setError(
+            axiosError.response?.data?.message || 'Failed to forward to CEO.',
+          );
+        });
+      return;
+    }
+
     mutation.mutate({
       incident_status: outcome,
       resolution_notes: resolutionNotes,
@@ -112,7 +136,10 @@ export const ResolveIncidentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem] overflow-hidden p-0 gap-0">
+      <DialogContent
+        hideClose={true}
+        className="sm:max-w-[550px] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[2rem] overflow-hidden p-0 gap-0"
+      >
         {success ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 border bg-emerald-50 border-emerald-100 text-emerald-600">
@@ -259,7 +286,7 @@ export const ResolveIncidentModal = ({
                       id: 'CEO_REVIEW',
                       label: 'Forward to CEO for Review',
                       icon: Send,
-                      color: 'blue',
+                      color: 'orange',
                       sub: 'Complex Case + Requires Executive Decision',
                     },
                   ]
@@ -328,7 +355,7 @@ export const ResolveIncidentModal = ({
                 type="submit"
                 onClick={handleSubmit}
                 disabled={mutation.isPending || !resolutionNotes.trim()}
-                className="flex-1 px-6 py-2.5 rounded-xl font-semibold text-[10px] uppercase tracking-widest bg-slate-900 hover:bg-black text-white shadow-lg transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-2.5 rounded-xl font-semibold text-[10px] uppercase tracking-widest bg-[#ff8000] hover:bg-[#e67300] text-white shadow-lg shadow-orange-500/20 transform active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
               >
                 {mutation.isPending ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

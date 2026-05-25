@@ -61,6 +61,8 @@ export const PurchaseOrderModal = ({
   );
   const [scannedPoUrl, setScannedPoUrl] = useState('');
 
+  const today = new Date().toISOString().split('T')[0];
+
   useEffect(() => {
     if (isOpen && request) {
       if (request.purchase_order) {
@@ -353,6 +355,7 @@ export const PurchaseOrderModal = ({
                   <input
                     type="date"
                     required
+                    min={today}
                     value={orderDate}
                     onChange={(e) => setOrderDate(e.target.value)}
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-semibold text-slate-700 shadow-sm transition-all"
@@ -607,9 +610,11 @@ export const PurchaseOrderModal = ({
                     {signingMethod === 'digital' ? (
                       <input
                         type="date"
+                        required
+                        min={today}
                         value={hispSignDate}
                         onChange={(e) => setHispSignDate(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-semibold text-slate-700 outline-none"
+                        className="w-full px-4 py-2.5 bg-white border border-orange-100 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-[#ff8000]/20"
                       />
                     ) : (
                       <div className="h-10 border-b border-orange-200 flex items-center justify-center text-[10px] italic text-orange-300 font-medium uppercase tracking-widest">
@@ -650,10 +655,15 @@ export const PurchaseOrderModal = ({
                   </label>
                   <input
                     type="text"
+                    disabled={!isDigitallySigned || signingMethod !== 'digital'}
                     value={vendorSignName}
                     onChange={(e) => setVendorSignName(e.target.value)}
-                    placeholder="Vendor signatory name..."
-                    className={`w-full px-5 py-3 bg-white border rounded-2xl outline-none focus:ring-4 text-xs font-semibold text-slate-800 shadow-sm transition-all ${isDigitallySigned && signingMethod === 'digital' ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-slate-200 focus:ring-slate-500/10 focus:border-slate-500'}`}
+                    placeholder={
+                      isDigitallySigned
+                        ? 'Vendor signatory name...'
+                        : 'Signatory Not Present'
+                    }
+                    className={`w-full px-5 py-3 bg-white border rounded-2xl outline-none focus:ring-4 text-xs font-semibold text-slate-800 shadow-sm transition-all disabled:opacity-50 disabled:bg-slate-50 ${isDigitallySigned && signingMethod === 'digital' ? 'border-emerald-200 focus:ring-emerald-500/10 focus:border-emerald-500' : 'border-slate-200 focus:ring-slate-500/10 focus:border-slate-500'}`}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -680,9 +690,14 @@ export const PurchaseOrderModal = ({
                     {signingMethod === 'digital' ? (
                       <input
                         type="date"
+                        required
+                        disabled={
+                          !isDigitallySigned || signingMethod !== 'digital'
+                        }
+                        min={today}
                         value={vendorSignDate}
                         onChange={(e) => setVendorSignDate(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none"
+                        className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-[#ff8000]/20 disabled:opacity-50 disabled:bg-slate-50"
                       />
                     ) : (
                       <div className="h-10 border-b border-slate-200 flex items-center justify-center text-[10px] italic text-slate-300 font-medium uppercase tracking-widest">

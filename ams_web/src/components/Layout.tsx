@@ -97,8 +97,7 @@ export const Layout = () => {
     if (!allIncidents || !user) return 0;
     if (isCEO) {
       return allIncidents.filter(
-        (i: { investigation_status: string }) =>
-          i.investigation_status === 'CEO_REVIEW',
+        (i: { status: string }) => i.status === 'CEO_REVIEW',
       ).length;
     }
     return allIncidents.filter(

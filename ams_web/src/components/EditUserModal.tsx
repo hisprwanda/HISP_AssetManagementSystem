@@ -46,7 +46,7 @@ export const EditUserModal = ({
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [role, setRole] = useState('Staff');
-  const [status, setStatus] = useState('Active');
+  const [status, setStatus] = useState('ACTIVE');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,9 +68,9 @@ export const EditUserModal = ({
       ];
       setRole(
         ALL_ROLES.find((r) => r.toLowerCase() === user.role?.toLowerCase()) ||
-        'Staff',
+          'Staff',
       );
-      setStatus(user.status || 'Active');
+      setStatus(user.status || 'ACTIVE');
 
       setError(null);
     }
@@ -239,8 +239,8 @@ export const EditUserModal = ({
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] outline-none transition-all appearance-none"
               >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
               </select>
             </div>
           </div>

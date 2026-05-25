@@ -59,6 +59,9 @@ export const CreateRequestModal = ({
   const [urgency, setUrgency] = useState('MEDIUM');
   const [description, setDescription] = useState('');
   const [isSharedLocal, setIsSharedLocal] = useState(false);
+  const [invalidFields, setInvalidFields] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const [items, setItems] = useState<RequestLineItem[]>([
     {
@@ -204,30 +207,24 @@ export const CreateRequestModal = ({
     setIsLoading(true);
     setError('');
 
-    if (!departmentId) {
-      setError('Please select a Directorate.');
-      setIsLoading(false);
-      return;
-    }
+    const newInvalidFields: Record<string, boolean> = {};
 
-    if (!requestedById) {
-      setError('Please select a Requester.');
-      setIsLoading(false);
-      return;
-    }
+    if (!departmentId) newInvalidFields.departmentId = true;
+    if (!requestedById) newInvalidFields.requestedById = true;
+    if (!description.trim()) newInvalidFields.description = true;
+    if (!destination.trim()) newInvalidFields.destination = true;
 
-    if (items.length === 0) {
-      setError('Please add at least one item to the request.');
-      setIsLoading(false);
-      return;
-    }
+    items.forEach((item) => {
+      if (!item.name.trim()) newInvalidFields[`item_${item.id}_name`] = true;
+      if (item.quantity <= 0)
+        newInvalidFields[`item_${item.id}_quantity`] = true;
+      if (item.unit_price <= 0)
+        newInvalidFields[`item_${item.id}_unit_price`] = true;
+    });
 
-    const hasIncompleteItems = items.some(
-      (i) => !i.name.trim() || i.quantity <= 0 || i.unit_price <= 0,
-    );
-
-    if (hasIncompleteItems) {
-      setError('All line items must have a name, quantity, and unit price.');
+    if (Object.keys(newInvalidFields).length > 0) {
+      setInvalidFields(newInvalidFields);
+      setError('Please fix the highlighted fields before submitting.');
       setIsLoading(false);
       return;
     }
@@ -385,9 +382,17 @@ export const CreateRequestModal = ({
                       onChange={(e) => {
                         setDepartmentId(e.target.value);
                         setRequestedById('');
+                        setInvalidFields((prev) => ({
+                          ...prev,
+                          departmentId: false,
+                        }));
                       }}
                       disabled={loadingDepts || isHOD}
-                      className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium appearance-none disabled:opacity-50"
+                      className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
+                        invalidFields.departmentId
+                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                      }`}
                     >
                       <option value="" disabled>
                         {loadingDepts ? 'Loading...' : 'Select Directorate...'}
@@ -414,6 +419,10 @@ export const CreateRequestModal = ({
                         onChange={(e) => {
                           const selectedId = e.target.value;
                           setRequestedById(selectedId);
+                          setInvalidFields((prev) => ({
+                            ...prev,
+                            requestedById: false,
+                          }));
                           const selectedUser = users?.find(
                             (u: User) => u.id === selectedId,
                           );
@@ -425,7 +434,11 @@ export const CreateRequestModal = ({
                           }
                         }}
                         disabled={!departmentId || loadingUsers}
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium appearance-none disabled:opacity-50"
+                        className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
+                          invalidFields.requestedById
+                            ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                            : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                        }`}
                       >
                         <option value="" disabled>
                           {!departmentId
@@ -520,9 +533,19 @@ export const CreateRequestModal = ({
                   <textarea
                     required
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                      setInvalidFields((prev) => ({
+                        ...prev,
+                        description: false,
+                      }));
+                    }}
                     placeholder="Briefly describe why these assets/services are needed..."
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium min-h-[80px] resize-none"
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium min-h-[80px] resize-none border ${
+                      invalidFields.description
+                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                    }`}
                   />
                 </div>
               </div>
@@ -573,14 +596,22 @@ export const CreateRequestModal = ({
                               min="1"
                               required
                               value={item.quantity}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 handleItemChange(
                                   item.id,
                                   'quantity',
-                                  parseInt(e.target.value) || 1,
-                                )
-                              }
-                              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold text-center transition-all"
+                                  parseInt(e.target.value) || 0,
+                                );
+                                setInvalidFields((prev) => ({
+                                  ...prev,
+                                  [`item_${item.id}_quantity`]: false,
+                                }));
+                              }}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-center rounded-xl border ${
+                                invalidFields[`item_${item.id}_quantity`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -589,14 +620,22 @@ export const CreateRequestModal = ({
                               placeholder="e.g., HP Screen Monitor"
                               required
                               value={item.name}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 handleItemChange(
                                   item.id,
                                   'name',
                                   e.target.value,
-                                )
-                              }
-                              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold"
+                                );
+                                setInvalidFields((prev) => ({
+                                  ...prev,
+                                  [`item_${item.id}_name`]: false,
+                                }));
+                              }}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold rounded-xl border ${
+                                invalidFields[`item_${item.id}_name`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -621,14 +660,22 @@ export const CreateRequestModal = ({
                               placeholder="0"
                               required
                               value={item.unit_price}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 handleItemChange(
                                   item.id,
                                   'unit_price',
                                   parseFloat(e.target.value) || 0,
-                                )
-                              }
-                              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-bold text-right"
+                                );
+                                setInvalidFields((prev) => ({
+                                  ...prev,
+                                  [`item_${item.id}_unit_price`]: false,
+                                }));
+                              }}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-right rounded-xl border ${
+                                invalidFields[`item_${item.id}_unit_price`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                           </td>
                           <td className="px-4 py-4 text-right text-sm font-semibold text-slate-800">
@@ -676,8 +723,18 @@ export const CreateRequestModal = ({
                       type="text"
                       placeholder="e.g., Kigali HQ, 3rd Floor"
                       value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium"
+                      onChange={(e) => {
+                        setDestination(e.target.value);
+                        setInvalidFields((prev) => ({
+                          ...prev,
+                          destination: false,
+                        }));
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium border ${
+                        invalidFields.destination
+                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                      }`}
                     />
                   </div>
                   <div className="space-y-1.5 group">
