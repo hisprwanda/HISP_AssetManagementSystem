@@ -39,7 +39,7 @@ export class AssetRequestsService {
     private readonly categoryRepo: Repository<Category>,
     private readonly notificationsService: NotificationsService,
     private readonly assignmentsService: AssetAssignmentsService,
-  ) { }
+  ) {}
 
   async create(
     dto: CreateAssetRequestDto,
@@ -169,7 +169,7 @@ export class AssetRequestsService {
       request.purchase_order = dto.purchase_order;
     }
 
-    const saved = await this.requestRepo.save(request);
+    await this.requestRepo.save(request);
 
     if (dto.logistics?.contact_phone && request.requested_by?.id) {
       await this.userRepo.update(request.requested_by.id, {
@@ -257,12 +257,16 @@ export class AssetRequestsService {
       const requester = await this.userRepo.findOne({
         where: { id: request.requested_by?.id },
       });
-      this.notificationsService.notifyCEOProcurementReview({
-        requestId: id,
-        requestTitle: request.title,
-        requesterName: requester?.full_name || 'Staff Member',
-        amount: request.financials?.grand_total || 0,
-      }).catch(err => console.error('[Notifications] CEO Notify Failed:', err));
+      this.notificationsService
+        .notifyCEOProcurementReview({
+          requestId: id,
+          requestTitle: request.title,
+          requesterName: requester?.full_name || 'Staff Member',
+          amount: (request.financials?.grand_total as number) || 0,
+        })
+        .catch((err) =>
+          console.error('[Notifications] CEO Notify Failed:', err),
+        );
     }
 
     return savedRequest;
@@ -420,14 +424,21 @@ export class AssetRequestsService {
       const requester = await this.userRepo.findOne({
         where: { id: first.requested_by?.id },
       });
-      const totalAmount = savedResults.reduce((sum, r) => sum + (r.financials?.grand_total || 0), 0);
+      const totalAmount = savedResults.reduce(
+        (sum, r) => sum + ((r.financials?.grand_total as number) || 0),
+        0,
+      );
 
-      this.notificationsService.notifyCEOProcurementReview({
-        requestId: first.id, // Using first as reference for the batch
-        requestTitle: `Batch Request: ${savedResults.length} items (${first.batch_number})`,
-        requesterName: requester?.full_name || 'Staff Member',
-        amount: totalAmount,
-      }).catch(err => console.error('[Notifications] CEO Batch Notify Failed:', err));
+      this.notificationsService
+        .notifyCEOProcurementReview({
+          requestId: first.id, // Using first as reference for the batch
+          requestTitle: `Batch Request: ${savedResults.length} items (${first.batch_number})`,
+          requesterName: requester?.full_name || 'Staff Member',
+          amount: totalAmount,
+        })
+        .catch((err) =>
+          console.error('[Notifications] CEO Batch Notify Failed:', err),
+        );
     }
 
     return savedResults;

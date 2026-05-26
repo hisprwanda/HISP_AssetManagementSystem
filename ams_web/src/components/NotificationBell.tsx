@@ -16,7 +16,14 @@ interface Notification {
   title: string;
   message: string;
   is_read: boolean;
-  type: 'CEO_APPROVED' | 'CEO_REJECTED' | 'INFO' | 'ALERT' | 'INCIDENT' | 'REACTIVATION_REQUEST' | 'PROCUREMENT_REVIEW';
+  type:
+    | 'CEO_APPROVED'
+    | 'CEO_REJECTED'
+    | 'INFO'
+    | 'ALERT'
+    | 'INCIDENT'
+    | 'REACTIVATION_REQUEST'
+    | 'PROCUREMENT_REVIEW';
   request_id?: string;
   request_title?: string;
   created_at: string;
@@ -163,8 +170,9 @@ export const NotificationBell = () => {
               notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`flex gap-3 px-5 py-4 border-b border-slate-50 cursor-pointer transition-all hover:bg-slate-50 ${!notif.is_read ? 'bg-orange-50/40' : ''
-                    }`}
+                  className={`flex gap-3 px-5 py-4 border-b border-slate-50 cursor-pointer transition-all hover:bg-slate-50 ${
+                    !notif.is_read ? 'bg-orange-50/40' : ''
+                  }`}
                   onClick={() => {
                     if (!notif.is_read) markReadMutation.mutate(notif.id);
                   }}

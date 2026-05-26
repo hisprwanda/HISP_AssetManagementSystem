@@ -25,7 +25,7 @@ export class AssetAssignmentsService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   async create(createDto: CreateAssetAssignmentDto) {
     const asset = await this.assetRepo.findOne({

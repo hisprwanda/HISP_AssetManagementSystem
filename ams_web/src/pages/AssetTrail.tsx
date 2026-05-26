@@ -550,10 +550,10 @@ export const AssetTrail = () => {
               purchase_date: pDate,
               status:
                 statusRaw === 'IN_STOCK' ||
-                  statusRaw === 'ASSIGNED' ||
-                  statusRaw === 'BROKEN' ||
-                  statusRaw === 'MISSING' ||
-                  statusRaw === 'DISPOSED'
+                statusRaw === 'ASSIGNED' ||
+                statusRaw === 'BROKEN' ||
+                statusRaw === 'MISSING' ||
+                statusRaw === 'DISPOSED'
                   ? statusRaw
                   : 'IN_STOCK',
             };
@@ -779,12 +779,13 @@ export const AssetTrail = () => {
                       </td>
                       <td className="px-8 py-6">
                         <span
-                          className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border shadow-sm ${asset.status === 'ASSIGNED'
+                          className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border shadow-sm ${
+                            asset.status === 'ASSIGNED'
                               ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                               : asset.status === 'DISPOSED'
                                 ? 'bg-slate-50 text-slate-400 border-slate-200'
                                 : 'bg-orange-50 text-orange-600 border-orange-200'
-                            }`}
+                          }`}
                         >
                           {asset.status.replace(/_/g, ' ')}
                         </span>

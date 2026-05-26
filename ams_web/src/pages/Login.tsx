@@ -24,7 +24,8 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isDeactivated, setIsDeactivated] = useState(false);
-  const [isRequestingReactivation, setIsRequestingReactivation] = useState(false);
+  const [isRequestingReactivation, setIsRequestingReactivation] =
+    useState(false);
   const [reactivationRequestSent, setReactivationRequestSent] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -83,7 +84,9 @@ export const Login = () => {
         message: string;
       };
       const errorMsg = axiosError.response?.data?.message || axiosError.message;
-      const finalMsg = Array.isArray(errorMsg) ? errorMsg.join(', ') : (errorMsg as string);
+      const finalMsg = Array.isArray(errorMsg)
+        ? errorMsg.join(', ')
+        : (errorMsg as string);
 
       if (finalMsg === 'ACCOUNT_DEACTIVATED') {
         setIsDeactivated(true);
@@ -120,7 +123,7 @@ export const Login = () => {
       };
       setForgotError(
         (axiosError.response?.data?.message as string) ||
-        'Failed to process request. Please try again.',
+          'Failed to process request. Please try again.',
       );
     } finally {
       setIsSubmittingForgot(false);
@@ -191,10 +194,11 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Mail
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
-                    ? 'text-red-400'
-                    : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                    }`}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+                    loginError
+                      ? 'text-red-400'
+                      : 'text-slate-400 group-focus-within:text-[#ff8000]'
+                  }`}
                 />
                 <input
                   type="email"
@@ -204,10 +208,11 @@ export const Login = () => {
                     setEmail(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
-                    ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
-                    : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                    }`}
+                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
+                    loginError
+                      ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
+                      : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                  }`}
                   placeholder="example@hisp.tech"
                 />
               </div>
@@ -221,10 +226,11 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Lock
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
-                    ? 'text-red-400'
-                    : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                    }`}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+                    loginError
+                      ? 'text-red-400'
+                      : 'text-slate-400 group-focus-within:text-[#ff8000]'
+                  }`}
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -234,10 +240,11 @@ export const Login = () => {
                     setPassword(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
-                    ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
-                    : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                    }`}
+                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
+                    loginError
+                      ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
+                      : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                  }`}
                   placeholder="••••••••••••"
                 />
                 <button
@@ -286,7 +293,9 @@ export const Login = () => {
                           Account Access Restricted
                         </p>
                         <p className="text-[10px] font-medium text-orange-700/80 leading-relaxed">
-                          Your account status is currently set to inactive. If you believe this is an error, you can submit a re-activation request below.
+                          Your account status is currently set to inactive. If
+                          you believe this is an error, you can submit a
+                          re-activation request below.
                         </p>
                         {!reactivationRequestSent ? (
                           <button
@@ -302,7 +311,8 @@ export const Login = () => {
                           </button>
                         ) : (
                           <p className="text-[10px] font-bold text-green-600 flex items-center gap-1.5 mt-1.5 bg-green-50 w-fit px-2 py-0.5 rounded-md border border-green-100">
-                            <CheckCircle2 className="w-3 h-3" /> Request Sent to Administration
+                            <CheckCircle2 className="w-3 h-3" /> Request Sent to
+                            Administration
                           </p>
                         )}
                       </div>
@@ -408,9 +418,7 @@ export const Login = () => {
                     {isSubmittingForgot ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <>
-                        Send Reset Link
-                      </>
+                      <>Send Reset Link</>
                     )}
                   </button>
                 </div>

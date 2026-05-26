@@ -174,19 +174,21 @@ export const Directorate = () => {
             <div className="flex items-center bg-slate-100 p-1 rounded-xl w-fit">
               <button
                 onClick={() => setActiveTab('units')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'units'
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'units'
                     ? 'bg-white text-[#ff8000] shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                  }`}
+                }`}
               >
                 Organisational Units
               </button>
               <button
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'users'
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'users'
                     ? 'bg-white text-[#ff8000] shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                  }`}
+                }`}
               >
                 Users
               </button>
@@ -249,10 +251,11 @@ export const Directorate = () => {
                     <tr
                       key={dept.id}
                       onClick={() => setSelectedDept(dept)}
-                      className={`hover:bg-white/60 transition-colors group cursor-pointer ${dept.users?.some((u) => u.reactivation_requested)
+                      className={`hover:bg-white/60 transition-colors group cursor-pointer ${
+                        dept.users?.some((u) => u.reactivation_requested)
                           ? 'bg-orange-50/50 border-l-4 border-l-[#ff8000]'
                           : ''
-                        }`}
+                      }`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
@@ -265,9 +268,16 @@ export const Directorate = () => {
                               title={dept.name}
                             >
                               {dept.name}
-                              {dept.users?.some((u) => u.reactivation_requested) && (
+                              {dept.users?.some(
+                                (u) => u.reactivation_requested,
+                              ) && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-[#ff8000] text-[8px] font-bold text-white uppercase tracking-tighter animate-pulse">
-                                  {dept.users.filter(u => u.reactivation_requested).length} Request(s)
+                                  {
+                                    dept.users.filter(
+                                      (u) => u.reactivation_requested,
+                                    ).length
+                                  }{' '}
+                                  Request(s)
                                 </span>
                               )}
                             </span>
@@ -281,24 +291,26 @@ export const Directorate = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`text-sm font-bold flex items-center gap-1 ${dept.status === 'Inactive' ||
-                              !dept.users ||
-                              dept.users.length === 0
-                              ? 'text-slate-400'
-                              : 'text-emerald-600'
-                            }`}
-                        >
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full ${dept.status === 'Inactive' ||
-                                !dept.users ||
-                                dept.users.length === 0
-                                ? 'bg-slate-300'
-                                : 'bg-emerald-500 animate-pulse'
-                              }`}
-                          />{' '}
-                          {dept.status === 'Inactive' ||
+                          className={`text-sm font-bold flex items-center gap-1 ${
+                            dept.status === 'Inactive' ||
                             !dept.users ||
                             dept.users.length === 0
+                              ? 'text-slate-400'
+                              : 'text-emerald-600'
+                          }`}
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              dept.status === 'Inactive' ||
+                              !dept.users ||
+                              dept.users.length === 0
+                                ? 'bg-slate-300'
+                                : 'bg-emerald-500 animate-pulse'
+                            }`}
+                          />{' '}
+                          {dept.status === 'Inactive' ||
+                          !dept.users ||
+                          dept.users.length === 0
                             ? 'Inactive'
                             : 'Active'}
                         </span>
@@ -535,10 +547,11 @@ export const Directorate = () => {
               {paginatedStaff.map((user) => (
                 <tr
                   key={user.id}
-                  className={`hover:bg-white/60 transition-colors group ${user.reactivation_requested
+                  className={`hover:bg-white/60 transition-colors group ${
+                    user.reactivation_requested
                       ? 'bg-orange-50/70 border-l-4 border-l-[#ff8000]'
                       : ''
-                    }`}
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
@@ -579,7 +592,8 @@ export const Directorate = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${[
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
+                        [
                           'Admin and Finance Director',
                           'Finance Officer',
                           'Operations Officer',
@@ -589,11 +603,11 @@ export const Directorate = () => {
                           : user.role === 'HOD'
                             ? 'bg-orange-50 text-[#ff8000] border-orange-100'
                             : 'bg-slate-50 text-slate-500 border-slate-100'
-                        }`}
+                      }`}
                     >
                       <Shield className="w-3 h-3" />{' '}
                       {user.role === 'HOD' &&
-                        selectedDept.name === 'Office of the CEO'
+                      selectedDept.name === 'Office of the CEO'
                         ? 'CEO'
                         : user.role}
                     </div>

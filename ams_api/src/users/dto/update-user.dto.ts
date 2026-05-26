@@ -8,4 +8,12 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsEnum(UserStatus)
   @IsOptional()
   status?: UserStatus;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  invitation_accepted?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  reactivation_requested?: boolean;
 }

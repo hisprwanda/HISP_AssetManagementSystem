@@ -11,4 +11,4 @@ import { Asset } from 'src/assets/entities/asset.entity';
   providers: [CategoriesService],
   exports: [CategoriesService],
 })
-export class CategoriesModule { }
+export class CategoriesModule {}

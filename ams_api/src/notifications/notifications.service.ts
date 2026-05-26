@@ -12,7 +12,7 @@ export class NotificationsService {
     private readonly notifRepo: Repository<Notification>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-  ) { }
+  ) {}
   async notifyCEODecision(params: {
     status: 'CEO_APPROVED' | 'REJECTED';
     requestId: string;
@@ -521,7 +521,7 @@ export class NotificationsService {
     userEmail: string;
     departmentId?: string;
   }): Promise<void> {
-    const { userId, userName, userEmail, departmentId } = params;
+    const { userName, userEmail, departmentId } = params;
 
     const allUsers = await this.userRepo.find({ relations: ['department'] });
     const recipients = allUsers.filter((u) => {
@@ -532,7 +532,8 @@ export class NotificationsService {
       const isHOD =
         (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
         u.department?.id === departmentId;
-      const isCEO = roleUpper.includes('CEO') || roleUpper.includes('OFFICE OF THE CEO');
+      const isCEO =
+        roleUpper.includes('CEO') || roleUpper.includes('OFFICE OF THE CEO');
       return isAdmin || isHOD || isCEO;
     });
 

@@ -62,8 +62,8 @@ export const AssetReceiptFormModal = ({
 
   const [isPreparing, setIsPreparing] = useState(
     assignment?.form_status === 'DRAFT' ||
-    assignment?.form_status === 'REJECTED' ||
-    assignment?.id.includes('legacy-'),
+      assignment?.form_status === 'REJECTED' ||
+      assignment?.id.includes('legacy-'),
   );
   const [condition, setCondition] = useState(
     assignment?.condition_on_assign || '',
@@ -89,8 +89,8 @@ export const AssetReceiptFormModal = ({
       setPhoneNumber(assignment.user?.phone_number || '');
       setIsPreparing(
         assignment.form_status === 'DRAFT' ||
-        assignment.form_status === 'REJECTED' ||
-        assignment.id.includes('legacy-'),
+          assignment.form_status === 'REJECTED' ||
+          assignment.id.includes('legacy-'),
       );
     }
   }, [assignment]);
@@ -316,14 +316,15 @@ export const AssetReceiptFormModal = ({
                   {assignment.form_number || 'STAGED-FORM'}
                 </span>
                 <span
-                  className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-md border ${assignment.form_status === 'APPROVED'
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : assignment.form_status === 'REJECTED'
-                      ? 'bg-rose-50 text-rose-600 border-rose-100'
-                      : assignment.form_status === 'PENDING_ADMIN_REVIEW'
-                        ? 'bg-slate-100 text-slate-600 border-slate-200'
-                        : 'bg-orange-50 text-orange-600 border-orange-100'
-                    }`}
+                  className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-md border ${
+                    assignment.form_status === 'APPROVED'
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : assignment.form_status === 'REJECTED'
+                        ? 'bg-rose-50 text-rose-600 border-rose-100'
+                        : assignment.form_status === 'PENDING_ADMIN_REVIEW'
+                          ? 'bg-slate-100 text-slate-600 border-slate-200'
+                          : 'bg-orange-50 text-orange-600 border-orange-100'
+                  }`}
                 >
                   {assignment.form_status?.replace(/_/g, ' ') || 'STAGED'}
                 </span>
@@ -352,12 +353,13 @@ export const AssetReceiptFormModal = ({
                 className="flex flex-col items-center gap-2 relative"
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${step.completed
-                    ? 'bg-[#ff8000] border-[#ff8000] text-white shadow-[0_0_15px_rgba(255,128,0,0.3)]'
-                    : step.active
-                      ? 'bg-white border-[#ff8000] text-[#ff8000] animate-pulse'
-                      : 'bg-white border-slate-200 text-slate-300'
-                    }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
+                    step.completed
+                      ? 'bg-[#ff8000] border-[#ff8000] text-white shadow-[0_0_15px_rgba(255,128,0,0.3)]'
+                      : step.active
+                        ? 'bg-white border-[#ff8000] text-[#ff8000] animate-pulse'
+                        : 'bg-white border-slate-200 text-slate-300'
+                  }`}
                 >
                   {step.completed ? (
                     <CheckCircle2 className="w-5 h-5" />
@@ -366,17 +368,19 @@ export const AssetReceiptFormModal = ({
                   )}
                 </div>
                 <span
-                  className={`text-[9px] font-semibold uppercase tracking-widest ${step.active || step.completed
-                    ? 'text-slate-700'
-                    : 'text-slate-300'
-                    }`}
+                  className={`text-[9px] font-semibold uppercase tracking-widest ${
+                    step.active || step.completed
+                      ? 'text-slate-700'
+                      : 'text-slate-300'
+                  }`}
                 >
                   {step.label}
                 </span>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`absolute left-[calc(100%+0.5rem)] top-5 w-8 h-[2px] ${step.completed ? 'bg-[#ff8000]' : 'bg-slate-200'
-                      }`}
+                    className={`absolute left-[calc(100%+0.5rem)] top-5 w-8 h-[2px] ${
+                      step.completed ? 'bg-[#ff8000]' : 'bg-slate-200'
+                    }`}
                   />
                 )}
               </div>
@@ -931,23 +935,23 @@ export const AssetReceiptFormModal = ({
           (isAdmin &&
             (assignment.form_status === 'PENDING_USER_SIGNATURE' ||
               assignment.form_status === 'PENDING_ADMIN_REVIEW'))) && (
-            <div className="px-8 py-5 border-t border-slate-100 bg-white flex gap-3 print:hidden">
-              {isAdmin && (
-                <button
-                  onClick={handlePrint}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
-                >
-                  <Printer className="w-4 h-4 text-slate-400" /> Print Receipt
-                </button>
-              )}
+          <div className="px-8 py-5 border-t border-slate-100 bg-white flex gap-3 print:hidden">
+            {isAdmin && (
               <button
-                onClick={onClose}
-                className="px-8 py-3 bg-white border border-slate-200 text-slate-400 font-bold text-[11px] uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
+                onClick={handlePrint}
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
               >
-                Close
+                <Printer className="w-4 h-4 text-slate-400" /> Print Receipt
               </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={onClose}
+              className="px-8 py-3 bg-white border border-slate-200 text-slate-400 font-bold text-[11px] uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
+            >
+              Close
+            </button>
+          </div>
+        )}
       </div>
       <style
         dangerouslySetInnerHTML={{

@@ -41,7 +41,7 @@ export class AssetsService {
     private readonly incidentRepo: Repository<AssetIncident>,
     private readonly dataSource: DataSource,
     private readonly notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   async create(createAssetDto: CreateAssetDto): Promise<Asset> {
     const { category_id, department_id, assigned_to_user_id, ...assetData } =

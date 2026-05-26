@@ -19,6 +19,8 @@ export interface User {
   job_title?: string;
   phone_number?: string;
   department?: { id: string; name: string };
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  reactivation_requested?: boolean;
 }
 
 export interface AssetAssignment {

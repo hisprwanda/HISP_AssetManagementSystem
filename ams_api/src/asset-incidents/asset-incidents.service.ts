@@ -24,7 +24,7 @@ export class AssetIncidentsService {
     private readonly dataSource: DataSource,
     private readonly notificationsService: NotificationsService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   async reportIncident(dto: ReportIncidentDto) {
     const queryRunner = this.dataSource.createQueryRunner();

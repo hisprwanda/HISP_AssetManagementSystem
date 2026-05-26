@@ -16,7 +16,7 @@ export class AuthService {
     private mailService: MailService,
     private configService: ConfigService,
     private notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   async login(email: string, pass: string) {
     console.log(`[AuthService] Login attempt for email: ${email}`);
@@ -63,9 +63,11 @@ export class AuthService {
         await this.usersService.update(user.id, {
           status: UserStatus.ACTIVE,
           invitation_accepted: true,
-        } as any);
+        });
       } else {
-        console.warn(`[AuthService] Deactivated user attempted login: ${email}`);
+        console.warn(
+          `[AuthService] Deactivated user attempted login: ${email}`,
+        );
         throw new ForbiddenException('ACCOUNT_DEACTIVATED');
       }
     }
@@ -82,9 +84,9 @@ export class AuthService {
         is_temporary_password: user.is_temporary_password,
         department: user.department
           ? {
-            id: user.department.id,
-            name: user.department.name,
-          }
+              id: user.department.id,
+              name: user.department.name,
+            }
           : null,
       },
     };
@@ -141,7 +143,7 @@ export class AuthService {
 
     await this.usersService.update(user.id, {
       reactivation_requested: true,
-    } as any);
+    });
 
     await this.notificationsService.notifyReactivationRequest({
       userId: user.id,

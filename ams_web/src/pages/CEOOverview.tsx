@@ -193,6 +193,17 @@ export const CEOOverview = () => {
           status: i.investigation_status,
           user: i.reported_by?.full_name,
         })),
+        ...(users || [])
+          .filter((u) => u.reactivation_requested)
+          .map((u) => ({
+            id: u.id,
+            type: 'REACTIVATION',
+            label: 'Personnel',
+            title: `Account Re-activation: ${u.full_name}`,
+            date: new Date().toISOString(), // Fallback as we don't store request date yet, or use something else
+            status: 'PENDING',
+            user: u.full_name,
+          })),
       ].sort(
         (a, b) =>
           new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime(),
@@ -604,7 +615,11 @@ export const CEOOverview = () => {
                   className="flex gap-6 group cursor-pointer p-2 -mx-2 rounded-2xl hover:bg-slate-50 transition-all"
                   onClick={() =>
                     navigate(
-                      item.type === 'REQUEST' ? '/requests' : '/incidents',
+                      item.type === 'REQUEST'
+                        ? '/requests'
+                        : item.type === 'REACTIVATION'
+                          ? '/directorate'
+                          : '/incidents',
                     )
                   }
                 >
@@ -613,6 +628,8 @@ export const CEOOverview = () => {
                   >
                     {item.type === 'REQUEST' ? (
                       <ShoppingCart className="w-5 h-5" />
+                    ) : item.type === 'REACTIVATION' ? (
+                      <ShieldAlert className="w-5 h-5" />
                     ) : (
                       <ShieldAlert className="w-5 h-5" />
                     )}
@@ -623,7 +640,13 @@ export const CEOOverview = () => {
                         {item.title}
                       </p>
                       <span
-                        className={`px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest ${item.type === 'REQUEST' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'}`}
+                        className={`px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest ${
+                          item.type === 'REQUEST'
+                            ? 'bg-orange-100 text-orange-700'
+                            : item.type === 'REACTIVATION'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-slate-100 text-slate-700'
+                        }`}
                       >
                         {item.label}
                       </span>

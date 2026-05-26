@@ -212,7 +212,8 @@ export const CreateRequestModal = ({
     if (!requestedById) newInvalidFields.requestedById = true;
     if (!description.trim()) newInvalidFields.description = true;
     if (!destination.trim()) newInvalidFields.destination = true;
-    if (!budgetCode1.trim() && !budgetCode2.trim()) newInvalidFields.budgetCode = true;
+    if (!budgetCode1.trim() && !budgetCode2.trim())
+      newInvalidFields.budgetCode = true;
 
     items.forEach((item) => {
       if (!item.name.trim()) newInvalidFields[`item_${item.id}_name`] = true;
@@ -359,7 +360,9 @@ export const CreateRequestModal = ({
               {Object.values(invalidFields).some(Boolean) && (
                 <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-                  <p className="text-red-600 text-xs font-bold">Please fix the highlighted fields before submitting.</p>
+                  <p className="text-red-600 text-xs font-bold">
+                    Please fix the highlighted fields before submitting.
+                  </p>
                 </div>
               )}
               {error && !Object.values(invalidFields).some(Boolean) && (
@@ -387,10 +390,11 @@ export const CreateRequestModal = ({
                         }));
                       }}
                       disabled={loadingDepts || isHOD}
-                      className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${invalidFields.departmentId
-                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                        }`}
+                      className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
+                        invalidFields.departmentId
+                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                      }`}
                     >
                       <option value="" disabled>
                         {loadingDepts ? 'Loading...' : 'Select Directorate...'}
@@ -404,7 +408,8 @@ export const CreateRequestModal = ({
                   </div>
                   {invalidFields.departmentId && (
                     <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> This field is required.
+                      <AlertTriangle className="w-3 h-3" /> This field is
+                      required.
                     </p>
                   )}
                 </div>
@@ -437,10 +442,11 @@ export const CreateRequestModal = ({
                           }
                         }}
                         disabled={!departmentId || loadingUsers}
-                        className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${invalidFields.requestedById
-                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                          }`}
+                        className={`w-full pl-9 pr-4 py-2.5 outline-none focus:ring-2 transition-all text-sm font-medium appearance-none disabled:opacity-50 rounded-xl border ${
+                          invalidFields.requestedById
+                            ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                            : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                        }`}
                       >
                         <option value="" disabled>
                           {!departmentId
@@ -461,7 +467,8 @@ export const CreateRequestModal = ({
                     </div>
                     {invalidFields.requestedById && (
                       <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> This field is required.
+                        <AlertTriangle className="w-3 h-3" /> This field is
+                        required.
                       </p>
                     )}
                   </div>
@@ -548,15 +555,17 @@ export const CreateRequestModal = ({
                       }));
                     }}
                     placeholder="Briefly describe why these assets/services are needed..."
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium min-h-[80px] resize-none border ${invalidFields.description
-                      ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                      : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                      }`}
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium min-h-[80px] resize-none border ${
+                      invalidFields.description
+                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                    }`}
                   />
                 </div>
                 {invalidFields.description && (
                   <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" /> This field is required.
+                    <AlertTriangle className="w-3 h-3" /> This field is
+                    required.
                   </p>
                 )}
               </div>
@@ -618,13 +627,16 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_quantity`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-center rounded-xl border ${invalidFields[`item_${item.id}_quantity`]
-                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                                }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-center rounded-xl border ${
+                                invalidFields[`item_${item.id}_quantity`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                             {invalidFields[`item_${item.id}_quantity`] && (
-                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-center">Required</p>
+                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-center">
+                                Required
+                              </p>
                             )}
                           </td>
                           <td className="px-4 py-4">
@@ -644,13 +656,16 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_name`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold rounded-xl border ${invalidFields[`item_${item.id}_name`]
-                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                                }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold rounded-xl border ${
+                                invalidFields[`item_${item.id}_name`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                             {invalidFields[`item_${item.id}_name`] && (
-                              <p className="text-[9px] font-semibold text-red-500 mt-1">Item name is required</p>
+                              <p className="text-[9px] font-semibold text-red-500 mt-1">
+                                Item name is required
+                              </p>
                             )}
                           </td>
                           <td className="px-4 py-4">
@@ -686,13 +701,16 @@ export const CreateRequestModal = ({
                                   [`item_${item.id}_unit_price`]: false,
                                 }));
                               }}
-                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-right rounded-xl border ${invalidFields[`item_${item.id}_unit_price`]
-                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                                }`}
+                              className={`w-full px-4 py-2 outline-none focus:ring-2 transition-all text-sm font-bold text-right rounded-xl border ${
+                                invalidFields[`item_${item.id}_unit_price`]
+                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                  : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                              }`}
                             />
                             {invalidFields[`item_${item.id}_unit_price`] && (
-                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-right">Price required</p>
+                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-right">
+                                Price required
+                              </p>
                             )}
                           </td>
                           <td className="px-4 py-4 text-right text-sm font-semibold text-slate-800">
@@ -747,14 +765,16 @@ export const CreateRequestModal = ({
                           destination: false,
                         }));
                       }}
-                      className={`w-full px-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium border ${invalidFields.destination
-                        ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                        : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
-                        }`}
+                      className={`w-full px-4 py-2.5 rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium border ${
+                        invalidFields.destination
+                          ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
+                      }`}
                     />
                     {invalidFields.destination && (
                       <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> This field is required.
+                        <AlertTriangle className="w-3 h-3" /> This field is
+                        required.
                       </p>
                     )}
                   </div>
@@ -858,7 +878,10 @@ export const CreateRequestModal = ({
                       value={budgetCode1}
                       onChange={(e) => {
                         setBudgetCode1(e.target.value);
-                        setInvalidFields((prev) => ({ ...prev, budgetCode: false }));
+                        setInvalidFields((prev) => ({
+                          ...prev,
+                          budgetCode: false,
+                        }));
                       }}
                       className={`w-full px-4 py-2.5 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium uppercase ${invalidFields.budgetCode ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'}`}
                     />
@@ -873,13 +896,17 @@ export const CreateRequestModal = ({
                       value={budgetCode2}
                       onChange={(e) => {
                         setBudgetCode2(e.target.value);
-                        setInvalidFields((prev) => ({ ...prev, budgetCode: false }));
+                        setInvalidFields((prev) => ({
+                          ...prev,
+                          budgetCode: false,
+                        }));
                       }}
                       className={`w-full px-4 py-2.5 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium uppercase ${invalidFields.budgetCode ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'}`}
                     />
                     {invalidFields.budgetCode && (
                       <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1 col-span-2">
-                        <AlertTriangle className="w-3 h-3" /> At least one budget code is required.
+                        <AlertTriangle className="w-3 h-3" /> At least one
+                        budget code is required.
                       </p>
                     )}
                   </div>
