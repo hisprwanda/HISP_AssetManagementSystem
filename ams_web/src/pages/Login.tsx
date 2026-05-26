@@ -83,6 +83,8 @@ export const Login = () => {
       setLoginError(
         Array.isArray(errorMsg) ? errorMsg.join(', ') : (errorMsg as string),
       );
+      setPassword('');
+      setEmail('');
     } finally {
       setIsLoading(false);
     }
@@ -192,21 +194,10 @@ export const Login = () => {
             </div>
 
             <div className="group">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center mb-2">
                 <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors">
                   Secure Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForgotModal(true);
-                    setForgotMessage(null);
-                    setForgotError(null);
-                  }}
-                  className="text-[10px] font-bold text-[#ff8000] hover:text-[#e49f37] transition-colors uppercase tracking-widest"
-                >
-                  Forgot Password?
-                </button>
               </div>
               <div className="relative">
                 <Lock
@@ -239,6 +230,19 @@ export const Login = () => {
                   ) : (
                     <Eye className="w-4 h-4" />
                   )}
+                </button>
+              </div>
+              <div className="flex justify-end mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotModal(true);
+                    setForgotMessage(null);
+                    setForgotError(null);
+                  }}
+                  className="text-[10px] font-bold text-[#ff8000] hover:text-[#e49f37] transition-colors uppercase tracking-widest"
+                >
+                  Forgot Password?
                 </button>
               </div>
               {loginError && (
@@ -310,9 +314,9 @@ export const Login = () => {
                 </div>
 
                 {forgotMessage && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-2.5 animate-in fade-in">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <p className="text-[11px] font-semibold text-emerald-700 leading-relaxed">
+                  <div className="p-3 bg-orange-50 border border-orange-100 rounded-xl flex items-start gap-2.5 animate-in fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-[#ff8000] mt-0.5 shrink-0" />
+                    <p className="text-[11px] font-semibold text-orange-700 leading-relaxed">
                       {forgotMessage}
                     </p>
                   </div>

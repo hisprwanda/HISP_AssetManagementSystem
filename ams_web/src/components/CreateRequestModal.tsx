@@ -223,7 +223,6 @@ export const CreateRequestModal = ({
 
     if (Object.keys(newInvalidFields).length > 0) {
       setInvalidFields(newInvalidFields);
-      setError('Please fix the highlighted fields before submitting.');
       setIsLoading(false);
       return;
     }
@@ -356,7 +355,13 @@ export const CreateRequestModal = ({
               onSubmit={handleSubmit}
               className="flex-1 overflow-y-auto p-8 space-y-8 bg-white"
             >
-              {error && (
+              {Object.values(invalidFields).some(Boolean) && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                  <p className="text-red-600 text-xs font-bold">Please fix the highlighted fields before submitting.</p>
+                </div>
+              )}
+              {error && !Object.values(invalidFields).some(Boolean) && (
                 <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-bold rounded-xl text-center">
                   {error}
                 </div>
@@ -396,6 +401,11 @@ export const CreateRequestModal = ({
                       ))}
                     </select>
                   </div>
+                  {invalidFields.departmentId && (
+                    <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> This field is required.
+                    </p>
+                  )}
                 </div>
 
                 {!isHOD || requestMode === 'INDIVIDUAL' ? (
@@ -448,6 +458,11 @@ export const CreateRequestModal = ({
                         })}
                       </select>
                     </div>
+                    {invalidFields.requestedById && (
+                      <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> This field is required.
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-1.5 group">
@@ -538,6 +553,11 @@ export const CreateRequestModal = ({
                       }`}
                   />
                 </div>
+                {invalidFields.description && (
+                  <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> This field is required.
+                  </p>
+                )}
               </div>
 
               <hr className="border-slate-100" />
@@ -602,6 +622,9 @@ export const CreateRequestModal = ({
                                 : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
                                 }`}
                             />
+                            {invalidFields[`item_${item.id}_quantity`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-center">Required</p>
+                            )}
                           </td>
                           <td className="px-4 py-4">
                             <input
@@ -625,6 +648,9 @@ export const CreateRequestModal = ({
                                 : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
                                 }`}
                             />
+                            {invalidFields[`item_${item.id}_name`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1">Item name is required</p>
+                            )}
                           </td>
                           <td className="px-4 py-4">
                             <input
@@ -664,6 +690,9 @@ export const CreateRequestModal = ({
                                 : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
                                 }`}
                             />
+                            {invalidFields[`item_${item.id}_unit_price`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1 text-right">Price required</p>
+                            )}
                           </td>
                           <td className="px-4 py-4 text-right text-sm font-semibold text-slate-800">
                             {(item.quantity * item.unit_price).toLocaleString()}
@@ -722,6 +751,11 @@ export const CreateRequestModal = ({
                         : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'
                         }`}
                     />
+                    {invalidFields.destination && (
+                      <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> This field is required.
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5 group">
                     <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">

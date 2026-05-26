@@ -126,7 +126,6 @@ export const FormalizeRequestModal = ({
 
     if (Object.keys(newInvalidFields).length > 0) {
       setInvalidFields(newInvalidFields);
-      setError('Please fix the highlighted fields before submitting.');
       return;
     }
 
@@ -205,7 +204,13 @@ export const FormalizeRequestModal = ({
               onSubmit={handleSubmit}
               className="flex-1 overflow-y-auto px-8 py-4 space-y-8 custom-scrollbar"
             >
-              {error && (
+              {Object.values(invalidFields).some(Boolean) && (
+                <div className="p-3 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-xs font-bold">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Please fix the highlighted fields before submitting.
+                </div>
+              )}
+              {error && !Object.values(invalidFields).some(Boolean) && (
                 <div className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-3 text-red-600 text-sm font-bold">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   {error}
@@ -266,11 +271,14 @@ export const FormalizeRequestModal = ({
                                 updateItem(index, 'name', e.target.value)
                               }
                               className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-2 transition-all outline-none ${invalidFields[`item_${index}_name`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
                                 }`}
                               required
                             />
+                            {invalidFields[`item_${index}_name`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1">Item name is required</p>
+                            )}
                           </div>
                           <div className="col-span-6 md:col-span-3">
                             <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-1 block">
@@ -283,11 +291,14 @@ export const FormalizeRequestModal = ({
                                 updateItem(index, 'quantity', e.target.value)
                               }
                               className={`w-full bg-slate-50 border rounded-xl px-3 py-2.5 text-sm font-bold focus:ring-2 transition-all outline-none ${invalidFields[`item_${index}_quantity`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
                                 }`}
                               required
                             />
+                            {invalidFields[`item_${index}_quantity`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1">Required</p>
+                            )}
                           </div>
                           <div className="col-span-12 md:col-span-4">
                             <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-1 block">
@@ -300,11 +311,14 @@ export const FormalizeRequestModal = ({
                                 updateItem(index, 'unit_price', e.target.value)
                               }
                               className={`w-full bg-slate-50 border rounded-xl px-3 py-2.5 text-sm font-bold focus:ring-2 transition-all outline-none ${invalidFields[`item_${index}_unit_price`]
-                                  ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
-                                  : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
+                                ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500'
+                                : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
                                 }`}
                               required
                             />
+                            {invalidFields[`item_${index}_unit_price`] && (
+                              <p className="text-[9px] font-semibold text-red-500 mt-1">Price required</p>
+                            )}
                           </div>
                           <button
                             type="button"

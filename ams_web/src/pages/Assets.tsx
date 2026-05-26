@@ -523,13 +523,13 @@ export const Assets = () => {
                 </span>
                 ?
               </p>
-              <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl mb-6 flex items-start gap-2.5">
-                <div className="w-4 h-4 rounded-full bg-blue-200 flex items-center justify-center shrink-0 mt-0.5">
-                  <CheckCircle2 className="w-2.5 h-2.5 text-blue-600" />
+              <div className="p-3 bg-orange-50 border border-orange-100 rounded-xl mb-6 flex items-start gap-2.5">
+                <div className="w-4 h-4 rounded-full bg-[#ff8000] flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-white" />
                 </div>
-                <p className="text-[10px] font-semibold text-blue-700 leading-tight text-left">
+                <p className="text-[10px] font-semibold text-orange-700 leading-tight text-left">
                   <span className="uppercase tracking-widest block mb-0.5 opacity-70">Asset Preservation</span>
-                  Assigned assets will be moved to <span className="text-blue-900 border-b border-blue-200">"Legacy / Uncategorized"</span> so no records are lost.
+                  Assigned assets will be moved to <span className="text-orange-900 border-b border-orange-200">"Legacy / Uncategorized"</span> so no records are lost.
                 </p>
               </div>
               <div className="flex gap-3">
