@@ -91,11 +91,12 @@ export const Login = () => {
       if (finalMsg === 'ACCOUNT_DEACTIVATED') {
         setIsDeactivated(true);
         setLoginError('This account has been deactivated by administration.');
+        // Do NOT clear email/password so they can request re-activation easily
       } else {
         setLoginError(finalMsg);
+        setPassword('');
+        setEmail('');
       }
-      setPassword('');
-      setEmail('');
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +124,7 @@ export const Login = () => {
       };
       setForgotError(
         (axiosError.response?.data?.message as string) ||
-          'Failed to process request. Please try again.',
+        'Failed to process request. Please try again.',
       );
     } finally {
       setIsSubmittingForgot(false);
@@ -145,7 +146,7 @@ export const Login = () => {
         Array.isArray(msg)
           ? msg.join(', ')
           : msg ||
-              'Failed to request re-activation. Our server might be temporarily unreachable.',
+          'Failed to request re-activation. Our server might be temporarily unreachable.',
       );
     } finally {
       setIsRequestingReactivation(false);
@@ -204,11 +205,10 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Mail
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                    loginError
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
                       ? 'text-red-400'
                       : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                  }`}
+                    }`}
                 />
                 <input
                   type="email"
@@ -218,11 +218,10 @@ export const Login = () => {
                     setEmail(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
-                    loginError
+                  className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
                       ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
                       : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                  }`}
+                    }`}
                   placeholder="example@hisp.tech"
                 />
               </div>
@@ -236,11 +235,10 @@ export const Login = () => {
               </div>
               <div className="relative">
                 <Lock
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                    loginError
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${loginError
                       ? 'text-red-400'
                       : 'text-slate-400 group-focus-within:text-[#ff8000]'
-                  }`}
+                    }`}
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -250,11 +248,10 @@ export const Login = () => {
                     setPassword(e.target.value);
                     if (loginError) setLoginError(null);
                   }}
-                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${
-                    loginError
+                  className={`w-full pl-10 pr-12 py-2.5 bg-white border rounded-xl shadow-sm outline-none focus:ring-4 transition-all font-medium text-slate-700 placeholder:text-slate-300 text-sm ${loginError
                       ? 'border-red-200 focus:ring-red-500/10 focus:border-red-400 bg-red-50/10'
                       : 'border-slate-100 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'
-                  }`}
+                    }`}
                   placeholder="••••••••••••"
                 />
                 <button
