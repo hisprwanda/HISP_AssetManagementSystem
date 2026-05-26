@@ -12,7 +12,7 @@ export class NotificationsService {
     private readonly notifRepo: Repository<Notification>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-  ) {}
+  ) { }
   async notifyCEODecision(params: {
     status: 'CEO_APPROVED' | 'REJECTED';
     requestId: string;
@@ -155,6 +155,39 @@ export class NotificationsService {
         title: 'Investigation Forwarded for Executive Review',
         message: `An incident involving "${assetName}" has been forwarded to your office for strategic review. Administrative Findings: "${adminRemarks}"`,
         type: 'INCIDENT',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
+  async notifyCEOProcurementReview(params: {
+    requestId: string;
+    requestTitle: string;
+    requesterName: string;
+    amount: number;
+  }): Promise<void> {
+    const { requestId, requestTitle, requesterName, amount } = params;
+
+    const allUsers = await this.userRepo.find();
+    const ceos = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      return (
+        roleUpper.includes('CEO') || roleUpper.includes('OFFICE OF THE CEO')
+      );
+    });
+
+    if (ceos.length === 0) return;
+
+    const notifications = ceos.map((ceo) => {
+      return this.notifRepo.create({
+        recipient: { id: ceo.id } as User,
+        title: 'Procurement Request Pending CEO Approval',
+        message: `A procurement request for "${requestTitle}" (Estimated: ${Number(amount).toLocaleString()} RWF) has been formalized and requires your final review and sign-off. Requester: ${requesterName}`,
+        type: 'PROCUREMENT_REVIEW',
+        request_id: requestId,
+        request_title: requestTitle,
         is_read: false,
       });
     });
@@ -475,6 +508,40 @@ export class NotificationsService {
         title,
         message,
         type: 'ALERT',
+        is_read: false,
+      });
+    });
+
+    await this.notifRepo.save(notifications);
+  }
+
+  async notifyReactivationRequest(params: {
+    userId: string;
+    userName: string;
+    userEmail: string;
+    departmentId?: string;
+  }): Promise<void> {
+    const { userId, userName, userEmail, departmentId } = params;
+
+    const allUsers = await this.userRepo.find({ relations: ['department'] });
+    const recipients = allUsers.filter((u) => {
+      const roleUpper = u.role.toUpperCase();
+      const isAdmin =
+        roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
+        roleUpper === 'FINANCE OFFICER';
+      const isHOD =
+        (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
+        u.department?.id === departmentId;
+      const isCEO = roleUpper.includes('CEO') || roleUpper.includes('OFFICE OF THE CEO');
+      return isAdmin || isHOD || isCEO;
+    });
+
+    const notifications = recipients.map((recipient) => {
+      return this.notifRepo.create({
+        recipient: { id: recipient.id } as User,
+        title: 'Account Re-activation Request',
+        message: `${userName} (${userEmail}) has requested to have their account re-activated. Please review their status in the Organisational Unit section.`,
+        type: 'REACTIVATION_REQUEST',
         is_read: false,
       });
     });

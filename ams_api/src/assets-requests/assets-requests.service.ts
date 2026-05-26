@@ -39,7 +39,7 @@ export class AssetRequestsService {
     private readonly categoryRepo: Repository<Category>,
     private readonly notificationsService: NotificationsService,
     private readonly assignmentsService: AssetAssignmentsService,
-  ) {}
+  ) { }
 
   async create(
     dto: CreateAssetRequestDto,
@@ -251,7 +251,21 @@ export class AssetRequestsService {
       }
     }
 
-    return saved;
+    const savedRequest = await this.requestRepo.save(request);
+
+    if (dto.status === 'HOD_APPROVED') {
+      const requester = await this.userRepo.findOne({
+        where: { id: request.requested_by?.id },
+      });
+      this.notificationsService.notifyCEOProcurementReview({
+        requestId: id,
+        requestTitle: request.title,
+        requesterName: requester?.full_name || 'Staff Member',
+        amount: request.financials?.grand_total || 0,
+      }).catch(err => console.error('[Notifications] CEO Notify Failed:', err));
+    }
+
+    return savedRequest;
   }
 
   async createBulkRequest(dto: CreateBulkRequestDto): Promise<AssetRequest[]> {
@@ -399,7 +413,24 @@ export class AssetRequestsService {
       return req;
     });
 
-    return await this.requestRepo.save(updatedRequests);
+    const savedResults = await this.requestRepo.save(updatedRequests);
+
+    if (savedResults.length > 0) {
+      const first = savedResults[0];
+      const requester = await this.userRepo.findOne({
+        where: { id: first.requested_by?.id },
+      });
+      const totalAmount = savedResults.reduce((sum, r) => sum + (r.financials?.grand_total || 0), 0);
+
+      this.notificationsService.notifyCEOProcurementReview({
+        requestId: first.id, // Using first as reference for the batch
+        requestTitle: `Batch Request: ${savedResults.length} items (${first.batch_number})`,
+        requesterName: requester?.full_name || 'Staff Member',
+        amount: totalAmount,
+      }).catch(err => console.error('[Notifications] CEO Batch Notify Failed:', err));
+    }
+
+    return savedResults;
   }
 
   async uploadPoScanned(id: string, fileUrl: string): Promise<AssetRequest> {

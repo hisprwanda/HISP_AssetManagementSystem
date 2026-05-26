@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
-  X,
   ShoppingCart,
   Building2,
   Calendar,
@@ -16,6 +15,7 @@ import {
   FileText,
   Send,
   LucideIcon,
+  AlertTriangle,
 } from 'lucide-react';
 import { AssetRequest, POData } from '../types/assets';
 
@@ -60,6 +60,7 @@ export const PurchaseOrderModal = ({
     'digital',
   );
   const [scannedPoUrl, setScannedPoUrl] = useState('');
+  const [invalidFields, setInvalidFields] = useState<Record<string, boolean>>({});
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -108,6 +109,39 @@ export const PurchaseOrderModal = ({
   const grandTotal = subtotal + shippingCost + otherCost;
 
   if (!isOpen || !request) return null;
+
+  const handleConfirm = () => {
+    const newInvalid: Record<string, boolean> = {};
+    if (!vendorDetails.trim()) newInvalid.vendorDetails = true;
+    if (!paymentTerms.trim()) newInvalid.paymentTerms = true;
+    if (!periodOfPerformance.trim()) newInvalid.periodOfPerformance = true;
+    if (!specialInstructions.trim()) newInvalid.specialInstructions = true;
+    if (Object.keys(newInvalid).length > 0) {
+      setInvalidFields(newInvalid);
+      return;
+    }
+    setInvalidFields({});
+    onConfirm({
+      vendor_details: vendorDetails,
+      po_number: poNumber,
+      order_date: orderDate,
+      payment_terms: paymentTerms,
+      special_instructions: specialInstructions,
+      period_of_performance: periodOfPerformance,
+      shipping_cost: shippingCost,
+      other_cost: otherCost,
+      grand_total: grandTotal,
+      hisp_sign_name: hispSignName,
+      hisp_sign_date: hispSignDate,
+      vendor_sign_name: vendorSignName,
+      vendor_sign_date: vendorSignDate,
+      authorized_by: hispSignName,
+      bill_to: billTo,
+      ship_to: shipTo,
+      is_digitally_signed: signingMethod === 'digital',
+      scanned_po_url: scannedPoUrl,
+    });
+  };
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'width=900,height=1100');
@@ -248,23 +282,21 @@ export const PurchaseOrderModal = ({
           </div>
         </div>
 
-        ${
-          isDigitallySigned
-            ? `
+        ${isDigitallySigned
+        ? `
         <div style="margin-top:20px;padding:12px;background:#f0fdf4;border:1px solid #dcfce7;border-radius:8px;text-align:center">
           <span style="color:#166534;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px">✓ Digitally Signed & Accepted via HISP AMS</span>
         </div>`
-            : ''
-        }
+        : ''
+      }
 
-        ${
-          scannedPoUrl
-            ? `
+        ${scannedPoUrl
+        ? `
         <div style="margin-top:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;text-align:center">
           <span style="color:#64748b;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px">Permanent Scanned Record Attached to System</span>
         </div>`
-            : ''
-        }
+        : ''
+      }
 
         <div class="footer">
           <p>Financial commitment is only established upon mutual signature of this Purchase Order by both HISP and the vendor.</p>
@@ -320,19 +352,18 @@ export const PurchaseOrderModal = ({
             >
               <Printer className="w-5 h-5" />
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
         <form
           className="flex-1 overflow-y-auto p-8 space-y-10 bg-white"
           onSubmit={(e) => e.preventDefault()}
         >
+          {Object.values(invalidFields).some(Boolean) && (
+            <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+              <p className="text-red-600 text-xs font-bold">Please fix the highlighted fields before submitting.</p>
+            </div>
+          )}
           <div className="bg-slate-50/30 p-8 rounded-[2rem] border border-slate-100 space-y-8">
             <div className="grid grid-cols-12 gap-10">
               <div className="col-span-12 md:col-span-7 space-y-1.5">
@@ -372,14 +403,16 @@ export const PurchaseOrderModal = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <RequisitionLabel label="Payment Terms" icon={CreditCard} />
+                  <RequisitionLabel label="Payment Terms *" icon={CreditCard} />
                   <input
                     type="text"
+                    required
                     value={paymentTerms}
-                    onChange={(e) => setPaymentTerms(e.target.value)}
+                    onChange={(e) => { setPaymentTerms(e.target.value); setInvalidFields(p => ({ ...p, paymentTerms: false })); }}
                     placeholder="e.g., NET 30, Cash on Delivery..."
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-bold text-slate-700 shadow-sm transition-all placeholder:text-slate-300"
+                    className={`w-full px-5 py-3.5 bg-white border rounded-2xl outline-none focus:ring-4 text-sm font-bold text-slate-700 shadow-sm transition-all placeholder:text-slate-300 ${invalidFields.paymentTerms ? 'border-red-300 bg-red-50/30 focus:ring-red-500/10 focus:border-red-400' : 'border-slate-200 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'}`}
                   />
+                  {invalidFields.paymentTerms && <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> This field is required.</p>}
                 </div>
               </div>
             </div>
@@ -468,23 +501,27 @@ export const PurchaseOrderModal = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-8">
               <div className="space-y-1.5">
-                <RequisitionLabel label="Period of Performance" icon={Clock} />
+                <RequisitionLabel label="Period of Performance *" icon={Clock} />
                 <input
                   type="text"
+                  required
                   value={periodOfPerformance}
-                  onChange={(e) => setPeriodOfPerformance(e.target.value)}
+                  onChange={(e) => { setPeriodOfPerformance(e.target.value); setInvalidFields(p => ({ ...p, periodOfPerformance: false })); }}
                   placeholder="e.g., Delivery within 5 working days..."
-                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-bold text-slate-700 shadow-sm transition-all"
+                  className={`w-full px-5 py-3.5 border rounded-2xl outline-none focus:ring-4 text-sm font-bold text-slate-700 shadow-sm transition-all ${invalidFields.periodOfPerformance ? 'border-red-300 bg-red-50/30 focus:ring-red-500/10 focus:border-red-400' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'}`}
                 />
+                {invalidFields.periodOfPerformance && <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> This field is required.</p>}
               </div>
               <div className="space-y-1.5">
-                <RequisitionLabel label="Special Instructions" icon={Plus} />
+                <RequisitionLabel label="Special Instructions *" icon={Plus} />
                 <textarea
+                  required
                   value={specialInstructions}
-                  onChange={(e) => setSpecialInstructions(e.target.value)}
+                  onChange={(e) => { setSpecialInstructions(e.target.value); setInvalidFields(p => ({ ...p, specialInstructions: false })); }}
                   placeholder="Any specific delivery, warranty, or support terms..."
-                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-[#ff8000]/10 focus:border-[#ff8000] text-sm font-medium text-slate-700 min-h-[100px] resize-none shadow-sm transition-all"
+                  className={`w-full px-5 py-3.5 border rounded-2xl outline-none focus:ring-4 text-sm font-medium text-slate-700 min-h-[100px] resize-none shadow-sm transition-all ${invalidFields.specialInstructions ? 'border-red-300 bg-red-50/30 focus:ring-red-500/10 focus:border-red-400' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/10 focus:border-[#ff8000]'}`}
                 />
+                {invalidFields.specialInstructions && <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> This field is required.</p>}
               </div>
             </div>
 
@@ -761,29 +798,8 @@ export const PurchaseOrderModal = ({
             </button>
             <button
               type="button"
-              onClick={() =>
-                onConfirm({
-                  vendor_details: vendorDetails,
-                  po_number: poNumber,
-                  order_date: orderDate,
-                  payment_terms: paymentTerms,
-                  special_instructions: specialInstructions,
-                  period_of_performance: periodOfPerformance,
-                  shipping_cost: shippingCost,
-                  other_cost: otherCost,
-                  grand_total: grandTotal,
-                  hisp_sign_name: hispSignName,
-                  hisp_sign_date: hispSignDate,
-                  vendor_sign_name: vendorSignName,
-                  vendor_sign_date: vendorSignDate,
-                  authorized_by: hispSignName,
-                  bill_to: billTo,
-                  ship_to: shipTo,
-                  is_digitally_signed: signingMethod === 'digital',
-                  scanned_po_url: scannedPoUrl,
-                })
-              }
-              disabled={isPending || !vendorDetails || !poNumber}
+              onClick={handleConfirm}
+              disabled={isPending}
               className="px-10 py-2.5 bg-[#ff8000] hover:bg-[#e67300] text-white text-sm font-bold rounded-xl shadow-md transform active:scale-95 transition-all flex justify-center items-center gap-2"
             >
               {isPending ? (

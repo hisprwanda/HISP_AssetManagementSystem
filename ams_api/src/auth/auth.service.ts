@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { UserStatus } from 'src/users/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +15,8 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private configService: ConfigService,
-  ) {}
+    private notificationsService: NotificationsService,
+  ) { }
 
   async login(email: string, pass: string) {
     console.log(`[AuthService] Login attempt for email: ${email}`);
@@ -50,11 +53,21 @@ export class AuthService {
     }
 
     if (user.status === UserStatus.INACTIVE) {
-      console.log(
-        `[AuthService] First-time login for ${user.email}. Activating account...`,
-      );
-      await this.usersService.updateStatus(user.id, UserStatus.ACTIVE);
-      user.status = UserStatus.ACTIVE;
+      if (!user.invitation_accepted) {
+        console.log(
+          `[AuthService] First-time login for ${user.email}. Activating account...`,
+        );
+        user.status = UserStatus.ACTIVE;
+        user.invitation_accepted = true;
+        // We'll update the user object below when we save but let's be explicit
+        await this.usersService.update(user.id, {
+          status: UserStatus.ACTIVE,
+          invitation_accepted: true,
+        } as any);
+      } else {
+        console.warn(`[AuthService] Deactivated user attempted login: ${email}`);
+        throw new ForbiddenException('ACCOUNT_DEACTIVATED');
+      }
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
@@ -69,9 +82,9 @@ export class AuthService {
         is_temporary_password: user.is_temporary_password,
         department: user.department
           ? {
-              id: user.department.id,
-              name: user.department.name,
-            }
+            id: user.department.id,
+            name: user.department.name,
+          }
           : null,
       },
     };
@@ -114,6 +127,30 @@ export class AuthService {
       message:
         'If an account exists with this email, you will receive reset instructions.',
     };
+  }
+
+  async requestReactivation(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.status !== UserStatus.INACTIVE) {
+      return { message: 'Account is already active' };
+    }
+
+    await this.usersService.update(user.id, {
+      reactivation_requested: true,
+    } as any);
+
+    await this.notificationsService.notifyReactivationRequest({
+      userId: user.id,
+      userName: user.full_name,
+      userEmail: user.email,
+      departmentId: user.department?.id,
+    });
+
+    return { message: 'Reactivation request sent to administration' };
   }
 
   private generateTempPassword(): string {

@@ -212,6 +212,7 @@ export const CreateRequestModal = ({
     if (!requestedById) newInvalidFields.requestedById = true;
     if (!description.trim()) newInvalidFields.description = true;
     if (!destination.trim()) newInvalidFields.destination = true;
+    if (!budgetCode1.trim() && !budgetCode2.trim()) newInvalidFields.budgetCode = true;
 
     items.forEach((item) => {
       if (!item.name.trim()) newInvalidFields[`item_${item.id}_name`] = true;
@@ -855,8 +856,11 @@ export const CreateRequestModal = ({
                       type="text"
                       placeholder="e.g., BMGF-RCA"
                       value={budgetCode1}
-                      onChange={(e) => setBudgetCode1(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium uppercase"
+                      onChange={(e) => {
+                        setBudgetCode1(e.target.value);
+                        setInvalidFields((prev) => ({ ...prev, budgetCode: false }));
+                      }}
+                      className={`w-full px-4 py-2.5 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium uppercase ${invalidFields.budgetCode ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'}`}
                     />
                   </div>
                   <div className="space-y-1.5 group">
@@ -867,9 +871,17 @@ export const CreateRequestModal = ({
                       type="text"
                       placeholder="e.g., HISP-RW"
                       value={budgetCode2}
-                      onChange={(e) => setBudgetCode2(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ff8000]/20 focus:border-[#ff8000] text-sm font-medium uppercase"
+                      onChange={(e) => {
+                        setBudgetCode2(e.target.value);
+                        setInvalidFields((prev) => ({ ...prev, budgetCode: false }));
+                      }}
+                      className={`w-full px-4 py-2.5 border rounded-xl outline-none focus:ring-2 transition-all text-sm font-medium uppercase ${invalidFields.budgetCode ? 'border-red-200 bg-red-50 focus:ring-red-500/20 focus:border-red-500' : 'bg-slate-50 border-slate-200 focus:ring-[#ff8000]/20 focus:border-[#ff8000]'}`}
                     />
+                    {invalidFields.budgetCode && (
+                      <p className="text-[10px] font-semibold text-red-500 mt-1 flex items-center gap-1 col-span-2">
+                        <AlertTriangle className="w-3 h-3" /> At least one budget code is required.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

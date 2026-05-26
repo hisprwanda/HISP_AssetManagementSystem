@@ -135,6 +135,18 @@ export const Layout = () => {
     ).length;
   }, [hodRequests, user, isAdmin, isCEO]);
 
+  const { data: reactivationUsers } = useQuery({
+    queryKey: ['users', 'reactivation'],
+    queryFn: async () => {
+      const response = await api.get('/users');
+      return response.data.filter((u: any) => u.reactivation_requested);
+    },
+    enabled: isAdmin || isCEO,
+    refetchInterval: 30000,
+  });
+
+  const reactivationRequestsCount = reactivationUsers?.length || 0;
+
   const filteredResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return [];
 
@@ -314,10 +326,9 @@ export const Layout = () => {
         <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const commonClasses = (active: boolean) =>
-              `w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 group font-medium text-left ${
-                active
-                  ? 'bg-gradient-to-r from-[#ff8000] to-[#e49f37] text-white shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)]'
-                  : 'text-slate-500 hover:bg-white/80 hover:text-[#ff8000] hover:shadow-sm'
+              `w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 group font-medium text-left ${active
+                ? 'bg-gradient-to-r from-[#ff8000] to-[#e49f37] text-white shadow-[0_8px_16px_-6px_rgba(255,128,0,0.4)]'
+                : 'text-slate-500 hover:bg-white/80 hover:text-[#ff8000] hover:shadow-sm'
               }`;
 
             if (item.onClick) {
@@ -366,11 +377,10 @@ export const Layout = () => {
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2.5">
                         <item.icon
-                          className={`w-4 h-4 transition-transform duration-300 ${
-                            effectivelyActive
+                          className={`w-4 h-4 transition-transform duration-300 ${effectivelyActive
                               ? 'scale-110'
                               : 'group-hover:scale-110'
-                          }`}
+                            }`}
                         />
                         <div className="relative">
                           <span className="text-xs font-semibold">
@@ -380,11 +390,13 @@ export const Layout = () => {
                             user?.is_temporary_password) ||
                             (item.name === 'Incidents Report' &&
                               pendingIncidentsCount > 0) ||
+                            (item.name === 'Organisational Unit' &&
+                              reactivationRequestsCount > 0) ||
                             ((item.name === 'Asset Requests' ||
                               item.name === 'Procurement') &&
                               pendingRequestsCount > 0)) && (
-                            <span className="absolute -top-1 -right-2 w-2 h-2 bg-[#ff8000] rounded-full border border-white animate-pulse shadow-[0_0_8px_rgba(255,128,0,0.5)]" />
-                          )}
+                              <span className="absolute -top-1 -right-2 w-2 h-2 bg-[#ff8000] rounded-full border border-white animate-pulse shadow-[0_0_8px_rgba(255,128,0,0.5)]" />
+                            )}
                         </div>
                       </div>
                     </div>
@@ -406,7 +418,7 @@ export const Layout = () => {
               </span>
               <span className="text-[9px] text-[#e49f37] uppercase font-semibold tracking-wider">
                 {user?.role === 'HOD' &&
-                user?.department?.name === 'Office of the CEO'
+                  user?.department?.name === 'Office of the CEO'
                   ? 'CEO'
                   : user?.role || 'SYSTEM ADMIN'}
               </span>
@@ -480,11 +492,10 @@ export const Layout = () => {
                           className="w-full flex items-center gap-4 px-6 py-4 hover:bg-orange-50/50 transition-all text-left group"
                         >
                           <div
-                            className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner ${
-                              result.type === 'asset'
+                            className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner ${result.type === 'asset'
                                 ? 'bg-slate-50 border border-slate-100'
                                 : 'bg-orange-50 border border-orange-100'
-                            }`}
+                              }`}
                           >
                             {result.type === 'asset' ? (
                               <Laptop className="w-5 h-5 text-slate-500" />

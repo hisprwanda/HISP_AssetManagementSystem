@@ -16,7 +16,7 @@ interface Notification {
   title: string;
   message: string;
   is_read: boolean;
-  type: 'CEO_APPROVED' | 'CEO_REJECTED' | 'INFO' | 'ALERT' | 'INCIDENT';
+  type: 'CEO_APPROVED' | 'CEO_REJECTED' | 'INFO' | 'ALERT' | 'INCIDENT' | 'REACTIVATION_REQUEST' | 'PROCUREMENT_REVIEW';
   request_id?: string;
   request_title?: string;
   created_at: string;
@@ -80,6 +80,10 @@ export const NotificationBell = () => {
         return <XCircle className="w-4 h-4 text-red-500 shrink-0" />;
       case 'INCIDENT':
         return <Bell className="w-4 h-4 text-orange-500 shrink-0" />;
+      case 'PROCUREMENT_REVIEW':
+        return <ShoppingCart className="w-4 h-4 text-[#ff8000] shrink-0" />;
+      case 'REACTIVATION_REQUEST':
+        return <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />;
       default:
         return <ShoppingCart className="w-4 h-4 text-orange-500 shrink-0" />;
     }
@@ -159,9 +163,8 @@ export const NotificationBell = () => {
               notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`flex gap-3 px-5 py-4 border-b border-slate-50 cursor-pointer transition-all hover:bg-slate-50 ${
-                    !notif.is_read ? 'bg-orange-50/40' : ''
-                  }`}
+                  className={`flex gap-3 px-5 py-4 border-b border-slate-50 cursor-pointer transition-all hover:bg-slate-50 ${!notif.is_read ? 'bg-orange-50/40' : ''
+                    }`}
                   onClick={() => {
                     if (!notif.is_read) markReadMutation.mutate(notif.id);
                   }}

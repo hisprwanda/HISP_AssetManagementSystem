@@ -68,4 +68,10 @@ export class User {
 
   @Column({ default: true })
   is_temporary_password: boolean;
+
+  @Column({ default: false })
+  invitation_accepted: boolean;
+
+  @Column({ default: false })
+  reactivation_requested: boolean;
 }

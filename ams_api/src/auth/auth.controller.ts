@@ -7,7 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -24,5 +24,13 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Reset instructions sent' })
   async forgotPassword(@Body() forgotPassDto: ForgotPassDto) {
     return this.authService.forgotPassword(forgotPassDto.email);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('request-reactivation')
+  @ApiOperation({ summary: 'Request account re-activation' })
+  @ApiResponse({ status: 200, description: 'Re-activation request sent' })
+  async requestReactivation(@Body() forgotPassDto: ForgotPassDto) {
+    return this.authService.requestReactivation(forgotPassDto.email);
   }
 }

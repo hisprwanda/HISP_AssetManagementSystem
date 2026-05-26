@@ -68,7 +68,7 @@ export const EditUserModal = ({
       ];
       setRole(
         ALL_ROLES.find((r) => r.toLowerCase() === user.role?.toLowerCase()) ||
-          'Staff',
+        'Staff',
       );
       setStatus(user.status || 'ACTIVE');
 
@@ -119,7 +119,8 @@ export const EditUserModal = ({
       phone_number: phoneNumber,
       role,
       status,
-    });
+      reactivation_requested: status === 'ACTIVE' ? false : undefined,
+    } as any);
   };
 
   const isFinanceDept =

@@ -23,7 +23,10 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     const isLoginRequest = error.config?.url?.includes('/auth/login');
 
-    if (error.response?.status === 401 && !isLoginRequest) {
+    const isForbidden = error.response?.status === 403;
+    const isUnauthorized = error.response?.status === 401;
+
+    if ((isUnauthorized || isForbidden) && !isLoginRequest) {
       sessionStorage.removeItem('hisp_token');
       sessionStorage.removeItem('hisp_user');
 

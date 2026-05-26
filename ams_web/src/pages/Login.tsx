@@ -23,6 +23,9 @@ export const Login = () => {
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isDeactivated, setIsDeactivated] = useState(false);
+  const [isRequestingReactivation, setIsRequestingReactivation] = useState(false);
+  const [reactivationRequestSent, setReactivationRequestSent] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -80,9 +83,14 @@ export const Login = () => {
         message: string;
       };
       const errorMsg = axiosError.response?.data?.message || axiosError.message;
-      setLoginError(
-        Array.isArray(errorMsg) ? errorMsg.join(', ') : (errorMsg as string),
-      );
+      const finalMsg = Array.isArray(errorMsg) ? errorMsg.join(', ') : (errorMsg as string);
+
+      if (finalMsg === 'ACCOUNT_DEACTIVATED') {
+        setIsDeactivated(true);
+        setLoginError('This account has been deactivated by administration.');
+      } else {
+        setLoginError(finalMsg);
+      }
       setPassword('');
       setEmail('');
     } finally {
@@ -116,6 +124,18 @@ export const Login = () => {
       );
     } finally {
       setIsSubmittingForgot(false);
+    }
+  };
+
+  const handleReactivationRequest = async () => {
+    setIsRequestingReactivation(true);
+    try {
+      await api.post('/auth/request-reactivation', { email });
+      setReactivationRequestSent(true);
+    } catch (error) {
+      console.error('Failed to request reactivation:', error);
+    } finally {
+      setIsRequestingReactivation(false);
     }
   };
 
@@ -246,12 +266,49 @@ export const Login = () => {
                 </button>
               </div>
               {loginError && (
-                <p className="mt-2 text-[11px] font-bold text-red-500 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                  <AlertCircle className="w-3 h-3" />
-                  {loginError === 'Invalid email or password'
-                    ? 'Authentication failed: Check your email and password.'
-                    : loginError}
-                </p>
+                <div className="space-y-3 mt-2">
+                  <p className="text-[11px] font-bold text-red-500 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <AlertCircle className="w-3 h-3" />
+                    {loginError === 'Invalid email or password'
+                      ? 'Authentication failed: Check your email and password.'
+                      : loginError === 'ACCOUNT_DEACTIVATED'
+                        ? 'This account has been deactivated by administration.'
+                        : loginError}
+                  </p>
+
+                  {isDeactivated && (
+                    <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300">
+                      <div className="w-5 h-5 rounded-full bg-[#ff8000] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                        <CheckCircle2 className="w-3 h-3 text-white" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-bold text-orange-800 leading-tight">
+                          Account Access Restricted
+                        </p>
+                        <p className="text-[10px] font-medium text-orange-700/80 leading-relaxed">
+                          Your account status is currently set to inactive. If you believe this is an error, you can submit a re-activation request below.
+                        </p>
+                        {!reactivationRequestSent ? (
+                          <button
+                            type="button"
+                            onClick={handleReactivationRequest}
+                            disabled={isRequestingReactivation}
+                            className="text-[10px] font-bold text-[#ff8000] hover:text-[#e67300] underline decoration-2 underline-offset-2 mt-1.5 flex items-center gap-1.5 transition-colors"
+                          >
+                            {isRequestingReactivation ? (
+                              <div className="w-2.5 h-2.5 border-2 border-[#ff8000]/30 border-t-[#ff8000] rounded-full animate-spin" />
+                            ) : null}
+                            Request for account re-activation
+                          </button>
+                        ) : (
+                          <p className="text-[10px] font-bold text-green-600 flex items-center gap-1.5 mt-1.5 bg-green-50 w-fit px-2 py-0.5 rounded-md border border-green-100">
+                            <CheckCircle2 className="w-3 h-3" /> Request Sent to Administration
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
