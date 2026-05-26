@@ -140,7 +140,7 @@ export const Layout = () => {
     queryKey: ['users', 'reactivation'],
     queryFn: async () => {
       const response = await api.get('/users');
-      return response.data.filter((u: UserType) => u.reactivation_requested);
+      return response.data.filter((u: UserType) => !!u.reactivation_requested);
     },
     enabled: isAdmin || isCEO,
     refetchInterval: 30000,

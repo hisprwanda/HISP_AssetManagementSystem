@@ -30,7 +30,7 @@ export const useAuth = () => {
   const isStaff =
     roleUpper.includes('STAFF') || (!isFinanceAdmin && !isHOD && !isCEO);
 
-  const isAdmin = isFinanceAdmin;
+  const isAdmin = isFinanceAdmin || roleUpper === 'SYSTEM_ADMIN';
 
   return {
     ...context,

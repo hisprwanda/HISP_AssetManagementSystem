@@ -87,6 +87,7 @@ export const Directorate = () => {
         const response = await api.get('/departments');
         return response.data;
       },
+      refetchInterval: 30000,
     },
   );
 
@@ -99,6 +100,7 @@ export const Directorate = () => {
       return response.data;
     },
     enabled: !!selectedDept,
+    refetchInterval: 30000,
   });
 
   const filteredStaff = useMemo(() => {
@@ -252,7 +254,7 @@ export const Directorate = () => {
                       key={dept.id}
                       onClick={() => setSelectedDept(dept)}
                       className={`hover:bg-white/60 transition-colors group cursor-pointer ${
-                        dept.users?.some((u) => u.reactivation_requested)
+                        dept.users?.some((u) => !!u.reactivation_requested)
                           ? 'bg-orange-50/50 border-l-4 border-l-[#ff8000]'
                           : ''
                       }`}
@@ -269,12 +271,12 @@ export const Directorate = () => {
                             >
                               {dept.name}
                               {dept.users?.some(
-                                (u) => u.reactivation_requested,
+                                (u) => !!u.reactivation_requested,
                               ) && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-[#ff8000] text-[8px] font-bold text-white uppercase tracking-tighter animate-pulse">
                                   {
                                     dept.users.filter(
-                                      (u) => u.reactivation_requested,
+                                      (u) => !!u.reactivation_requested,
                                     ).length
                                   }{' '}
                                   Request(s)
@@ -566,7 +568,7 @@ export const Directorate = () => {
                       <div className="flex flex-col">
                         <span className="font-bold text-slate-800 flex items-center gap-2">
                           {user.full_name}
-                          {user.reactivation_requested && (
+                          {!!user.reactivation_requested && (
                             <span className="px-1.5 py-0.5 rounded-md bg-[#ff8000] text-[8px] font-bold text-white uppercase tracking-widest shadow-sm">
                               Reactivation Requested
                             </span>
@@ -648,7 +650,7 @@ export const Directorate = () => {
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          {user.reactivation_requested && (
+                          {!!user.reactivation_requested && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

@@ -528,7 +528,8 @@ export class NotificationsService {
       const roleUpper = u.role.toUpperCase();
       const isAdmin =
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
-        roleUpper === 'FINANCE OFFICER';
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper === 'SYSTEM_ADMIN';
       const isHOD =
         (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
         u.department?.id === departmentId;
