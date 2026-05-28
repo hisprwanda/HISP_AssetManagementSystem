@@ -20,6 +20,7 @@ import { RequestTrail } from './pages/RequestTrail';
 import { AssetTrail } from './pages/AssetTrail';
 import { Profile } from './pages/Profile';
 import { Overview } from './pages/Overview';
+import { SystemTrail } from './pages/SystemTrail';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
             <Route path="/financial-trail" element={<FinancialTrail />} />
             <Route path="/request-trail" element={<RequestTrail />} />
             <Route path="/assignment-history" element={<AssignmentHistory />} />
+            <Route path="/system-trail" element={<SystemTrail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/penalties" element={<Penalties />} />
           </Route>
