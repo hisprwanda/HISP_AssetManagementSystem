@@ -491,6 +491,27 @@ export const HODOverview = () => {
                           >
                             {asset.status.replace('_', ' ')}
                           </span>
+                          {asset.assignment_history?.some(
+                            (a) => a.form_status === 'PENDING_USER_SIGNATURE',
+                          ) && (
+                            <button
+                              onClick={() => {
+                                const pending = asset.assignment_history?.find(
+                                  (a) =>
+                                    a.form_status === 'PENDING_USER_SIGNATURE',
+                                );
+                                if (pending)
+                                  setSigningAssignment({
+                                    ...pending,
+                                    asset,
+                                  } as unknown as AssetAssignment);
+                              }}
+                              className="px-3 py-1.5 bg-[#ff8000] text-white hover:bg-orange-600 rounded-lg text-[10px] font-semibold uppercase tracking-widest shadow-md transition-colors flex items-center gap-2 animate-pulse"
+                              title="Sign Receipt Form"
+                            >
+                              <FileCheck className="w-3.5 h-3.5" /> Sign Form
+                            </button>
+                          )}
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => {

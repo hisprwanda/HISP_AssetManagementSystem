@@ -13,6 +13,7 @@ export class NotificationsService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
   ) {}
+
   async notifyCEODecision(params: {
     status: 'CEO_APPROVED' | 'REJECTED';
     requestId: string;
@@ -44,13 +45,11 @@ export class NotificationsService {
       const isCEO =
         roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
 
-      if (isCEO) continue;
-
       if (user.id === requestedById) {
         recipients.push({ user, role: 'staff' });
       } else if (isHOD && user.department?.id === departmentId) {
         recipients.push({ user, role: 'hod' });
-      } else if (isAdmin) {
+      } else if (isAdmin || isCEO) {
         recipients.push({ user, role: 'admin' });
       }
     }
@@ -107,21 +106,31 @@ export class NotificationsService {
     const { requestId, requestTitle, requesterName, departmentId } = params;
 
     const allUsers = await this.userRepo.find({ relations: ['department'] });
-    const hods = allUsers.filter((u) => {
+    const recipients = allUsers.filter((u) => {
       const roleUpper = u.role.toUpperCase();
-      return (
+      const isHODInDept =
         (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
-        u.department?.id === departmentId
-      );
+        u.department?.id === departmentId;
+      const isCEO =
+        roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
+      return isHODInDept || isCEO;
     });
 
-    if (hods.length === 0) return;
+    if (recipients.length === 0) return;
 
-    const notifications = hods.map((hod) => {
+    const notifications = recipients.map((recipient) => {
+      const isCEO =
+        recipient.role.toUpperCase().includes('CEO') ||
+        recipient.role.toUpperCase().includes('OFFICE OF THE CEO');
+
       return this.notifRepo.create({
-        recipient: { id: hod.id } as User,
-        title: 'New Procurement Request Pending Review',
-        message: `${requesterName} has submitted a new procurement request for "${requestTitle}". Please review the justification and advance it to the next workflow stage.`,
+        recipient: { id: recipient.id } as User,
+        title: isCEO
+          ? `Broadcasting: New Request Pending Review`
+          : 'New Procurement Request Pending Review',
+        message: isCEO
+          ? `Visibility: ${requesterName} from department ${departmentId} submitted a request for "${requestTitle}".`
+          : `${requesterName} has submitted a new procurement request for "${requestTitle}". Please review the justification and advance it to the next workflow stage.`,
         type: 'INFO',
         request_id: requestId,
         request_title: requestTitle,
@@ -184,7 +193,9 @@ export class NotificationsService {
       return this.notifRepo.create({
         recipient: { id: ceo.id } as User,
         title: 'Procurement Request Pending CEO Approval',
-        message: `A procurement request for "${requestTitle}" (Estimated: ${Number(amount).toLocaleString()} RWF) has been formalized and requires your final review and sign-off. Requester: ${requesterName}`,
+        message: `A procurement request for "${requestTitle}" (Estimated: ${Number(
+          amount,
+        ).toLocaleString()} RWF) has been formalized and requires your final review and sign-off. Requester: ${requesterName}`,
         type: 'PROCUREMENT_REVIEW',
         request_id: requestId,
         request_title: requestTitle,
@@ -214,14 +225,14 @@ export class NotificationsService {
     for (const user of allUsers) {
       const roleUpper = user.role.toUpperCase();
       const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
-      const isCEO =
+      const roleIsCEO =
         roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
 
       if (user.id === reporterId) {
         recipients.push({ user, role: 'reporter' });
       } else if (isHOD && user.department?.id === departmentId) {
         recipients.push({ user, role: 'hod' });
-      } else if (isCEO) {
+      } else if (roleIsCEO) {
         recipients.push({ user, role: 'admin' });
       }
     }
@@ -240,7 +251,9 @@ export class NotificationsService {
       } else if (role === 'hod') {
         message = `Final decision on incident involving "${assetName}" in your department: ${decisionText}. Remarks: "${remarks}"`;
       } else {
-        message = `The investigation for "${assetName}" has been finalized with a verdict of ${decisionText} by ${isCEO ? 'the CEO' : 'Administration'}.`;
+        message = `The investigation for "${assetName}" has been finalized with a verdict of ${decisionText} by ${
+          isCEO ? 'the CEO' : 'Administration'
+        }.`;
       }
 
       return this.notifRepo.create({
@@ -272,12 +285,14 @@ export class NotificationsService {
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
         roleUpper === 'FINANCE OFFICER';
       const isHOD = roleUpper.includes('HOD') || roleUpper.includes('HEAD OF');
+      const isCEO =
+        roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
 
       if (user.id === requestedById) {
         recipients.push({ user, role: 'staff' });
       } else if (isHOD && user.department?.id === departmentId) {
         recipients.push({ user, role: 'hod' });
-      } else if (isAdmin) {
+      } else if (isAdmin || isCEO) {
         recipients.push({ user, role: 'admin' });
       }
     }
@@ -328,7 +343,9 @@ export class NotificationsService {
       const roleUpper = u.role.toUpperCase();
       return (
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
-        roleUpper === 'FINANCE OFFICER'
+        roleUpper === 'FINANCE OFFICER' ||
+        roleUpper.includes('CEO') ||
+        roleUpper.includes('OFFICE OF THE CEO')
       );
     });
 
@@ -345,12 +362,16 @@ export class NotificationsService {
       case 'SIGNED_BY_USER':
         recipients = admins;
         title = 'Form Signed: Review Required';
-        message = `${targetUser.full_name || 'A staff member'} has signed the receipt form for "${assetName}". Please verify the signature and approve the assignment.`;
+        message = `${
+          targetUser.full_name || 'A staff member'
+        } has signed the receipt form for "${assetName}". Please verify the signature and approve the assignment.`;
         break;
       case 'REJECTED':
         recipients = [targetUser];
         title = 'Receipt Form Rejected';
-        message = `Your digital receipt for "${assetName}" has been rejected. Reason: "${rejectionReason || 'Details need correction'}". Please review the comments and sign again.`;
+        message = `Your digital receipt for "${assetName}" has been rejected. Reason: "${
+          rejectionReason || 'Details need correction'
+        }". Please review the comments and sign again.`;
         break;
       case 'APPROVED':
         recipients = [targetUser];
@@ -385,7 +406,9 @@ export class NotificationsService {
       ? 'Penalty Settled Successfully'
       : 'Penalty Status Updated';
     const message = isResolved
-      ? `Your financial penalty of ${Number(amount).toLocaleString()} RWF for asset "${assetName}" has been officially settled. Your account is now clear regarding this incident.`
+      ? `Your financial penalty of ${Number(
+          amount,
+        ).toLocaleString()} RWF for asset "${assetName}" has been officially settled. Your account is now clear regarding this incident.`
       : `The settlement status for the incident involving "${assetName}" has been updated by Administration. Please check your portal for current status.`;
 
     const notification = this.notifRepo.create({
@@ -406,25 +429,30 @@ export class NotificationsService {
     const { asset, initiator } = params;
 
     const allUsers = await this.userRepo.find({ relations: ['department'] });
-    const isAdminOrHOD = (u: User) => {
+    const isAdminOrHODOrCEO = (u: User) => {
       const roleUpper = u.role.toUpperCase();
       const isAdmin =
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
-        roleUpper === 'FINANCE OFFICER' ||
         roleUpper === 'FINANCE OFFICER';
       const isHOD =
         (roleUpper.includes('HOD') || roleUpper.includes('HEAD OF')) &&
         u.department?.id === asset.department?.id;
-      return isAdmin || isHOD;
+      const isCEO =
+        roleUpper.includes('OFFICE OF THE CEO') || roleUpper === 'CEO';
+      return isAdmin || isHOD || isCEO;
     };
 
-    const recipients = allUsers.filter(isAdminOrHOD);
+    const recipients = allUsers.filter(isAdminOrHODOrCEO);
 
     const notifications = recipients.map((recipient) => {
       return this.notifRepo.create({
         recipient: { id: recipient.id } as User,
         title: `Asset Return Initiated: ${asset.name}`,
-        message: `${initiator.full_name} has initiated a return for the asset "${asset.name}" (${asset.tag_id || asset.serial_number}). Please review and acknowledge the request.`,
+        message: `${
+          initiator.full_name
+        } has initiated a return for the asset "${asset.name}" (${
+          asset.tag_id || asset.serial_number
+        }). Please review and acknowledge the request.`,
         type: 'INFO',
         is_read: false,
       });
@@ -462,7 +490,9 @@ export class NotificationsService {
       ? 'Asset Return: Damage Reported'
       : 'Asset Return: Completed';
     const message = isDamaged
-      ? `Your return for "${asset.name}" has been processed. Inspection found issues: "${remarks || 'Damage reported'}". An incident report has been automatically created for further investigation.`
+      ? `Your return for "${asset.name}" has been processed. Inspection found issues: "${
+          remarks || 'Damage reported'
+        }". An incident report has been automatically created for further investigation.`
       : `Your return for "${asset.name}" has been successfully completed. The asset has been inspected and returned to stock. Thank you.`;
 
     const notification = this.notifRepo.create({
@@ -489,7 +519,6 @@ export class NotificationsService {
       const roleUpper = u.role.toUpperCase();
       return (
         roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
-        roleUpper === 'FINANCE OFFICER' ||
         roleUpper === 'FINANCE OFFICER'
       );
     });
@@ -500,7 +529,11 @@ export class NotificationsService {
         ? 'has fully depreciated'
         : 'warranty has expired';
 
-    const message = `The asset ${assetName} (Serial: ${serialNumber || 'N/A'}) ${reasonText}. It currently holds a value of ${Number(currentValue).toLocaleString()} RWF. Please schedule a review for potential disposal or replacement.`;
+    const message = `The asset ${assetName} (Serial: ${
+      serialNumber || 'N/A'
+    }) ${reasonText}. It currently holds a value of ${Number(
+      currentValue,
+    ).toLocaleString()} RWF. Please schedule a review for potential disposal or replacement.`;
 
     const notifications = recipients.map((user) => {
       return this.notifRepo.create({
@@ -567,35 +600,51 @@ export class NotificationsService {
     } = params;
 
     const allUsers = await this.userRepo.find();
-    let recipient: User | undefined;
+    const recipients: User[] = [];
 
     const roleUpper = requesterRole.toUpperCase();
+
+    // Add CEO for overview
+    const ceos = allUsers.filter((u) => {
+      const uRoleUpper = u.role.toUpperCase();
+      return (
+        uRoleUpper.includes('CEO') || uRoleUpper.includes('OFFICE OF THE CEO')
+      );
+    });
+    recipients.push(...ceos);
+
     if (roleUpper === 'FINANCE OFFICER' || roleUpper === 'OPERATIONS OFFICER') {
-      recipient = allUsers.find(
+      const admin = allUsers.find(
         (u) => u.role.toUpperCase() === 'ADMIN AND FINANCE DIRECTOR',
       );
+      if (admin) recipients.push(admin);
     } else if (
       roleUpper === 'ADMIN AND FINANCE DIRECTOR' ||
       roleUpper === 'FINANCE OFFICER'
     ) {
-      recipient = allUsers.find(
+      const finance = allUsers.find(
         (u) => u.role.toUpperCase() === 'FINANCE OFFICER',
       );
+      if (finance) recipients.push(finance);
     }
 
-    if (!recipient || recipient.id === requesterId) return;
+    const uniqueRecipients = Array.from(new Set(recipients)).filter(
+      (r) => r.id !== requesterId,
+    );
 
-    const notification = this.notifRepo.create({
-      recipient: { id: recipient.id } as User,
-      title: 'New Personal Asset Request',
-      message: `${requesterName} (${requesterRole}) has submitted a personal asset request for "${requestTitle}". Please review the details in the procurement portal.`,
-      type: 'INFO',
-      request_id: requestId,
-      request_title: requestTitle,
-      is_read: false,
+    const notifications = uniqueRecipients.map((recipient) => {
+      return this.notifRepo.create({
+        recipient: { id: recipient.id } as User,
+        title: 'New Personal Asset Request',
+        message: `${requesterName} (${requesterRole}) has submitted a personal asset request for "${requestTitle}". Please review the details in the procurement portal.`,
+        type: 'INFO',
+        request_id: requestId,
+        request_title: requestTitle,
+        is_read: false,
+      });
     });
 
-    await this.notifRepo.save(notification);
+    await this.notifRepo.save(notifications);
   }
 
   async getForUser(userId: string): Promise<Notification[]> {

@@ -954,6 +954,19 @@ export const Assets = () => {
                                 </>
                               )}
 
+                              {isAdmin && asset.status === 'IN_STOCK' && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAssetToEdit(asset);
+                                  }}
+                                  className="p-2 text-slate-400 hover:text-[#ff8000] hover:bg-orange-50 rounded-lg transition-colors"
+                                  title="Assign / Re-assign Asset"
+                                >
+                                  <FileCheck className="w-4 h-4" />
+                                </button>
+                              )}
+
                               {(isAdmin ||
                                 asset.assigned_to?.id === currentUser?.id) &&
                                 (() => {
