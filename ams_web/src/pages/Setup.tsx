@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Mail, Lock, User, Phone, Loader2 } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, Phone, Loader2, Shield } from 'lucide-react';
 import { api } from '../lib/api';
 
 export const Setup = () => {
@@ -8,6 +8,7 @@ export const Setup = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Admin and Finance Director');
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export const Setup = () => {
         email,
         phone_number: phone,
         password,
-        role: 'Admin and Finance Director',
+        role,
         department_id: '00000000-0000-0000-0000-000000000000',
       });
 
@@ -207,14 +208,31 @@ export const Setup = () => {
               </div>
             </div>
 
-            <div className="bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-[#ff8000] flex-shrink-0" />
-              <p className="text-xs text-slate-600">
-                Role assigned:{' '}
-                <span className="font-semibold text-[#ff8000]">
-                  Admin and Finance Director
-                </span>
-              </p>
+            <div className="group">
+              <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 group-focus-within:text-[#ff8000] transition-colors mb-2 block">
+                Assign System Role
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[
+                  'Admin and Finance Director',
+                  'Finance Officer',
+                ].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRole(r)}
+                    className={`px-4 py-3 rounded-xl border text-[11px] font-bold transition-all flex items-center gap-3 text-left ${role === r
+                        ? 'bg-orange-50 border-[#ff8000] text-[#ff8000] shadow-sm'
+                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                      }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <Shield className={`w-3.5 h-3.5 ${role === r ? 'text-[#ff8000]' : 'text-slate-300'}`} />
+                    </div>
+                    <span>{r}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <button
